@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>口ゃんねる</title>
+    <link href="css/mypage.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button" @click="displayTabJudge(1)" id="btn1">タブ1</button>
+                <button class="tab-button" @click="displayTabJudge(2)" id="btn2">タブ2</button>
+                <button class="tab-button" @click="displayTabJudge(3)" id="btn3">タブ3</button>
+            </div>
+
+            <div class="tab-content-area">
+                <div id="tab1" v-if="test1" class="tab-content">
+                    <h3>タブ1のコンテンツ</h3>
+                    <p>これはタブ1のコンテンツです。</p>
+                    <button @click="copy(1)">共有</button>
+                </div>
+
+                <div id="tab2" v-if="test2" class="tab-content">
+                    <h3>タブ2のコンテンツ</h3>
+                    <p>これはタブ2のコンテンツです。</p>
+                </div>
+
+                <div id="tab3" v-if="test3" class="tab-content">
+                    <h3>タブ3のコンテンツ</h3>
+                    <p>これはタブ3のコンテンツです。</p>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+
+
+
+    <script>
+
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    products: [],
+                    searchInput: '',
+                    test1: true,
+                    test2: false,
+                    test3: false,
+                    BelongingComunities: [],
+                }
+
+            },
+
+            methods: {
+                displayTabJudge(tabNum) {
+                    console.log('tabNum' + tabNum);
+
+                    for (let i = 1; i < 4; i++) {
+                        this['test' + i] = false;
+                    }
+                    this['test' + tabNum] = true;
+
+                    for (let i = 1; i < 4; i++) {
+                    }
+                },
+
+                getBelongingCommunities() {
+                    axios.get('/getBelongingCommunities')
+                        .then(res => {
+                            this.BelongingCommunities = res.data;
+                            console.log(this.BelongingCommunities);
+                        });
+                },
+
+                copy(id) {
+                    axios.get(`/getUrl?name=${id}`)
+                        .then(res => {
+                            const url = res.data;
+                            console.log(url);
+
+                            // 取得したURLをクリップボードにコピーする処理を実行
+                            const el = document.createElement('textarea');
+                            el.value = url;
+                            document.body.appendChild(el);
+                            el.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(el);
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
+                }
+
+
+
+
+            },
+
+            // created: function () {
+            //     console.log("created");
+            //     this.getBelongingCommunities();
+            // }
+
+        }).mount('#app')
+
+    </script>
+
+
+</body>
+
+</html>
