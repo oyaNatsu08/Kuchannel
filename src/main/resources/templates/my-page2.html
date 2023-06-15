@@ -31,11 +31,11 @@
                       <tbody>
 
                         
-                        <tr v-for ="community in belongingCommunities">
-                          <td>{{community.communityName}}</td>
+                        <tr v-for ="com in belongingCommunities">
+                          <td>{{com.communityName}}</td>
                           <td><button type="button">共有</button></td>
-                          <td><input type="text" v-bind:value="community.nickName"><button type="button">変更</button></button></td>
-                          <td><button type="button">退会</button></td>
+                          <td><input type="text" v-bind:value="com.nickName"><button type="button">変更</button></button></td>
+                          <td><button type="button" @click="withdrawal(com.communityId)">退会</button></td>
                         </tr>
                 
                       </tbody>
@@ -96,6 +96,7 @@
             },
             //所属しているコミュニティを取得
             getBelongingCommunities(){
+                this.belongingCommunities =[];
                 axios.get('/getBelongingCommunities')
                 .then(res =>{
                     for(let i=0; i<res.data.length; i++){
@@ -106,6 +107,23 @@
                     console.log(this.belongingCommunities);
                 });
             },
+            withdrawal(communityId){
+              axios.request({
+                        url: '/withdrawal',
+                        method: 'post',
+                        data: communityId,
+                        headers: {
+                            'Content-Type': 'text/plain'
+                        }
+              })
+              .then(res =>{
+                this.getBelongingCommunities();
+                });
+              // axios.post('/withdrawal',communityId)
+              //   .then(res =>{
+              //       this.getBelongingCommunities();
+              //   });
+            }
 
 
             

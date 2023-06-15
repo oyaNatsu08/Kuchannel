@@ -23,4 +23,18 @@ public class UchimaDao {
         System.out.println(result);
         return result;
     }
+
+    public  int withdrawal(Integer userId,Integer communityId){
+        System.out.println("withdrawal");
+        System.out.println(userId);
+        System.out.println(communityId);
+
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", userId);
+        param.addValue("communityId", communityId);
+        var result = jdbcTemplate.update("UPDATE community_user SET flag = false WHERE user_id = :userId AND community_id = :communityId",param);
+        return result;
+
+    }
+
 }

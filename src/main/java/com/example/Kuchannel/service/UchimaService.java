@@ -27,4 +27,9 @@ public class UchimaService {
 
     }
 
+    public int withdrawal(Integer userId,Integer communityId){
+        return uchimaDao.withdrawal(userId,communityId);
+
+    }
+
 }

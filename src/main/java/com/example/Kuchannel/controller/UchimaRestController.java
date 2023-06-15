@@ -5,6 +5,8 @@ import com.example.Kuchannel.service.UchimaService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -28,5 +30,14 @@ public class UchimaRestController {
         //セッションからユーザーのidを渡すように変える。今は1で固定している
         List<BelongingCommunities> communityList = uchimaService.getBelongingCommunities(1);
         return communityList;
+    }
+
+    @PostMapping(value = "/withdrawal", consumes = "text/plain;charset=UTF-8")
+    public int withdrawal(@RequestBody String getCommunityId){
+        var communityId =Integer.parseInt(getCommunityId);
+        //session.getAttribute("userId");
+        //セッションからユーザーのidを渡すように変える。今は1で固定している
+        int result = uchimaService.withdrawal(1,communityId);
+        return result;
     }
 }
