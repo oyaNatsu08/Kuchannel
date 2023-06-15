@@ -1,4 +1,4 @@
 package com.example.Kuchannel.service;
 
-public class OyafusoService {
+public class OyafusoService implements KuchannelService {
 }
