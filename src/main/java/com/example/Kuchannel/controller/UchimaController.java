@@ -1,5 +1,27 @@
 package com.example.Kuchannel.controller;
 
+import com.example.Kuchannel.service.UchimaService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+@Controller
 public class UchimaController {
-    //UCHIMAテスト
+
+
+//    @Autowired
+//    UchimaService uchimaService;
+//
+//    @Autowired
+//    HttpSession session;
+
+    //マイページの表示
+    @GetMapping("/mypage")
+    public String myPage() {
+        return "my-page2";
+    }
+
+
 }

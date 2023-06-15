@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>口ゃんねる</title>
+    <link href="css/mypage.css" rel="stylesheet">
+
+</head>
+<body>
+    <div id="app">
+
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button" @click="displayTabJudge(1)" id="btn1">タブ1</button>
+                <button class="tab-button" @click="displayTabJudge(2)" id="btn2">タブ2</button>
+                <button class="tab-button" @click="displayTabJudge(3)" id="btn3">タブ3</button>
+            </div>
+        
+            <div class="tab-content-area">
+                <div id="tab1" v-if="test1" class="tab-content">
+                    <table>
+                        
+                      <thead>
+                        <tr>
+                          <th>コミュニティ名</th>
+                          <th>共有リンクのコピー</th>
+                          <th>ニックネーム</th>
+                          <th>退会する</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+
+                        
+                        <tr v-for ="community in belongingCommunities">
+                          <td>{{community.communityName}}</td>
+                          <td><button type="button">共有</button></td>
+                          <td><input type="text" v-bind:value="community.nickName"><button type="button">変更</button></button></td>
+                          <td><button type="button">退会</button></td>
+                        </tr>
+                
+                      </tbody>
+                    </table>
+                </div>
+        
+                <div id="tab2" v-if="test2" class="tab-content">
+                    <h3>タブ2のコンテンツ</h3>
+                    <p>これはタブ2のコンテンツです。</p>
+                </div>
+        
+                <div id="tab3" v-if="test3" class="tab-content">
+                    <h3>タブ3のコンテンツ</h3>
+                    <p>これはタブ3のコンテンツです。</p>
+                </div>
+        
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    
+
+
+    <script>
+  
+        const { createApp } = Vue
+      
+        createApp({
+          data(){
+            return{
+              products :[],
+              searchInput:'',
+              test1:true,
+              test2:false,
+              test3:false,
+              belongingCommunities:[],
+
+            }
+      
+      
+          },
+      
+          methods:{
+            //タブが押されたら、それに対応した内容が表示される
+            displayTabJudge(tabNum){
+                console.log('tabNum'+tabNum);
+
+                for (let i=1; i<4; i++){
+                this['test'+i] = false;
+                }
+                this['test'+tabNum] =true;
+                
+                for(let i=1; i<4; i++){
+                }
+            },
+            //所属しているコミュニティを取得
+            getBelongingCommunities(){
+                axios.get('/getBelongingCommunities')
+                .then(res =>{
+                    for(let i=0; i<res.data.length; i++){
+                        if(res.data[i].flag === true ){
+                            this.belongingCommunities.push(res.data[i]);
+                        }
+                    }
+                    console.log(this.belongingCommunities);
+                });
+            },
+
+
+            
+            
+      
+            
+          },
+      
+          created:function(){
+            console.log("created");
+            this.getBelongingCommunities();
+          }
+      
+        }).mount('#app')
+      
+      </script>
+
+    
+    </body>
+</html>
