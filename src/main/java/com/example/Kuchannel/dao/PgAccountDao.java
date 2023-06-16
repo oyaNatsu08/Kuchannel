@@ -29,7 +29,7 @@ public class PgAccountDao implements AccountDao {
     }
 
 
-    //アカウント新規作成
+    //アカウント新規作成（start）
     @Override
     public CreateRecord create(String loginId, String password, String name, String image_path) {
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -38,12 +38,13 @@ public class PgAccountDao implements AccountDao {
         param.addValue("name", name);
         param.addValue("image_path", image_path);
 
-        String sql = "INSERT INTO users(loginId, password, name, image_path) VALUES(:loginId, :password, :name, :image_path)";
+        String sql = "INSERT INTO users(login_id, password, name, image_path) VALUES(:loginId, :password, :name, :image_path)";
 
         try {
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(sql, param, keyHolder);
-            int key = keyHolder.getKey().intValue();
+//            int key = keyHolder.getKey().intValue();
+            int key = Integer.parseInt(keyHolder.getKeys().get("id").toString());
 
             CreateRecord create = new CreateRecord(loginId, password, name, image_path);
             return create;
@@ -52,4 +53,18 @@ public class PgAccountDao implements AccountDao {
             return null;
         }
     }
+    //新規作成（end）
+
+    //プロフィール編集（start）
+//    @Override
+//    public ProfileEditRecord edit(int id,String name, String password) {
+//        //更新のSQL文
+//        String sql = "UPDATE users SET name =:name, password = :password WHERE id = :id";
+//
+//        MapSqlParameterSource param = new MapSqlParameterSource();
+//        param.addValue("name", name);
+//        param.addValue("password", password);
+//        param.addValue("id",id);
+//
+//    }
 }

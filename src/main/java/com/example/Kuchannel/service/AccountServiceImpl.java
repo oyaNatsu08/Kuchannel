@@ -21,4 +21,10 @@ public class AccountServiceImpl implements AccountService {
     public CreateRecord create(String loginId, String password, String name, String image_path) {
         return accountDao.create(loginId,password,name,image_path);
     }
+
+    //プロフィール編集
+//    @Override
+//    public  ProfileEditRecord edit(int id,String name , String password){
+//        return accountDao.edit(name,password);
+//    }
 }

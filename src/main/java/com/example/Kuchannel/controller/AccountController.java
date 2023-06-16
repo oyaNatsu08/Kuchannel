@@ -33,8 +33,11 @@ public class AccountController {
     public String login(@Validated @ModelAttribute("UserForm") UserForm userForm,
                         BindingResult bindingResult,
                         Model model) {
+        System.out.println("login");
         //バリデーション
         if (bindingResult.hasErrors()) {
+            System.out.println("エラー");
+
             return "login";
         }
 
@@ -45,6 +48,8 @@ public class AccountController {
 
         if (user == null) {
             model.addAttribute("error", "IDまたはパスワードが不正です");
+            System.out.println("エラーヌル");
+
             return "login";
         }
         //セッション
@@ -73,32 +78,27 @@ public class AccountController {
 
 
 //    /*-------------------------Insert(新規追加)--------------------------*/
-//    @GetMapping("/account-add")
-//    public String newUser(@ModelAttribute("CreateForm") CreateForm createForm) {
-//        return "account-add";
-//    }
-//
-//    @GetMapping("/account-add")
-//    public String accountAdd(@ModelAttribute("CreateForm") CreateForm createForm) {
-//        return "account-add";
-//    }
-//
-//    @PostMapping("account-add")
-//    public String accountAdd(@Validated @ModelAttribute("CreateForm") CreateForm createForm,
-//                         BindingResult bindingResult,
-//                         Model model) {
-//        //バリデーション
-//        if (bindingResult.hasErrors()) {
-//            return "account-add";
-//        }
-//        String loginId = createForm.getLoginId();
-//        String password = createForm.getPassword();
-//        String name = createForm.getName();
-//        String image_path = createForm.getImage_path();
-//        CreateRecord create = new CreateRecord(loginId, password, name, image_path);
-//        accountService.create(loginId, password, name, image_path);
-//        return "redirect:/menu";
-//    }
+    @GetMapping("/create-user")
+    public String accountAdd(@ModelAttribute("CreateForm") CreateForm createForm) {
+        return "create-user";
+    }
+
+    @PostMapping("create-user")
+    public String accountAdd(@Validated @ModelAttribute("CreateForm") CreateForm createForm,
+                         BindingResult bindingResult,
+                         Model model) {
+        //バリデーション
+        if (bindingResult.hasErrors()) {
+            return "create-user";
+        }
+        String loginId = createForm.getLoginId();
+        String password = createForm.getPassword();
+        String name = createForm.getName();
+        String image_path = createForm.getImage_path();
+        CreateRecord create = new CreateRecord(loginId, password, name, image_path);
+        accountService.create(loginId, password, name, image_path);
+        return "redirect:/login";
+    }
 //    /*------------------------------------------------------------------------*/
 }
 
