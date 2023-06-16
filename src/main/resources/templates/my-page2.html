@@ -11,9 +11,9 @@
 
         <div class="tab-container">
             <div class="tab-buttons">
-                <button class="tab-button" @click="displayTabJudge(1)" id="btn1">タブ1</button>
-                <button class="tab-button" @click="displayTabJudge(2)" id="btn2">タブ2</button>
-                <button class="tab-button" @click="displayTabJudge(3)" id="btn3">タブ3</button>
+                <button class="tab-button" @click="displayTabJudge(1)" id="btn1">コミュニティ一覧</button>
+                <button class="tab-button" @click="displayTabJudge(2)" id="btn2">自分のスレッド</button>
+                <button class="tab-button" @click="displayTabJudge(3)" id="btn3">自分のレビュー</button>
             </div>
         
             <div class="tab-content-area">
@@ -54,12 +54,9 @@
                       </tr>
                     </thead>
                     <tbody>
-
-                      
                       <tr v-for ="thread in myThreads">
                         <td><a href="#">{{thread.threadTitle}}</a></td>
                         <td><a href="#">{{thread.communityName}}</a></td>
-                        
                       </tr>
               
                     </tbody>
@@ -67,8 +64,29 @@
                 </div>
         
                 <div id="tab3" v-if="test3" class="tab-content">
-                    <h3>タブ3のコンテンツ</h3>
-                    <p>これはタブ3のコンテンツです。</p>
+                  <table>
+                        
+                    <thead>
+                      <tr>
+                        <th>タイトル</th>
+                        <th>本文</th>
+                        <th>スレッド名</th>
+                        <th>コミュニティ名</th>
+                        <th>日付</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for ="review in myReviews">
+                        <td ><a href="#">{{review.reviewTitle}}</a></td>
+                        <td class="review-cell">{{review.review}}</td>
+                        <td>{{review.threadTitle}}</td>
+                        <td>{{review.communityName}}</td>
+                        <td>{{review.createDate}}</td>
+
+                      </tr>
+              
+                    </tbody>
+                  </table>
                 </div>
         
 
@@ -96,7 +114,7 @@
               belongingCommunities:[],
               inputNickName:'',
               myThreads:[],
-              
+              myReviews:[],
             }
       
       
@@ -171,6 +189,16 @@
                 
             },
 
+            //投稿したレビューを取得
+            getMyReviews(){
+              this.myReviews =[];
+              axios.get('/getMyReviews')
+              .then(res =>{
+                this.myReviews =res.data;
+                console.log(res.data);
+              })
+            },
+
 
             
             
@@ -182,6 +210,7 @@
             console.log("created");
             this.getBelongingCommunities();
             this.getMyThreads();
+            this.getMyReviews();
           }
       
         }).mount('#app')

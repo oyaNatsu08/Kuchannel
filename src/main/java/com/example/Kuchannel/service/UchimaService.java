@@ -3,6 +3,7 @@ package com.example.Kuchannel.service;
 
 import com.example.Kuchannel.dao.UchimaDao;
 import com.example.Kuchannel.entity.BelongingCommunities;
+import com.example.Kuchannel.entity.MyReview;
 import com.example.Kuchannel.entity.MyThread;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -40,5 +41,9 @@ public class UchimaService {
 
     //マイページで自分の立てたスレッドを表示する用
     public List<MyThread> getMyThreads(Integer userId){return uchimaDao.getMyThreads(userId);}
+
+
+    //マイページで自分のレビューを表示する用
+    public List<MyReview> getMyReviews(Integer userId){return uchimaDao.getMyReviews(userId);}
 
 }

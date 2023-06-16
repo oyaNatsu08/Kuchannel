@@ -1,6 +1,7 @@
 package com.example.Kuchannel.dao;
 
 import com.example.Kuchannel.entity.BelongingCommunities;
+import com.example.Kuchannel.entity.MyReview;
 import com.example.Kuchannel.entity.MyThread;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -49,6 +50,15 @@ public class UchimaDao {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
         var result = jdbcTemplate.query("SELECT th.id AS threadId, th.title AS threadTitle, co.name AS communityName, co.url AS communityUrl FROM threads th JOIN communities co ON th.community_id = co.id JOIN community_user cu ON co.id = cu.community_id WHERE th.user_id = :userId AND cu.flag = true;",param,new DataClassRowMapper<>(MyThread.class));
+        System.out.println(result);
+        return result;
+    }
+
+    //    マイページ用で、自分で書いたレビュー取得する処理
+    public List<MyReview>getMyReviews(Integer userId){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", userId);
+        var result = jdbcTemplate.query("SELECT rev.title AS reviewTitle, rev.review, th.title AS threadTitle, co.name AS communityName, rev.create_date AS createDate FROM reviews rev JOIN threads th ON rev.thread_id = th.id JOIN communities co ON th.community_id = co.id JOIN community_user cu on co.id = cu.community_id WHERE th.user_id = :userId AND cu.flag = true;",param,new DataClassRowMapper<>(MyReview.class));
         System.out.println(result);
         return result;
     }

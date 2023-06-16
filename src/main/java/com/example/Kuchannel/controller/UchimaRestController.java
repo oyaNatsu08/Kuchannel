@@ -1,6 +1,7 @@
 package com.example.Kuchannel.controller;
 
 import com.example.Kuchannel.entity.BelongingCommunities;
+import com.example.Kuchannel.entity.MyReview;
 import com.example.Kuchannel.entity.MyThread;
 import com.example.Kuchannel.service.UchimaService;
 import jakarta.servlet.http.HttpSession;
@@ -56,6 +57,15 @@ public class UchimaRestController {
         //session.getAttribute("userId");
         //セッションからユーザーのidを渡すように変える。今は1で固定している
         List<MyThread> result = uchimaService.getMyThreads(1);
+        return result;
+    }
+
+    //マイページ用で、レビューを取得する
+    @GetMapping("/getMyReviews")
+    public List<MyReview> getMyReviews(){
+        //session.getAttribute("userId");
+        //セッションからユーザーのidを渡すように変える。今は1で固定している
+        List<MyReview> result = uchimaService.getMyReviews(1);
         return result;
     }
 
