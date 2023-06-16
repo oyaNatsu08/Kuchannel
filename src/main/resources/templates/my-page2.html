@@ -34,7 +34,7 @@
                         <tr v-for ="com in belongingCommunities">
                           <td>{{com.communityName}}</td>
                           <td><button type="button">共有</button></td>
-                          <td><input type="text" v-bind:value="com.nickName"><button type="button">変更</button></button></td>
+                          <td><input type="text"  v-model="com.nickName"><button type="button" @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)">変更</button></button></td>
                           <td><button type="button" @click="withdrawal(com.communityId)">退会</button></td>
                         </tr>
                 
@@ -42,9 +42,28 @@
                     </table>
                 </div>
         
+                
+                
                 <div id="tab2" v-if="test2" class="tab-content">
-                    <h3>タブ2のコンテンツ</h3>
-                    <p>これはタブ2のコンテンツです。</p>
+                  <table>
+                        
+                    <thead>
+                      <tr>
+                        <th>スレッド名</th>
+                        <th>コミュニティ名</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+
+                      
+                      <tr v-for ="thread in myThreads">
+                        <td><a href="#">{{thread.threadTitle}}</a></td>
+                        <td><a href="#">{{thread.communityName}}</a></td>
+                        
+                      </tr>
+              
+                    </tbody>
+                  </table>
                 </div>
         
                 <div id="tab3" v-if="test3" class="tab-content">
@@ -75,7 +94,9 @@
               test2:false,
               test3:false,
               belongingCommunities:[],
-
+              inputNickName:'',
+              myThreads:[],
+              
             }
       
       
@@ -107,6 +128,7 @@
                     console.log(this.belongingCommunities);
                 });
             },
+            //退会処理
             withdrawal(communityId){
               axios.request({
                         url: '/withdrawal',
@@ -119,11 +141,35 @@
               .then(res =>{
                 this.getBelongingCommunities();
                 });
-              // axios.post('/withdrawal',communityId)
-              //   .then(res =>{
-              //       this.getBelongingCommunities();
-              //   });
-            }
+            },
+
+            //ニックネームの更新
+            updateNickName(inputNickName,communityId,userId,communityName){
+              const updateInfo = {
+                communityId : communityId,
+                userId : userId,
+                communityName : communityName,
+                nickName: inputNickName,
+                flag : true
+              };
+              axios.post('/updateNickName',updateInfo)
+              .then(res =>{
+                this.getBelongingCommunities();
+              });
+
+              
+            },
+            
+            //建てたスレッドを取得
+            getMyThreads(){
+                this.myThreads =[];
+                axios.get('/getMyThreads')
+                .then(res =>{
+                    this.myThreads = res.data;
+                    console.log(res.data);
+                });
+                
+            },
 
 
             
@@ -135,6 +181,7 @@
           created:function(){
             console.log("created");
             this.getBelongingCommunities();
+            this.getMyThreads();
           }
       
         }).mount('#app')

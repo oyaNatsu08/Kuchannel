@@ -1,6 +1,7 @@
 package com.example.Kuchannel.controller;
 
 import com.example.Kuchannel.entity.BelongingCommunities;
+import com.example.Kuchannel.entity.MyThread;
 import com.example.Kuchannel.service.UchimaService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ public class UchimaRestController {
         return communityList;
     }
 
+    //マイページで任意のコミュにティから退会する用の処理。
     @PostMapping(value = "/withdrawal", consumes = "text/plain;charset=UTF-8")
     public int withdrawal(@RequestBody String getCommunityId){
         var communityId =Integer.parseInt(getCommunityId);
@@ -40,4 +42,21 @@ public class UchimaRestController {
         int result = uchimaService.withdrawal(1,communityId);
         return result;
     }
+
+//    マイページ用の、ニックネームを変更する処理
+    @PostMapping("/updateNickName")
+    public int updateNickName(@RequestBody BelongingCommunities updateInfo){
+        int result = uchimaService.updateNickName(updateInfo);
+        return result;
+    }
+
+    //マイページ用で、スレッドを取得する
+    @GetMapping("/getMyThreads")
+    public List<MyThread> getMyThread(){
+        //session.getAttribute("userId");
+        //セッションからユーザーのidを渡すように変える。今は1で固定している
+        List<MyThread> result = uchimaService.getMyThreads(1);
+        return result;
+    }
+
 }

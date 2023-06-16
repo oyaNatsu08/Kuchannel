@@ -26,9 +26,80 @@ CREATE TABLE SPRING_SESSION_ATTRIBUTES (
 	CONSTRAINT SPRING_SESSION_ATTRIBUTES_FK FOREIGN KEY (SESSION_PRIMARY_ID) REFERENCES SPRING_SESSION(PRIMARY_ID) ON DELETE CASCADE
 );
 
+
+--各テーブルの全件検索
+SELECT * FROM users;
+
+SELECT * FROM communities;
+
+SELECT * FROM community_user;
+
+SELECT * FROM threads;
+
+SELECT * FROM hashtags;
+
+SELECT * FROM thread_hashtag;
+
+SELECT * FROM reviews;
+
+SELECT * FROM replies;
+
+SELECT * FROM notices;
+
+SELECT * FROM review_images;
+
+SELECT * FROM thread_goods;
+
+SELECT * FROM review_goods;
+
+SELECT * FROM inquiries;
+
+
+
+
+--マイページでコミュニティ表示用
+SELECT c.name AS community_name,c_u.nick_name
+FROM comunity_user c_u
+JOIN comunities c
+ON c_u.comunity_id = c.id
+WHERE c_u.user_id =1
+
+SELECT c.name AS community_name,c_u.nick_name FROM comunity_user c_u JOIN comunities c ON c_u.comunity_id = c.id WHERE c_u.user_id =1
+
+
+
+
+
+--DROP TABLE集
+DROP TABLE inquiries;
+
+DROP TABLE review_goods;
+
+DROP TABLE thread_goods;
+
+DROP TABLE review_images;
+
+DROP TABLE notices;
+
+DROP TABLE replies;
+
+DROP TABLE reviews;
+
+DROP TABLE thread_hashtag;
+
+DROP TABLE hashtags;
+
+DROP TABLE threads;
+
+DROP TABLE comunity_user;
+
+DROP TABLE comunities;
+
+DROP TABLE users;
+
 CREATE TABLE users(
 id SERIAL PRIMARY KEY,
-user_id VARCHAR(50) NOT NULL UNIQUE,
+login_id VARCHAR(50) NOT NULL UNIQUE,
 name VARCHAR(50) NOT NULL,
 password VARCHAR(50) NOT NULL,
 image_path VARCHAR(255)
@@ -140,32 +211,14 @@ comunity_id INT NOT NULL REFERENCES comunities(id),
 content TEXT NOT NULL,
 flag BOOLEAN NOT NULL
 );
---DROP TABLE inquiries;
 
---各テーブルの全件検索
-SELECT * FROM users;
 
-SELECT * FROM comunities;
 
-SELECT * FROM comunity_user;
 
-SELECT * FROM threads;
 
-SELECT * FROM hashtags;
 
-SELECT * FROM thread_hashtag;
 
-SELECT * FROM reviews;
 
-SELECT * FROM replies;
 
-SELECT * FROM notices;
 
-SELECT * FROM review_images;
-
-SELECT * FROM thread_goods;
-
-SELECT * FROM review_goods;
-
-SELECT * FROM inquiries;
 
