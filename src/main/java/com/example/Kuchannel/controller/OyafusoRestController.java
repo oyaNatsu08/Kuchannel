@@ -15,6 +15,7 @@ public class OyafusoRestController {
 
     @GetMapping("/getUrl")
     public String getUrl(@RequestParam("name") Integer id) {
+        System.out.println("コミュニティURL:" + oyafusoService.getUrl(id).url());
         return oyafusoService.getUrl(id).url();
     }
 

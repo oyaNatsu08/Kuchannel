@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>口ゃんねる(口コミ)</title>
+    <link href="/css/oyafuso.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body>
+    <h2 th:text="${communityName} + 'に参加しますか？'"></h2>
+    <form action="/join" method="post" th:object="${communityJoin}">
+        <p>
+            ニックネーム(任意)：
+            <input type="text" th:field="*{joinNickName}">
+            <span class="red" th:errors="*{joinNickName}"></span>
+        </p>
+
+        <input type="hidden" name="url" th:value="${url}">
+        <a class="btn btn-outline-secondary" th:href="@{/my-page}" role="button" th:text="参加しない"></a>
+        <button type="submit" class="btn btn-warning" th:text="参加する"></button>
+
+    </form>
+</body>
+</html>

@@ -1,7 +1,8 @@
 package com.example.Kuchannel.service;
 
-import com.example.Kuchannel.entity.CommunityRecord;
-import com.example.Kuchannel.entity.UrlRecord;
+import com.example.Kuchannel.entity.*;
+
+import java.util.List;
 
 public interface KuchannelService {
 
@@ -16,5 +17,21 @@ public interface KuchannelService {
 
     //コミュニティIDを元にURLを取得する
     UrlRecord getUrl(Integer id);
+
+    //URLを元にコミュニティIDを取得する
+    CommunityRecord getCommunity(String url);
+
+    //コミュニティに参加しているかチェック
+    CommunityUserRecord checkJoin(Integer userId, String url);
+
+    //レビューIDをもとにレビューをセレクト
+    ReviewRecord findReviews(Integer reviewId);
+
+    //ユーザーのお知らせ一覧をセレクト
+    List<NoticeReplyRecord> userNotice(Integer userId);
+    List<InquiryRecord> userInquiry(Integer userId);
+
+    //ユーザーを特定する
+    UserRecord findUser(Integer userId);
 
 }

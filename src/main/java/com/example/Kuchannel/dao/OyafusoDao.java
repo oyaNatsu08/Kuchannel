@@ -1,7 +1,6 @@
 package com.example.Kuchannel.dao;
 
-import com.example.Kuchannel.entity.CommunityRecord;
-import com.example.Kuchannel.entity.UrlRecord;
+import com.example.Kuchannel.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.swing.plaf.basic.BasicTreeUI;
 import java.security.Key;
+import java.util.List;
 
 @Repository
 public class OyafusoDao implements KuchannelDao {
@@ -69,6 +69,94 @@ public class OyafusoDao implements KuchannelDao {
         param.addValue("communityId", id);
         var list = jdbcTemplate.query("SELECT url FROM communities WHERE id = :communityId", param,
                 new DataClassRowMapper<>(UrlRecord.class));
+
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    //URLを元にコミュニティIDを取得する
+    public CommunityRecord getCommunity(String url) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("url", url);
+
+        var list = jdbcTemplate.query("SELECT id, name, url, delete_date FROM communities WHERE url = :url", param,
+                new DataClassRowMapper<>(CommunityRecord.class));
+
+        return list.isEmpty() ? null : list.get(0);
+
+    }
+
+    //コミュニティに参加しているかチェック
+    @Override
+    public CommunityUserRecord checkJoin(Integer userId, String url) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", userId);
+        param.addValue("url", url);
+
+        var list = jdbcTemplate.query("SELECT cu.id, user_id, community_id, nick_name, role, flag " +
+                        "FROM community_user cu JOIN communities co ON cu.community_id = co.id " +
+                        "WHERE cu.user_id = :userId AND co.url = :url", param,
+                        new DataClassRowMapper<>(CommunityUserRecord.class));
+
+        return list.isEmpty() ? null : list.get(0);
+
+    }
+
+    //ユーザーIDをもとにレビューをセレクト
+    @Override
+    public ReviewRecord findReviews(Integer reviewId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("reviewId", reviewId);
+        var list = jdbcTemplate.query("SELECT id, user_id, thread_id, title, review, create_date FROM reviews WHERE id = :reviewId", param,
+                new DataClassRowMapper<>(ReviewRecord.class));
+
+        return list.isEmpty() ? null : list.get(0);
+
+    }
+
+    //ユーザーのお知らせ一覧をセレクト
+    @Override
+    public List<NoticeReplyRecord> userNotice(Integer userId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", userId);
+
+        var list = jdbcTemplate.query("SELECT rep.user_id AS replyUserId, th.title AS threadTitle, " +
+                        "no.read_flag AS flag, rev.id AS reviewId " +
+                "FROM threads th JOIN reviews rev ON th.id = rev.thread_id " +
+                "JOIN replies rep ON rev.id = rep.review_id " +
+                "JOIN notices no ON rep.id = no.reply_id " +
+                "WHERE rev.user_id = :userId", param,
+                new DataClassRowMapper<>(NoticeReplyRecord.class));
+
+        return list;
+
+    }
+
+    //ユーザーのお知らせ一覧(問い合わせ)をセレクト
+    @Override
+    public List<InquiryRecord> userInquiry(Integer userId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", userId);
+
+        var list = jdbcTemplate.query("SELECT u.name AS inquiryUserName, co.id AS communityId, co.name AS communityName " +
+                "FROM inquiries inq JOIN community_user cu ON inq.community_id = cu.community_id " +
+                "JOIN communities co ON cu.community_id = co.id " +
+                "JOIN users u ON inq.user_id = u.id " +
+                "WHERE cu.role = 2 AND cu.user_id = :userId AND inq.flag = false", param,
+                new DataClassRowMapper<>(InquiryRecord.class));
+
+        return list;
+
+    }
+
+
+    //ユーザーIDを元に、ユーザーを特定する
+    @Override
+    public UserRecord findUser(Integer userId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", userId);
+
+        var list = jdbcTemplate.query("SELECT id, login_id, name, password, image_path FROM users WHERE id = :userId", param,
+                new DataClassRowMapper<>(UserRecord.class));
 
         return list.isEmpty() ? null : list.get(0);
     }
