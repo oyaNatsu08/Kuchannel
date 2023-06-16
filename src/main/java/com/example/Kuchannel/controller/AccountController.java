@@ -70,23 +70,18 @@ public class AccountController {
 
 
 //    /*-------------------------Insert(新規追加)--------------------------*/
-    @GetMapping("/account-add")
-    public String newUser(@ModelAttribute("CreateForm") CreateForm createForm) {
-        return "account-add";
-    }
-
-    @GetMapping("/account-add")
+    @GetMapping("/create-user")
     public String accountAdd(@ModelAttribute("CreateForm") CreateForm createForm) {
-        return "account-add";
+        return "create-user";
     }
 
-    @PostMapping("account-add")
+    @PostMapping("create-user")
     public String accountAdd(@Validated @ModelAttribute("CreateForm") CreateForm createForm,
                          BindingResult bindingResult,
                          Model model) {
         //バリデーション
         if (bindingResult.hasErrors()) {
-            return "account-add";
+            return "create-user";
         }
         String loginId = createForm.getLoginId();
         String password = createForm.getPassword();
@@ -94,7 +89,7 @@ public class AccountController {
         String image_path = createForm.getImage_path();
         CreateRecord create = new CreateRecord(loginId, password, name, image_path);
         accountService.create(loginId, password, name, image_path);
-        return "redirect:/menu";
+        return "redirect:/login";
     }
 //    /*------------------------------------------------------------------------*/
 }
