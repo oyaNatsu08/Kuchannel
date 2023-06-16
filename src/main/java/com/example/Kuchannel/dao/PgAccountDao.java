@@ -5,6 +5,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -20,12 +21,21 @@ public class PgAccountDao implements AccountDao {
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("loginId", loginId);
         parameterSource.addValue("password", password);
-        System.out.println(loginId);
-        System.out.println(password);
 
         var list = jdbcTemplate.query("SELECT * FROM users WHERE login_id = :loginId AND password = :password",
                 parameterSource, new DataClassRowMapper<>(UserRecord.class));
         return list.isEmpty() ? null : list.get(0);
+    }
+
+    //プロフィール画面
+    @Override
+    public ProfileRecord detail(String loginId) {
+        MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+        parameterSource.addValue("loginId",loginId);
+
+        var list = jdbcTemplate.query("SELECT * FROM users WHERE login_id = :loginId",
+                parameterSource, new DataClassRowMapper<>(ProfileRecord.class));
+        return list.get(0);
     }
 
 
@@ -52,4 +62,7 @@ public class PgAccountDao implements AccountDao {
             return null;
         }
     }
+
+    //プロフィール画面
+
 }

@@ -16,6 +16,11 @@ public class AccountServiceImpl implements AccountService {
         return accountDao.Login(loginId, password);
     }
 
+    //プロフィール画面
+    public ProfileRecord detail(String loginId) {
+        return accountDao.detail(loginId);
+    }
+
     //アカウント新規作成
     @Override
     public CreateRecord create(String loginId, String password, String name, String image_path) {

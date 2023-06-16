@@ -3,6 +3,7 @@ package com.example.Kuchannel.controller;
 import com.example.Kuchannel.form.CreateForm;
 import com.example.Kuchannel.form.UserForm;
 import com.example.Kuchannel.record.CreateRecord;
+import com.example.Kuchannel.record.UserRecord;
 import com.example.Kuchannel.service.AccountServiceImpl;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,23 @@ public class AccountController {
             return "test";
         }
     }
+    /*------------------------------------------------------------------------*/
+
+
+    /*------------------------プロフィール画面-----------------------------------*/
+
+    @GetMapping("/profile-details")
+    public String profileDetail(Model model){
+
+        UserRecord userData = (UserRecord) session.getAttribute("user");
+        var user_id = userData.loginId();
+
+        var list = model.addAttribute("profile",accountService.detail(user_id));
+        return "profile-details";
+    }
+
+
+
     /*------------------------------------------------------------------------*/
 
 
