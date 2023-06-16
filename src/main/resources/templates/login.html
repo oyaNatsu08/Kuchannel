@@ -1,10 +1,47 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>口ゃんねる(口コミ)</title>
+    <title>ログイン</title>
+    <link href="/css/commons.css" rel="stylesheet">
 </head>
-<body>
 
+<body class="login-body">
+
+<div class="login-form">
+    <h1 class="site_logo">口ゃんねる（口コミ）</h1>
+
+    <div class="error" th:if="${error}">
+        <p class="error" th:text="${error}"></p>
+    </div>
+
+    <form action="login" method="post" th:object="${UserForm}">
+            <div class="cp_iptxt">
+                <span class="size">ユーザーID</span><input class="base-input" type="text" name="loginId" th:field="*{loginId}">
+                <div class="error" th:each="error: ${#fields.errors('loginId')}">
+                    [[ ${error} ]]
+                </div>
+            </div>
+
+            <div class="cp_iptxt">
+                <span class="size">パスワード</span><input class="base-input" type="password" name="password" th:field="*{password}">
+                <div class="error" th:each="error: ${#fields.errors('password')}">
+                    [[ ${error} ]]
+                </div>
+            </div>
+        <button id="login-btn" class="custom-btn" type="submit">
+            ログイン
+        </button>
+        <br>
+        <a href="create-user.html" style="line-height: 70px;">新規作成</a>
+    </form>
+</div>
+<script>
+    'use strict'
+    document.getElementById('login-btn').addEventListener('click', () => {
+      location.href = './menu.html'
+    })
+  </script>
 </body>
 </html>
+

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ログイン</title>
+    <link href="css/commons.css" rel="stylesheet">
+</head>
+<body class="login-body">
+<div class="header">
+    <h1 class="site_logo">口ゃんねる（口コミ）</h1>
+</div>
+
+<div class="login-form">
+    <img src="./images/logo.png" class="login-logo">
+    <p class="error">エラーメッセージ</p>
+
+    <form action="login" method="post">
+        <fieldset>
+            <div class="cp_iptxt">
+                <span>ユーザーID</span><input class="base-input" type="text" name="loginId" placeholder="ID">
+                <div class="error">エラーメッセージ</div>
+            </div>
+
+            <div>
+                <span>パスワード</span><input class="base-input" type="password" name="pass" placeholder="PASS">
+                <div class="error">エラーメッセージ</div>
+            </div>
+
+            <div>
+                <span>名前</span><input class="base-input" type="name" name="name" placeholder="NAME">
+                <div class="error">エラーメッセージ</div>
+            </div>
+        </fieldset>
+<!--        <button id="login-btn" class="custom-btn" type="button">-->
+            <table>
+                <tr>
+                    <td>
+                        <a href="login.html" class="btn">戻る</a></td>
+                    <td><button>登録</button></td>
+                </tr>
+            </table>
+        </button>
+    </form>
+</div>
+<!--<script>-->
+<!--    'use strict'-->
+<!--    document.getElementById('login-btn').addEventListener('click', () => {-->
+<!--      location.href = './menu.html'-->
+<!--    })-->
+<!--  </script>-->
+</body>
+</html>
