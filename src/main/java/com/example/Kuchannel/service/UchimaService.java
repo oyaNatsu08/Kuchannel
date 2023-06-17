@@ -24,16 +24,11 @@ public class UchimaService {
 
 
     //マイページ用。データベースから所属しているコミュニティを取得
-    public List<BelongingCommunities> getBelongingCommunities(Integer userId){
-        return uchimaDao.getBelongingCommunities(userId);
-
-    }
+    public List<BelongingCommunities> getBelongingCommunities(Integer userId){return uchimaDao.getBelongingCommunities(userId);}
 
     //マイページ用。退会処理。
-    public int withdrawal(Integer userId,Integer communityId){
-        return uchimaDao.withdrawal(userId,communityId);
+    public int withdrawal(Integer userId,Integer communityId){return uchimaDao.withdrawal(userId,communityId);}
 
-    }
     //マイページ用。ニックネームの変更
     public int updateNickName(BelongingCommunities updateInfo){
         return  uchimaDao.updateNickName(updateInfo);

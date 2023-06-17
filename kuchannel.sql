@@ -68,6 +68,15 @@ SELECT c.name AS community_name,c_u.nick_name FROM comunity_user c_u JOIN comuni
 
 
 
+UPDATE community_user 
+SET nick_name = 'test3'
+WHERE user_id =1  AND community_id = 4
+
+
+
+UPDATE community_user SET nick_name = ':nickName' WHERE user_id = 1 AND community_id = 4
+
+UPDATE community_user SET nick_name = ':nickName2' WHERE user_id = 1 AND community_id = 4
 
 
 --DROP TABLE集
@@ -215,10 +224,52 @@ flag BOOLEAN NOT NULL
 
 
 
+--ユーザーがどのコミュニティに参加しているか検索
+SELECT community_id
+FROM community_user
+WHERE user_id =1 AND flag =true
+
+--自分が建てたスレッド、かつ今所属しているコミュニティのものだけを表示①
+SELECT th.id AS thread_id,th.title, co.name AS community_name
+FROM threads th
+JOIN communities co
+ON th.community_id = co.id
+WHERE user_id=1 AND community_id IN(
+                        SELECT community_id
+                        FROM community_user
+                        WHERE user_id =1 AND flag =true
+                                            )
+
+--②
+SELECT th.id, th.title, co.name
+from threads th join communities co on th.community_id = co.id 
+join community_user cu on co.id = cu.community_id 
+where th.user_id = 1 and cu.flag = true;
+
+
+
+
+--②一行バージョン
+
+SELECT th.id AS threadId, th.title AS threadTitle, co.name AS communityName, co.url AS communityUrl FROM threads th JOIN communities co ON th.community_id = co.id JOIN community_user cu ON co.id = cu.community_id WHERE th.user_id = 1 AND cu.flag = true;
 
 
 
 
 
+--マイページでレビュー表示する用
+SELECT rev.title, rev.review, th.title, co.name
+FROM reviews rev
+JOIN threads th ON rev.thread_id = th.id
+JOIN communities co ON th.community_id = co.id 
+JOIN community_user cu on co.id = cu.community_id 
+WHERE th.user_id = 1 AND cu.flag = true;
+
+--上の１行版
+SELECT rev.title AS reviewTitle, rev.review, th.title AS threadTitle, co.name AS communityName,rev.create_date AS createDate FROM reviews rev JOIN threads th ON rev.thread_id = th.id JOIN communities co ON th.community_id = co.id JOIN community_user cu on co.id = cu.community_id WHERE th.user_id = 1 AND cu.flag = true;
 
 
+SELECT * FROM reviews;
+
+
+DELETE FROM reviews WHERE id BETWEEN 11 AND 16

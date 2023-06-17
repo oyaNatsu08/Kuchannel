@@ -2,6 +2,7 @@ package com.example.Kuchannel.entity;
 
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -10,6 +11,7 @@ public class MyReview {
     private String review;
     private String threadTitle;
     private String communityName;
-    private LocalDateTime createDate;
+    private LocalDate createDate;
+
 
 }

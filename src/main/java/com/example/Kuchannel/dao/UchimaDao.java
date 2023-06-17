@@ -58,7 +58,7 @@ public class UchimaDao {
     public List<MyReview>getMyReviews(Integer userId){
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
-        var result = jdbcTemplate.query("SELECT rev.title AS reviewTitle, rev.review, th.title AS threadTitle, co.name AS communityName, rev.create_date AS createDate FROM reviews rev JOIN threads th ON rev.thread_id = th.id JOIN communities co ON th.community_id = co.id JOIN community_user cu on co.id = cu.community_id WHERE th.user_id = :userId AND cu.flag = true;",param,new DataClassRowMapper<>(MyReview.class));
+        var result = jdbcTemplate.query("SELECT rev.title AS reviewTitle, CONCAT(LEFT(rev.review,10),'...') AS review, th.title AS threadTitle, co.name AS communityName, DATE(rev.create_date) AS createDate FROM reviews rev JOIN threads th ON rev.thread_id = th.id JOIN communities co ON th.community_id = co.id JOIN community_user cu on co.id = cu.community_id WHERE th.user_id = :userId AND cu.flag = true;",param,new DataClassRowMapper<>(MyReview.class));
         System.out.println(result);
         return result;
     }
