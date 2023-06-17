@@ -1,6 +1,6 @@
 package com.example.Kuchannel.service;
 
-import com.example.Kuchannel.controller.CreateRecord;
+import com.example.Kuchannel.entity.CreateRecord;
 import com.example.Kuchannel.entity.UserRecord;
 import com.example.Kuchannel.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,5 +1,5 @@
 package com.example.Kuchannel.dao;
-import com.example.Kuchannel.controller.CreateRecord;
+import com.example.Kuchannel.entity.CreateRecord;
 import com.example.Kuchannel.entity.UserRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;

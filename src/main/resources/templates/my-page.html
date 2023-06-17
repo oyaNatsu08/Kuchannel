@@ -39,8 +39,7 @@
               <button type="button" @click="openPopupCommu">コミュニティ作成</button>
               <tr v-for="com in belongingCommunities">
                 <td>{{com.communityName}}</td>
-                <p>ようこそ、[[ ${session.user.name} ]] さん [[ ${session.user.id } ]]</p>
-                <td><button type="button" @click="copy(session.user.id)">共有</button></td>
+                <td><button type="button" @click="copy(com.communityId)">共有</button></td>
                 <td><input type="text" v-model="com.nickName"><button type="button"
                     @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)">変更</button></button>
                 </td>

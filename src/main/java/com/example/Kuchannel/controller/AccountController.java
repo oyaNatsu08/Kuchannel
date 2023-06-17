@@ -1,5 +1,6 @@
 package com.example.Kuchannel.controller;
 
+import com.example.Kuchannel.entity.CreateRecord;
 import com.example.Kuchannel.form.CommunityAddForm;
 import com.example.Kuchannel.form.CreateForm;
 import com.example.Kuchannel.form.UserForm;

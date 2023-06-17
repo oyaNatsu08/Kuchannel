@@ -49,7 +49,10 @@ public class UchimaDao {
     public List<MyThread>getMyThreads(Integer userId){
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
-        var result = jdbcTemplate.query("SELECT th.id AS threadId, th.title AS threadTitle, co.name AS communityName, co.url AS communityUrl FROM threads th JOIN communities co ON th.community_id = co.id JOIN community_user cu ON co.id = cu.community_id WHERE th.user_id = :userId AND cu.flag = true;",param,new DataClassRowMapper<>(MyThread.class));
+        var result = jdbcTemplate.query("SELECT th.id AS threadId, th.title AS threadTitle, co.name AS communityName, co.url AS communityUrl " +
+                "FROM threads th JOIN communities co ON th.community_id = co.id JOIN community_user cu ON co.id = cu.community_id " +
+                "WHERE th.user_id = :userId AND cu.user_id = :userId AND cu.flag = true;", param,
+                new DataClassRowMapper<>(MyThread.class));
         System.out.println(result);
         return result;
     }

@@ -90,7 +90,7 @@ public class OyafusoDao {
 
         var list = jdbcTemplate.query("SELECT cu.id, user_id, community_id, nick_name, role, flag " +
                         "FROM community_user cu JOIN communities co ON cu.community_id = co.id " +
-                        "WHERE cu.user_id = :userId AND co.url = :url", param,
+                        "WHERE cu.user_id = :userId AND co.url = :url AND cu.flag = true", param,
                         new DataClassRowMapper<>(CommunityUserRecord.class));
 
         return list.isEmpty() ? null : list.get(0);
