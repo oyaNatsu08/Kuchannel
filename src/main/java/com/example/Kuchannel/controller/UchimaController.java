@@ -1,5 +1,7 @@
 package com.example.Kuchannel.controller;
 
+import com.example.Kuchannel.form.CommunityAddForm;
+import com.example.Kuchannel.form.UserForm;
 import com.example.Kuchannel.service.UchimaService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +16,18 @@ public class UchimaController {
 //    @Autowired
 //    UchimaService uchimaService;
 //
-//    @Autowired
-//    HttpSession session;
+    @Autowired
+    HttpSession session;
 
     //マイページの表示
     @GetMapping("/mypage")
-    public String myPage() {
-        return "my-page2";
+    public String myPage(@ModelAttribute("UserForm") UserForm userForm,
+                         @ModelAttribute("communityAdd") CommunityAddForm communityAddForm) {
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
+            return "my-page";
+        }
     }
 
 

@@ -11,5 +11,4 @@ public class KuchannelApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(KuchannelApplication.class, args);
 	}
-
 }

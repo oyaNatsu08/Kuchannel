@@ -3,6 +3,7 @@ package com.example.Kuchannel.controller;
 import com.example.Kuchannel.entity.BelongingCommunities;
 import com.example.Kuchannel.entity.MyReview;
 import com.example.Kuchannel.entity.MyThread;
+import com.example.Kuchannel.entity.UserRecord;
 import com.example.Kuchannel.service.UchimaService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +27,12 @@ public class UchimaRestController {
     //所属しているコミュニティを取得。（マイページ用）
     @GetMapping("/getBelongingCommunities")
     public List<BelongingCommunities> getBelongingCommunities(){
-        System.out.println("ゲットコミュニティ");
+        //System.out.println("ゲットコミュニティ");
 
         //session.getAttribute("userId");
-        //セッションからユーザーのidを渡すように変える。今は1で固定している
-        List<BelongingCommunities> communityList = uchimaService.getBelongingCommunities(1);
+        //セッションからユーザーのidを渡すように変える。今は1で固定している → 修正済み
+        var user = (UserRecord)session.getAttribute("user");
+        List<BelongingCommunities> communityList = uchimaService.getBelongingCommunities(user.id());
         return communityList;
     }
 
@@ -39,8 +41,9 @@ public class UchimaRestController {
     public int withdrawal(@RequestBody String getCommunityId){
         var communityId =Integer.parseInt(getCommunityId);
         //session.getAttribute("userId");
-        //セッションからユーザーのidを渡すように変える。今は1で固定している
-        int result = uchimaService.withdrawal(1,communityId);
+        //セッションからユーザーのidを渡すように変える。今は1で固定している → 修正済み
+        var user = (UserRecord)session.getAttribute("user");
+        int result = uchimaService.withdrawal(user.id(), communityId);
         return result;
     }
 
@@ -55,8 +58,9 @@ public class UchimaRestController {
     @GetMapping("/getMyThreads")
     public List<MyThread> getMyThread(){
         //session.getAttribute("userId");
-        //セッションからユーザーのidを渡すように変える。今は1で固定している
-        List<MyThread> result = uchimaService.getMyThreads(1);
+        //セッションからユーザーのidを渡すように変える。今は1で固定している→修正済み
+        UserRecord user = (UserRecord) session.getAttribute("user");
+        List<MyThread> result = uchimaService.getMyThreads(user.id());
         return result;
     }
 
@@ -64,8 +68,9 @@ public class UchimaRestController {
     @GetMapping("/getMyReviews")
     public List<MyReview> getMyReviews(){
         //session.getAttribute("userId");
-        //セッションからユーザーのidを渡すように変える。今は1で固定している
-        List<MyReview> result = uchimaService.getMyReviews(1);
+        //セッションからユーザーのidを渡すように変える。今は1で固定している → 修正済み
+        var user = (UserRecord)session.getAttribute("user");
+        List<MyReview> result = uchimaService.getMyReviews(user.id());
         return result;
     }
 

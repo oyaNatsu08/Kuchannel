@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>口ゃんねる</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            text-align: center;
+            
+        }
+
+        .notice-list {
+            margin: 0 auto;
+            max-width: 800px;
+            padding: 20px;
+            border: 1px solid gray;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <th:block th:insert="common/header"></th:block>
+        <h1>お知らせ</h1>
+
+        <th:block th:each="notice : ${notices}">
+            <div th:if="${notice.flag}">
+                <a th:href="@{/review(id=${notice.reviewId})}"><p class="notice-list" style="background-color: sandybrown;" th:text="${notice.replyUserName} + 'さんが' + ${notice.threadTitle} + 'へのレビューに返信しました'"></p></a>
+            </div>
+            <div th:unless="${notice.flag}">
+                <a th:href="@{/review(id=${notice.reviewId})}"><p class="notice-list" style="background-color: gray;" th:text="${notice.replyUserName} + 'さんが' + ${notice.threadTitle} + 'へのレビューに返信しました'"></p></a>
+            </div>
+        </th:block>
+        <th:block th:each="inquiry : ${inquires}">
+            <p class="notice-list" style="background-color: lightcoral;" th:text="${inquiry.inquiryUserName} + 'さんから' + ${inquiry.communityName} + 'へお問い合わせがありました'"></p>
+        </th:block>
+
+    </div>
+
+    <script src="/js/base.js"></script>
+
+</body>
+
+</html>

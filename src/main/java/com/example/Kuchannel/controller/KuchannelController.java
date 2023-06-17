@@ -1,4 +1,4 @@
 package com.example.Kuchannel.controller;
 
-public class MiyagiController {
+public class KuchannelController {
 }
