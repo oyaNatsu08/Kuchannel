@@ -11,6 +11,4 @@ createApp({
             this.showMenu = !this.showMenu;
         }
     },
-    created: function () {
-    }
-}).mount('#app')
+}).mount('#app0')

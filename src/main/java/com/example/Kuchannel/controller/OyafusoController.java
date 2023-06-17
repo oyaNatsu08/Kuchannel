@@ -3,7 +3,8 @@ package com.example.Kuchannel.controller;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.CommunityAddForm;
 import com.example.Kuchannel.form.CommunityJoinForm;
-import com.example.Kuchannel.service.KuchannelService;
+import com.example.Kuchannel.form.UserForm;
+import com.example.Kuchannel.service.OyafusoService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,14 +23,20 @@ import java.util.UUID;
 public class OyafusoController {
 
     @Autowired
-    private KuchannelService oyafusoService;
+    private OyafusoService oyafusoService;
 
     @Autowired
     private HttpSession session;
 
     @GetMapping("/community-add")
-    public String commuAdd(@ModelAttribute("communityAdd") CommunityAddForm communityAddForm) {
-        return "community-add";
+    public String commuAdd(@ModelAttribute("communityAdd") CommunityAddForm communityAddForm,
+                           @ModelAttribute("UserForm") UserForm userForm) {
+        //ログインしているか確認
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
+            return "community-add";
+        }
     }
 
     //コミュニティ作成処理
@@ -37,7 +44,7 @@ public class OyafusoController {
     public String communityAdd(@Validated @ModelAttribute("communityAdd") CommunityAddForm communityAddForm,
                                BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            return "community-add";
+            return "my-page";
         } else {
             String inviteCode = communityAddForm.getCommunityName();
 
@@ -51,7 +58,8 @@ public class OyafusoController {
             int communityId = oyafusoService.communityInsert(communityAddForm.getCommunityName(), "http://localhost:8080/community/" + randomString + "/" + communityAddForm.getCommunityName());
 
             //コミュニティユーザーテーブルにインサートする処理
-            oyafusoService.communityUserInsert(1, communityId, communityAddForm.getNickName(), 2); //Integer.parseInt(session.getAttribute("userId").toString())
+            var user = (UserRecord)session.getAttribute("user");
+            oyafusoService.communityUserInsert(user.id(), communityId, communityAddForm.getNickName(), 2); //Integer.parseInt(session.getAttribute("userId").toString())
 
             model.addAttribute("code", inviteCode);
 
@@ -71,17 +79,19 @@ public class OyafusoController {
     @GetMapping("/community/{randomString}/{code}")
     public String threadView(@ModelAttribute("communityAdd") CommunityAddForm communityAddForm,
                              @ModelAttribute("communityJoin") CommunityJoinForm communityForm,
+                             @ModelAttribute("UserForm") UserForm userForm,
                              @PathVariable("randomString") String str,
                              @PathVariable("code") String code,
                              Model model) {
 
         //ログインしているか確認
-//        if (session.getAttribute("user") == null) {
-//            return "login";
-//        } else {
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
             //コミュニティに初めて参加する場合は、参加確認画面へ飛んで、community_userテーブルを更新
             //コミュニティに参加しているかチェック
-            var communityUser = oyafusoService.checkJoin(3, "http://localhost:8080/community/" + str + "/" + code);
+            var user = (UserRecord)session.getAttribute("user");
+            var communityUser = oyafusoService.checkJoin(user.id(), "http://localhost:8080/community/" + str + "/" + code);
             if (communityUser == null) {
                 model.addAttribute("communityName", code);
                 model.addAttribute("url", "http://localhost:8080/community/" + str + "/" + code);
@@ -91,48 +101,56 @@ public class OyafusoController {
                 model.addAttribute("code", code);
                 return "thread-list";
             }
-//        }
-    }
-
-    //マイページ画面遷移
-    @GetMapping("/my-page")
-    public String myPageView() {
-        return "my-page";
+        }
     }
 
     //お知らせ画面遷移
     @GetMapping("/notice")
-    public String noticeView(Model model) {
+    public String noticeView(@ModelAttribute("UserForm") UserForm userForm, Model model) {
 
-        //お知らせ一覧を表示する
-        List<NoticeReplyRecord> notices = oyafusoService.userNotice(1);
+        //ログインしているか確認
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
 
-        //お知らせ一覧のユーザーIDをもとに、返信ユーザーを取得する
-        List<NoticeReplyRecord2> notices2 = new ArrayList<>();
-        for (NoticeReplyRecord notice : notices) {
-            UserRecord replyUser = oyafusoService.findUser(notice.replyUserId());
-            notices2.add(new NoticeReplyRecord2(replyUser.name(), notice.threadTitle(), notice.flag(), notice.reviewId()));
+            //お知らせ一覧を表示する
+            var user = (UserRecord)session.getAttribute("user");
+            List<NoticeReplyRecord> notices = oyafusoService.userNotice(user.id());
+
+            //お知らせ一覧のユーザーIDをもとに、返信ユーザーを取得する
+            List<NoticeReplyRecord2> notices2 = new ArrayList<>();
+            for (NoticeReplyRecord notice : notices) {
+                UserRecord replyUser = oyafusoService.findUser(notice.replyUserId());
+                notices2.add(new NoticeReplyRecord2(replyUser.name(), notice.threadTitle(), notice.flag(), notice.reviewId()));
+            }
+
+            //お問い合わせ情報を表示する
+            List<InquiryRecord> inquires = oyafusoService.userInquiry(user.id());
+
+            model.addAttribute("notices", notices2);
+            model.addAttribute("inquires", inquires);
+
+            return "notice-list";
+
         }
-
-        //お問い合わせ情報を表示する
-        List<InquiryRecord> inquires = oyafusoService.userInquiry(1);
-
-        model.addAttribute("notices", notices2);
-        model.addAttribute("inquires", inquires);
-
-        return "notice-list";
     }
 
     //レビュー一覧へ(仮)
     @GetMapping("/review")
     public String reviewView(@RequestParam("id") Integer reviewId,
+                             @ModelAttribute("UserForm") UserForm userForm,
                              Model model) {
+        //ログインしているか確認
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
 
-        ReviewRecord review = oyafusoService.findReviews(reviewId);
+            ReviewRecord review = oyafusoService.findReviews(reviewId);
 
-        model.addAttribute("review", review);
+            model.addAttribute("review", review);
 
-        return "review";
+            return "review";
+        }
     }
 
     //コミュニティに参加する処理
@@ -154,7 +172,8 @@ public class OyafusoController {
             CommunityRecord community = oyafusoService.getCommunity(url);
 
             //コミュニティユーザーテーブルにインサートする処理
-            oyafusoService.communityUserInsert(3, community.id(), communityForm.getJoinNickName(), 1); //Integer.parseInt(session.getAttribute("userId").toString())
+            var user = (UserRecord)session.getAttribute("user");
+            oyafusoService.communityUserInsert(user.id(), community.id(), communityForm.getJoinNickName(), 1); //Integer.parseInt(session.getAttribute("userId").toString())
 
             model.addAttribute("code", community.name());
 

@@ -1,5 +1,6 @@
 package com.example.Kuchannel.dao;
-import com.example.Kuchannel.record.*;
+import com.example.Kuchannel.controller.CreateRecord;
+import com.example.Kuchannel.entity.UserRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -10,18 +11,17 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @Repository
-public class PgAccountDao implements AccountDao {
+public class PgAccountDao {
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     //ログイン
-    @Override
     public UserRecord Login(String loginId, String password) {
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("loginId", loginId);
         parameterSource.addValue("password", password);
-        System.out.println(loginId);
-        System.out.println(password);
+//        System.out.println(loginId);
+//        System.out.println(password);
 
         var list = jdbcTemplate.query("SELECT * FROM users WHERE login_id = :loginId AND password = :password",
                 parameterSource, new DataClassRowMapper<>(UserRecord.class));
@@ -30,7 +30,6 @@ public class PgAccountDao implements AccountDao {
 
 
     //アカウント新規作成（start）
-    @Override
     public CreateRecord create(String loginId, String password, String name, String image_path) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("loginId", loginId);
@@ -56,7 +55,6 @@ public class PgAccountDao implements AccountDao {
     //新規作成（end）
 
     //プロフィール編集（start）
-//    @Override
 //    public ProfileEditRecord edit(int id,String name, String password) {
 //        //更新のSQL文
 //        String sql = "UPDATE users SET name =:name, password = :password WHERE id = :id";

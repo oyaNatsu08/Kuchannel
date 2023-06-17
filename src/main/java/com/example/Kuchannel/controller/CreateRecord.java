@@ -1,4 +1,4 @@
-package com.example.Kuchannel.record;
+package com.example.Kuchannel.controller;
 
 public record CreateRecord(String loginId, String password, String name, String image_path) {
     public CreateRecord(String loginId, String password, String name, String image_path) {

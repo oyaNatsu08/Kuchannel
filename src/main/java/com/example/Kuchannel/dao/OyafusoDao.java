@@ -15,13 +15,12 @@ import java.security.Key;
 import java.util.List;
 
 @Repository
-public class OyafusoDao implements KuchannelDao {
+public class OyafusoDao {
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     //urlが重複しないかチェック
-    @Override
     public CommunityRecord checkUrl(String str, String name) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("url", str);
@@ -34,7 +33,6 @@ public class OyafusoDao implements KuchannelDao {
     }
 
     //コミュニティテーブルインサート処理
-    @Override
     public int communityInsert(String name, String url) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("name", name);
@@ -51,7 +49,6 @@ public class OyafusoDao implements KuchannelDao {
     }
 
     //コミュニティユーザーテーブルインサート処理
-    @Override
     public int communityUserInsert(Integer userId, Integer communityId, String nickName, Integer role) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
@@ -60,7 +57,7 @@ public class OyafusoDao implements KuchannelDao {
         param.addValue("role", role);
 
         return jdbcTemplate.update("INSERT INTO community_user(user_id, community_id, nick_name, role, flag) " +
-                "VALUES(:userId, :communityId, :name, :role, 'f')", param);
+                "VALUES(:userId, :communityId, :name, :role, 't')", param);
     }
 
     //urlを取得する
@@ -86,7 +83,6 @@ public class OyafusoDao implements KuchannelDao {
     }
 
     //コミュニティに参加しているかチェック
-    @Override
     public CommunityUserRecord checkJoin(Integer userId, String url) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
@@ -102,7 +98,6 @@ public class OyafusoDao implements KuchannelDao {
     }
 
     //ユーザーIDをもとにレビューをセレクト
-    @Override
     public ReviewRecord findReviews(Integer reviewId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("reviewId", reviewId);
@@ -114,7 +109,6 @@ public class OyafusoDao implements KuchannelDao {
     }
 
     //ユーザーのお知らせ一覧をセレクト
-    @Override
     public List<NoticeReplyRecord> userNotice(Integer userId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
@@ -132,7 +126,6 @@ public class OyafusoDao implements KuchannelDao {
     }
 
     //ユーザーのお知らせ一覧(問い合わせ)をセレクト
-    @Override
     public List<InquiryRecord> userInquiry(Integer userId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
@@ -150,7 +143,6 @@ public class OyafusoDao implements KuchannelDao {
 
 
     //ユーザーIDを元に、ユーザーを特定する
-    @Override
     public UserRecord findUser(Integer userId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);

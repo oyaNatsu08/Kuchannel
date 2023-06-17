@@ -42,3 +42,12 @@ body {
     /* display: none; */
     text-align: center;
 }
+
+table{
+    width: 100%;
+}
+.review-cell {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

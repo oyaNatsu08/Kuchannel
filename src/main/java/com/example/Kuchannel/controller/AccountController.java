@@ -1,8 +1,8 @@
 package com.example.Kuchannel.controller;
 
+import com.example.Kuchannel.form.CommunityAddForm;
 import com.example.Kuchannel.form.CreateForm;
 import com.example.Kuchannel.form.UserForm;
-import com.example.Kuchannel.record.CreateRecord;
 import com.example.Kuchannel.service.AccountServiceImpl;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +32,12 @@ public class AccountController {
     @PostMapping("/login")
     public String login(@Validated @ModelAttribute("UserForm") UserForm userForm,
                         BindingResult bindingResult,
+                        @ModelAttribute("communityAdd") CommunityAddForm communityAddForm,
                         Model model) {
-        System.out.println("login");
+        //System.out.println("login");
         //バリデーション
         if (bindingResult.hasErrors()) {
-            System.out.println("エラー");
+            //System.out.println("エラー");
 
             return "login";
         }
@@ -48,13 +49,14 @@ public class AccountController {
 
         if (user == null) {
             model.addAttribute("error", "IDまたはパスワードが不正です");
-            System.out.println("エラーヌル");
+            //System.out.println("エラーヌル");
 
             return "login";
         }
         //セッション
         session.setAttribute("user", user);
-        return "test";
+
+        return "my-page";
 
     }
     /*------------------------------------------------------------------------*/
@@ -62,18 +64,23 @@ public class AccountController {
 
     /*------------------------logout(ログアウト)-----------------------------------*/
     @PostMapping("/logout")
+    public String logout0(@ModelAttribute("UserForm") UserForm userForm) {
+        session.invalidate();
+        return "logout";
+    }
+    @GetMapping("/logout")
     public String logout(@ModelAttribute("UserForm") UserForm userForm) {
         session.invalidate();
         return "logout";
     }
-    @GetMapping("/test")
-    public String top(@ModelAttribute("UserForm") UserForm userForm) {
-        if (session.getAttribute("user") == null) {
-            return "login";
-        } else {
-            return "test";
-        }
-    }
+//    @GetMapping("/test")
+//    public String top(@ModelAttribute("UserForm") UserForm userForm) {
+//        if (session.getAttribute("user") == null) {
+//            return "login";
+//        } else {
+//            return "test";
+//        }
+//    }
     /*------------------------------------------------------------------------*/
 
 
