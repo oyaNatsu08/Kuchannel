@@ -59,7 +59,13 @@ public class OyafusoController {
 
             //コミュニティユーザーテーブルにインサートする処理
             var user = (UserRecord)session.getAttribute("user");
-            oyafusoService.communityUserInsert(user.id(), communityId, communityAddForm.getNickName(), 2); //Integer.parseInt(session.getAttribute("userId").toString())
+
+            //もしニックネームがnullならユーザーネームを登録する
+            if ("".equals(communityAddForm.getNickName())) {
+                oyafusoService.communityUserInsert(user.id(), communityId, user.name(), 2);
+            } else {
+                oyafusoService.communityUserInsert(user.id(), communityId, communityAddForm.getNickName(), 2);
+            }
 
             model.addAttribute("code", inviteCode);
 
@@ -172,17 +178,24 @@ public class OyafusoController {
             CommunityRecord community = oyafusoService.getCommunity(url);
 
             var user = (UserRecord)session.getAttribute("user");
+            String nickName;
+            //もしニックネームがnullならユーザーネームを登録する
+            if ("".equals(communityForm.getJoinNickName())) {
+                nickName = user.name();
+            } else {
+                nickName = communityForm.getJoinNickName();
+            }
 
             //コミュニティに以前参加していたか確認
             if (oyafusoService.checkJoin(user.id(), community.id()) != null) {
 
                 //community_userテーブルをアップデート
-                oyafusoService.communityUserUpdate(user.id(), community.id(), communityForm.getJoinNickName());
+                oyafusoService.communityUserUpdate(user.id(), community.id(), nickName);
 
             } else {
 
                 //コミュニティユーザーテーブルにインサートする処理
-                oyafusoService.communityUserInsert(user.id(), community.id(), communityForm.getJoinNickName(), 1); //Integer.parseInt(session.getAttribute("userId").toString())
+                oyafusoService.communityUserInsert(user.id(), community.id(), nickName, 1); //Integer.parseInt(session.getAttribute("userId").toString())
 
             }
 
