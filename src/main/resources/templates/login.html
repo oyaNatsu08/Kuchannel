@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>ログイン</title>
-    <link href="css/commons.css" rel="stylesheet">
+    <link href="/css/commons.css" rel="stylesheet">
 </head>
 
 <body class="login-body">
@@ -15,7 +15,7 @@
         <p class="error" th:text="${error}"></p>
     </div>
 
-    <form action="login" method="post" th:object="${UserForm}">
+    <form action="/login" method="post" th:object="${UserForm}">
             <div class="cp_iptxt">
                 <span class="size">ユーザーID</span><input class="base-input" type="text" name="loginId" th:field="*{loginId}">
                 <div class="error" th:each="error: ${#fields.errors('loginId')}">
@@ -35,11 +35,7 @@
         <a th:href="@{create-user}" class="custom-btn">新規作成</a>
     </form>
 </div>
-<script>
-    'use strict'
-    document.getElementById('login-btn').addEventListener('click', () => {
-      location.href = './menu.html'
-    })
-  </script>
+    <script>
+    </script>
 </body>
 </html>

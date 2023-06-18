@@ -4,25 +4,21 @@ import com.example.Kuchannel.entity.BelongingCommunities;
 import com.example.Kuchannel.entity.MyReview;
 import com.example.Kuchannel.entity.MyThread;
 import com.example.Kuchannel.entity.UserRecord;
-import com.example.Kuchannel.service.UchimaService;
+import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-public class UchimaRestController {
+public class KuchannelRestController {
 
     @Autowired
-    UchimaService uchimaService;
+    private KuchannelService kuchannelService;
 
     @Autowired
-    HttpSession session;
-
+    private HttpSession session;
 
     //所属しているコミュニティを取得。（マイページ用）
     @GetMapping("/getBelongingCommunities")
@@ -32,7 +28,7 @@ public class UchimaRestController {
         //session.getAttribute("userId");
         //セッションからユーザーのidを渡すように変える。今は1で固定している → 修正済み
         var user = (UserRecord)session.getAttribute("user");
-        List<BelongingCommunities> communityList = uchimaService.getBelongingCommunities(user.id());
+        List<BelongingCommunities> communityList = kuchannelService.getBelongingCommunities(user.id());
         return communityList;
     }
 
@@ -43,14 +39,14 @@ public class UchimaRestController {
         //session.getAttribute("userId");
         //セッションからユーザーのidを渡すように変える。今は1で固定している → 修正済み
         var user = (UserRecord)session.getAttribute("user");
-        int result = uchimaService.withdrawal(user.id(), communityId);
+        int result = kuchannelService.withdrawal(user.id(), communityId);
         return result;
     }
 
-//    マイページ用の、ニックネームを変更する処理
+    //    マイページ用の、ニックネームを変更する処理
     @PostMapping("/updateNickName")
     public int updateNickName(@RequestBody BelongingCommunities updateInfo){
-        int result = uchimaService.updateNickName(updateInfo);
+        int result = kuchannelService.updateNickName(updateInfo);
         return result;
     }
 
@@ -60,7 +56,7 @@ public class UchimaRestController {
         //session.getAttribute("userId");
         //セッションからユーザーのidを渡すように変える。今は1で固定している→修正済み
         UserRecord user = (UserRecord) session.getAttribute("user");
-        List<MyThread> result = uchimaService.getMyThreads(user.id());
+        List<MyThread> result = kuchannelService.getMyThreads(user.id());
         return result;
     }
 
@@ -70,8 +66,16 @@ public class UchimaRestController {
         //session.getAttribute("userId");
         //セッションからユーザーのidを渡すように変える。今は1で固定している → 修正済み
         var user = (UserRecord)session.getAttribute("user");
-        List<MyReview> result = uchimaService.getMyReviews(user.id());
+        List<MyReview> result = kuchannelService.getMyReviews(user.id());
         return result;
+    }
+
+    /*----------------------------------------*/
+
+    @GetMapping("/getUrl")
+    public String getUrl(@RequestParam("name") Integer id) {
+        //System.out.println("コミュニティURL:" + kuchannelService.getUrl(id).url());
+        return kuchannelService.getUrl(id).url();
     }
 
 }

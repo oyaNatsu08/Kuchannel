@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-
+@Repository
 public class KuchannelDao {
 
     @Autowired
@@ -23,10 +23,22 @@ public class KuchannelDao {
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("loginId", loginId);
         parameterSource.addValue("password", password);
+//        System.out.println(loginId);
+//        System.out.println(password);
 
         var list = jdbcTemplate.query("SELECT * FROM users WHERE login_id = :loginId AND password = :password",
                 parameterSource, new DataClassRowMapper<>(UserRecord.class));
         return list.isEmpty() ? null : list.get(0);
+    }
+
+    //プロフィール画面
+    public ProfileRecord detail(String loginId) {
+        MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+        parameterSource.addValue("loginId",loginId);
+
+        var list = jdbcTemplate.query("SELECT * FROM users WHERE login_id = :loginId",
+                parameterSource, new DataClassRowMapper<>(ProfileRecord.class));
+        return list.get(0);
     }
 
 

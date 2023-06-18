@@ -3,8 +3,9 @@ package com.example.Kuchannel.controller;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.CommunityAddForm;
 import com.example.Kuchannel.form.CommunityJoinForm;
+import com.example.Kuchannel.form.CreateForm;
 import com.example.Kuchannel.form.UserForm;
-import com.example.Kuchannel.service.OyafusoService;
+import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,27 +18,111 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-
-
 @Controller
-public class OyafusoController {
+public class KuchannelController {
 
     @Autowired
-    private OyafusoService oyafusoService;
+    private KuchannelService kuchannelService;
 
     @Autowired
     private HttpSession session;
 
-    @GetMapping("/community-add")
-    public String commuAdd(@ModelAttribute("communityAdd") CommunityAddForm communityAddForm,
-                           @ModelAttribute("UserForm") UserForm userForm) {
-        //ログインしているか確認
+    /*------------------------login(ログイン)-----------------------------------*/
+    @GetMapping("/login")
+    public String user(@ModelAttribute("UserForm") UserForm userForm) {
+        return "login";
+    }
+
+    @PostMapping("/login")
+    public String login(@Validated @ModelAttribute("UserForm") UserForm userForm,
+                        BindingResult bindingResult,
+                        @ModelAttribute("communityAdd") CommunityAddForm communityAddForm,
+                        Model model) {
+        //バリデーション
+        if (bindingResult.hasErrors()) {
+            return "login";
+        }
+
+        String loginId = userForm.getLoginId();
+        String password = userForm.getPassword();
+
+        var user = kuchannelService.Login(loginId, password);
+
+        if (user == null) {
+            model.addAttribute("error", "IDまたはパスワードが不正です");
+            return "login";
+        }
+        //セッション
+        session.setAttribute("user", user);
+
+        return "my-page";
+
+    }
+    /*------------------------------------------------------------------------*/
+
+
+    /*------------------------logout(ログアウト)-----------------------------------*/
+    @GetMapping("/logout")
+    public String logout(@ModelAttribute("UserForm") UserForm userForm) {
+        session.invalidate();
+        return "logout";
+    }
+
+    /*------------------------------------------------------------------------*/
+
+
+    /*------------------------プロフィール画面-----------------------------------*/
+
+    @GetMapping("/profile-details")
+    public String profileDetail(Model model){
+
+        UserRecord userData = (UserRecord) session.getAttribute("user");
+        var user_id = userData.loginId();
+
+        var list = model.addAttribute("profile", kuchannelService.detail(user_id));
+        return "profile-details";
+    }
+
+    /*------------------------------------------------------------------------*/
+
+
+    /*-------------------------Insert(新規追加)--------------------------*/
+    @GetMapping("/create-user")
+    public String accountAdd(@ModelAttribute("CreateForm") CreateForm createForm) {
+        return "create-user";
+    }
+
+    @PostMapping("create-user")
+    public String accountAdd(@Validated @ModelAttribute("CreateForm") CreateForm createForm,
+                             BindingResult bindingResult,
+                             Model model) {
+        //バリデーション
+        if (bindingResult.hasErrors()) {
+            return "create-user";
+        }
+        String loginId = createForm.getLoginId();
+        String password = createForm.getPassword();
+        String name = createForm.getName();
+        String image_path = createForm.getImage_path();
+        CreateRecord create = new CreateRecord(loginId, password, name, image_path);
+        kuchannelService.create(loginId, password, name, image_path);
+        return "redirect:/login";
+    }
+
+    /*----------------------------------------*/
+
+    //マイページの表示
+    @GetMapping("/mypage")
+    public String myPage(@ModelAttribute("UserForm") UserForm userForm,
+                         @ModelAttribute("communityAdd") CommunityAddForm communityAddForm) {
         if (session.getAttribute("user") == null) {
             return "login";
         } else {
-            return "community-add";
+            return "my-page";
         }
     }
+
+   /*-----------------------------------------*/
 
     //コミュニティ作成処理
     @PostMapping("/community-add")
@@ -52,19 +137,19 @@ public class OyafusoController {
             do {
                 //ランダムな文字列を生成
                 randomString = generateRandomString();
-            } while (oyafusoService.checkUrl(randomString, communityAddForm.getCommunityName()) != null); //テーブルにurlが存在しなければループを抜ける ////urlが重複しないかチェック
+            } while (kuchannelService.checkUrl(randomString, communityAddForm.getCommunityName()) != null); //テーブルにurlが存在しなければループを抜ける ////urlが重複しないかチェック
 
             //コミュニティを作成する処理と作成したIDを受け取る
-            int communityId = oyafusoService.communityInsert(communityAddForm.getCommunityName(), "http://localhost:8080/community/" + randomString + "/" + communityAddForm.getCommunityName());
+            int communityId = kuchannelService.communityInsert(communityAddForm.getCommunityName(), "http://localhost:8080/community/" + randomString + "/" + communityAddForm.getCommunityName());
 
             //コミュニティユーザーテーブルにインサートする処理
             var user = (UserRecord)session.getAttribute("user");
 
             //もしニックネームがnullならユーザーネームを登録する
             if ("".equals(communityAddForm.getNickName())) {
-                oyafusoService.communityUserInsert(user.id(), communityId, user.name(), 2);
+                kuchannelService.communityUserInsert(user.id(), communityId, user.name(), 2);
             } else {
-                oyafusoService.communityUserInsert(user.id(), communityId, communityAddForm.getNickName(), 2);
+                kuchannelService.communityUserInsert(user.id(), communityId, communityAddForm.getNickName(), 2);
             }
 
             model.addAttribute("code", inviteCode);
@@ -97,7 +182,7 @@ public class OyafusoController {
             //コミュニティに初めて参加する場合は、参加確認画面へ飛んで、community_userテーブルを更新
             //コミュニティに参加しているかチェック
             var user = (UserRecord)session.getAttribute("user");
-            var communityUser = oyafusoService.checkJoin(user.id(), "http://localhost:8080/community/" + str + "/" + code);
+            var communityUser = kuchannelService.checkJoin(user.id(), "http://localhost:8080/community/" + str + "/" + code);
             if (communityUser == null) {
                 model.addAttribute("communityName", code);
                 model.addAttribute("url", "http://localhost:8080/community/" + str + "/" + code);
@@ -121,17 +206,17 @@ public class OyafusoController {
 
             //お知らせ一覧を表示する
             var user = (UserRecord)session.getAttribute("user");
-            List<NoticeReplyRecord> notices = oyafusoService.userNotice(user.id());
+            List<NoticeReplyRecord> notices = kuchannelService.userNotice(user.id());
 
             //お知らせ一覧のユーザーIDをもとに、返信ユーザーを取得する
             List<NoticeReplyRecord2> notices2 = new ArrayList<>();
             for (NoticeReplyRecord notice : notices) {
-                UserRecord replyUser = oyafusoService.findUser(notice.replyUserId());
+                UserRecord replyUser = kuchannelService.findUser(notice.replyUserId());
                 notices2.add(new NoticeReplyRecord2(replyUser.name(), notice.threadTitle(), notice.flag(), notice.reviewId()));
             }
 
             //お問い合わせ情報を表示する
-            List<InquiryRecord> inquires = oyafusoService.userInquiry(user.id());
+            List<InquiryRecord> inquires = kuchannelService.userInquiry(user.id());
 
             model.addAttribute("notices", notices2);
             model.addAttribute("inquires", inquires);
@@ -151,7 +236,7 @@ public class OyafusoController {
             return "login";
         } else {
 
-            ReviewRecord review = oyafusoService.findReviews(reviewId);
+            ReviewRecord review = kuchannelService.findReviews(reviewId);
 
             model.addAttribute("review", review);
 
@@ -167,7 +252,7 @@ public class OyafusoController {
                        Model model) {
         if (bindingResult.hasErrors()) {
             //参加したいコミュニティを特定する
-            CommunityRecord community = oyafusoService.getCommunity(url);
+            CommunityRecord community = kuchannelService.getCommunity(url);
 
             model.addAttribute("communityName", community.name());
 
@@ -175,7 +260,7 @@ public class OyafusoController {
         } else {
 
             //参加したいコミュニティを特定する
-            CommunityRecord community = oyafusoService.getCommunity(url);
+            CommunityRecord community = kuchannelService.getCommunity(url);
 
             var user = (UserRecord)session.getAttribute("user");
             String nickName;
@@ -187,15 +272,15 @@ public class OyafusoController {
             }
 
             //コミュニティに以前参加していたか確認
-            if (oyafusoService.checkJoin(user.id(), community.id()) != null) {
+            if (kuchannelService.checkJoin(user.id(), community.id()) != null) {
 
                 //community_userテーブルをアップデート
-                oyafusoService.communityUserUpdate(user.id(), community.id(), nickName);
+                kuchannelService.communityUserUpdate(user.id(), community.id(), nickName);
 
             } else {
 
                 //コミュニティユーザーテーブルにインサートする処理
-                oyafusoService.communityUserInsert(user.id(), community.id(), nickName, 1); //Integer.parseInt(session.getAttribute("userId").toString())
+                kuchannelService.communityUserInsert(user.id(), community.id(), nickName, 1); //Integer.parseInt(session.getAttribute("userId").toString())
 
             }
 
