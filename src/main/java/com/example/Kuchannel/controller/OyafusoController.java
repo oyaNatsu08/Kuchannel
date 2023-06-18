@@ -171,9 +171,20 @@ public class OyafusoController {
             //参加したいコミュニティを特定する
             CommunityRecord community = oyafusoService.getCommunity(url);
 
-            //コミュニティユーザーテーブルにインサートする処理
             var user = (UserRecord)session.getAttribute("user");
-            oyafusoService.communityUserInsert(user.id(), community.id(), communityForm.getJoinNickName(), 1); //Integer.parseInt(session.getAttribute("userId").toString())
+
+            //コミュニティに以前参加していたか確認
+            if (oyafusoService.checkJoin(user.id(), community.id()) != null) {
+
+                //community_userテーブルをアップデート
+                oyafusoService.communityUserUpdate(user.id(), community.id(), communityForm.getJoinNickName());
+
+            } else {
+
+                //コミュニティユーザーテーブルにインサートする処理
+                oyafusoService.communityUserInsert(user.id(), community.id(), communityForm.getJoinNickName(), 1); //Integer.parseInt(session.getAttribute("userId").toString())
+
+            }
 
             model.addAttribute("code", community.name());
 

@@ -37,9 +37,19 @@ public class OyafusoService {
         return oyafusoDao.getCommunity(url);
     }
 
-    //コミュニティに参加しているかチェック
+    //コミュニティに参加しているかチェック(ユーザIDとurlで確認)
     public CommunityUserRecord checkJoin(Integer userId, String url) {
         return oyafusoDao.checkJoin(userId, url);
+    }
+
+    //コミュニティに参加しているかチェック(ユーザIDとコミュニティIDで確認)
+    public CommunityUserRecord checkJoin(Integer userId, Integer communityId) {
+        return oyafusoDao.checkJoin(userId, communityId);
+    }
+
+    //コミュニティに再参加する処理
+    public int communityUserUpdate(Integer userId, Integer communityId, String nickName) {
+        return oyafusoDao.communityUserUpdate(userId, communityId, nickName);
     }
 
     //ユーザーIDをもとにレビューをセレクト

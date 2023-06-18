@@ -82,7 +82,7 @@ public class OyafusoDao {
 
     }
 
-    //コミュニティに参加しているかチェック
+    //コミュニティに参加しているかチェック(ユーザーIDとurlで確認)
     public CommunityUserRecord checkJoin(Integer userId, String url) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
@@ -95,6 +95,30 @@ public class OyafusoDao {
 
         return list.isEmpty() ? null : list.get(0);
 
+    }
+
+    //コミュニティに参加しているかチェック(ユーザーIDとurlで確認)
+    public CommunityUserRecord checkJoin(Integer userId, Integer communityId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", userId);
+        param.addValue("communityId", communityId);
+
+        var list = jdbcTemplate.query("SELECT id, user_id, community_id, nick_name, role, flag FROM community_user " +
+                        "WHERE user_id = :userId AND community_id = :communityId", param,
+                new DataClassRowMapper<>(CommunityUserRecord.class));
+
+        return list.isEmpty() ? null : list.get(0);
+
+    }
+
+    //コミュニティに再参加する処理
+    public int communityUserUpdate(Integer userId, Integer communityId, String nickName) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", userId);
+        param.addValue("communityId", communityId);
+        param.addValue("nickName", nickName);
+
+        return jdbcTemplate.update("UPDATE community_user SET nick_name = :nickName, flag = 't' WHERE user_id = :userId AND community_id = :communityId", param);
     }
 
     //ユーザーIDをもとにレビューをセレクト
