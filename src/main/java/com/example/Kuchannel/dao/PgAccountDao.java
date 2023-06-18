@@ -1,5 +1,6 @@
 package com.example.Kuchannel.dao;
 import com.example.Kuchannel.entity.CreateRecord;
+import com.example.Kuchannel.entity.ProfileRecord;
 import com.example.Kuchannel.entity.UserRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -26,6 +27,16 @@ public class PgAccountDao {
         var list = jdbcTemplate.query("SELECT * FROM users WHERE login_id = :loginId AND password = :password",
                 parameterSource, new DataClassRowMapper<>(UserRecord.class));
         return list.isEmpty() ? null : list.get(0);
+    }
+
+    //プロフィール画面
+    public ProfileRecord detail(String loginId) {
+        MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+        parameterSource.addValue("loginId",loginId);
+
+        var list = jdbcTemplate.query("SELECT * FROM users WHERE login_id = :loginId",
+                parameterSource, new DataClassRowMapper<>(ProfileRecord.class));
+        return list.get(0);
     }
 
 

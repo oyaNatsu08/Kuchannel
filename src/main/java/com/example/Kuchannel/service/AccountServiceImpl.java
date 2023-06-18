@@ -1,6 +1,7 @@
 package com.example.Kuchannel.service;
 
 import com.example.Kuchannel.entity.CreateRecord;
+import com.example.Kuchannel.entity.ProfileRecord;
 import com.example.Kuchannel.entity.UserRecord;
 import com.example.Kuchannel.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,11 @@ public class AccountServiceImpl {
     //ログイン
     public UserRecord Login(String loginId, String password) {
         return accountDao.Login(loginId, password);
+    }
+
+    //プロフィール画面
+    public ProfileRecord detail(String loginId) {
+        return accountDao.detail(loginId);
     }
 
     //アカウント新規作成

@@ -5,7 +5,7 @@
         <p @click="toggleMenu">アイコン</p>
         <ul v-if="showMenu">
             <li><a th:href="@{/mypage}">マイページへ</a></li>
-<!--            <li><a th:href="#">プロフィール閲覧</a></li>-->
+           <li><a th:href="@{/profile-details}">プロフィール閲覧</a></li>
             <li><a th:href="@{/logout}">ログアウト</a></li>
         </ul>
     </div>

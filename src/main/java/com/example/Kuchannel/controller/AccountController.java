@@ -1,6 +1,7 @@
 package com.example.Kuchannel.controller;
 
 import com.example.Kuchannel.entity.CreateRecord;
+import com.example.Kuchannel.entity.UserRecord;
 import com.example.Kuchannel.form.CommunityAddForm;
 import com.example.Kuchannel.form.CreateForm;
 import com.example.Kuchannel.form.UserForm;
@@ -35,11 +36,8 @@ public class AccountController {
                         BindingResult bindingResult,
                         @ModelAttribute("communityAdd") CommunityAddForm communityAddForm,
                         Model model) {
-        //System.out.println("login");
         //バリデーション
         if (bindingResult.hasErrors()) {
-            //System.out.println("エラー");
-
             return "login";
         }
 
@@ -50,8 +48,6 @@ public class AccountController {
 
         if (user == null) {
             model.addAttribute("error", "IDまたはパスワードが不正です");
-            //System.out.println("エラーヌル");
-
             return "login";
         }
         //セッション
@@ -74,18 +70,26 @@ public class AccountController {
         session.invalidate();
         return "logout";
     }
-//    @GetMapping("/test")
-//    public String top(@ModelAttribute("UserForm") UserForm userForm) {
-//        if (session.getAttribute("user") == null) {
-//            return "login";
-//        } else {
-//            return "test";
-//        }
-//    }
+
     /*------------------------------------------------------------------------*/
 
 
-//    /*-------------------------Insert(新規追加)--------------------------*/
+    /*------------------------プロフィール画面-----------------------------------*/
+
+    @GetMapping("/profile-details")
+    public String profileDetail(Model model){
+
+        UserRecord userData = (UserRecord) session.getAttribute("user");
+        var user_id = userData.loginId();
+
+        var list = model.addAttribute("profile", accountService.detail(user_id));
+        return "profile-details";
+    }
+
+    /*------------------------------------------------------------------------*/
+
+
+    /*-------------------------Insert(新規追加)--------------------------*/
     @GetMapping("/create-user")
     public String accountAdd(@ModelAttribute("CreateForm") CreateForm createForm) {
         return "create-user";
