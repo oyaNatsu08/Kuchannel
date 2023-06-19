@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang= "ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>新規登録</title>
+    <link href="/css/commons.css" rel="stylesheet">
+</head>
+<body class="create-body">
+<div class="create-form">
+    <h1 class="site_logo">口ゃんねる（口コミ）</h1>
+
+    <div class="error" th:if="${error}">
+        <p class="error" th:text="${error}"></p>
+    </div>
+
+    <form action="create-user" method="POST" th:object="${CreateForm}">
+            <div class="cp_iptxt">
+                <span class="size">ユーザーID</span><input class="base-input" type="text" name="loginId" th:field="*{loginId}">
+                <div class="error" th:each="error: ${#fields.errors('loginId')}">
+                    [[ ${error} ]]
+                </div>
+            </div>
+
+            <div class="cp-iptxt">
+                <span class="size">パスワード</span><input class="base-input" type="password" name="password" th:field="*{password}">
+                <div class="error" th:each="error: ${#fields.errors('password')}">
+                    [[ ${error} ]]
+                </div>
+            </div>
+
+            <div class="cp-iptxt">
+                <span class="size">名前</span><input class="base-input" type="name" name="name" th:field="*{name}">
+                <div class="error" th:each="error: ${#fields.errors('name')}">
+                    [[ ${error} ]]
+                </div>
+            </div>
+                        <a th:href="@{/login}" class="custom-btn">戻る</a>
+                        <button type="submit" class="custom-btn">登録</button>
+        </button>
+    </form>
+</div>
+<script>
+    'use strict'
+    document.getElementById('login-btn').addEventListener('click', () => {
+      location.href = './menu.html'
+    })
+  </script>
+</body>
+</html>
+
+
+
+<!--            <div>-->
+<!--                <span>アイコン</span>-->
+<!--                <input class="base-input" type="file" id="icon-upload" style="display: none;">-->
+<!--                <button onclick="openFilePicker()">参照</button>-->
+<!--                <div id="icon-preview"></div>-->
+<!--                <div class="error" th:each="error: ${#fields.errors('image_path')}">-->
+<!--                    [[ ${error} ]]-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <script>-->
+<!--    function openFilePicker() {-->
+<!--        document.getElementById('icon-upload').click();-->
+<!--    }-->
+
+<!--    document.getElementById('icon-upload').addEventListener('change', function(event) {-->
+<!--        var file = event.target.files[0];-->
+<!--        if (file) {-->
+<!--            var reader = new FileReader();-->
+<!--            reader.onload = function(e) {-->
+<!--                var previewElement = document.getElementById('icon-preview');-->
+<!--                previewElement.innerHTML = ''; // Clear previous preview-->
+
+<!--                var previewImage = document.createElement('img');-->
+<!--                previewImage.src = e.target.result;-->
+<!--                previewImage.style.maxWidth = '100px'; // Set the desired size for the preview image-->
+<!--                previewElement.appendChild(previewImage);-->
+<!--            }-->
+<!--            reader.readAsDataURL(file);-->
+<!--        }-->
+<!--    });-->
+<!--</script>-->
+
+<!--            <div>-->
+<!--                <span>アイコン</span>-->
+<!--                <input class="base-input" type="image_path" name="image_path" th:field="*{image_path}">-->
+<!--                <input id="icon-upload" type="file" style="display: none;">-->
+<!--                <button onclick="openFilePicker()">参照</button>-->
+<!--                <div class="error" th:each="error: ${#fields.errors('image_path')}">-->
+<!--                    [[ ${error} ]]-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <script>-->
+<!--    function openFilePicker() {-->
+<!--        document.getElementById('icon-upload').click();-->
+<!--    }-->
+
+<!--    document.getElementById('icon-upload').addEventListener('change', function(event) {-->
+<!--        var file = event.target.files[0];-->
+<!--        if (file) {-->
+<!--            var reader = new FileReader();-->
+<!--            reader.onload = function(e) {-->
+<!--                document.getElementById('icon-image').src = e.target.result;-->
+<!--                document.querySelector('input[name="icon"]').value = e.target.result;-->
+<!--            }-->
+<!--            reader.readAsDataURL(file);-->
+<!--        }-->
+<!--    });-->
+<!--</script>-->

@@ -1,0 +1,56 @@
+body {
+    background-image: url(/images/background.png);
+    background-attachment: fixed;
+    background-size: 100%;
+}
+
+.tab-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+
+.tab-buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.tab-button {
+    background-color: #f2f2f2;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 8px 16px;
+    margin-right: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.tab-button.active {
+    background-color: #ccc;
+}
+
+.tab-content-area {
+    width: 75%;
+    height: 70%;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tab-content {
+    /* display: none; */
+    text-align: center;
+}
+
+table{
+    width: 100%;
+}
+.review-cell {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
