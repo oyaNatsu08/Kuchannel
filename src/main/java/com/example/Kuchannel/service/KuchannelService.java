@@ -36,16 +36,11 @@ public class KuchannelService {
     /*--------------------------------------*/
 
     //マイページ用。データベースから所属しているコミュニティを取得
-    public List<BelongingCommunities> getBelongingCommunities(Integer userId){
-        return kuchannelDao.getBelongingCommunities(userId);
-
-    }
+    public List<BelongingCommunities> getBelongingCommunities(Integer userId){return kuchannelDao.getBelongingCommunities(userId);}
 
     //マイページ用。退会処理。
-    public int withdrawal(Integer userId,Integer communityId){
-        return kuchannelDao.withdrawal(userId,communityId);
+    public int withdrawal(Integer userId,Integer communityId){return kuchannelDao.withdrawal(userId,communityId);}
 
-    }
     //マイページ用。ニックネームの変更
     public int updateNickName(BelongingCommunities updateInfo){
         return  kuchannelDao.updateNickName(updateInfo);

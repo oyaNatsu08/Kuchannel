@@ -17,13 +17,13 @@
 
     <div class="tab-container">
       <div class="tab-buttons">
-        <button class="tab-button" @click="displayTabJudge(1)" id="btn1">コミュニティ一覧</button>
+        <button class="tab-button active" @click="displayTabJudge(1)" id="btn1">コミュニティ一覧</button>
         <button class="tab-button" @click="displayTabJudge(2)" id="btn2">自分のスレッド</button>
         <button class="tab-button" @click="displayTabJudge(3)" id="btn3">自分のレビュー</button>
       </div>
 
       <div class="tab-content-area">
-        <div id="tab1" v-if="test1" class="tab-content">
+        <div id="tab1" v-if="tab1" class="tab-content">
 
           <table>
 
@@ -73,7 +73,7 @@
           </div>
         </div>
 
-        <div id="tab2" v-if="test2" class="tab-content">
+        <div id="tab2" v-if="tab2" class="tab-content">
           <table>
 
             <thead>
@@ -92,7 +92,7 @@
           </table>
         </div>
 
-        <div id="tab3" v-if="test3" class="tab-content">
+        <div id="tab3" v-if="tab3" class="tab-content">
           <table>
 
             <thead>
@@ -133,9 +133,9 @@
         return {
           products: [],
           searchInput: '',
-          test1: true,
-          test2: false,
-          test3: false,
+          tab1: true,
+          tab2: false,
+          tab3: false,
           belongingCommunities: [],
           inputNickName: '',
           myThreads: [],
@@ -150,15 +150,24 @@
         displayTabJudge(tabNum) {
           console.log('tabNum' + tabNum);
 
-          for (let i = 1; i < 4; i++) { this['test' + i] = false; } this['test' + tabNum] = true; for (let i = 1; i < 4; i++) { }
+          for (let i = 1; i < 4; i++) { 
+            this['tab' + i] = false;
+            console.log('isPopUo'+ this.isPopupCommunity)
+            document.getElementById(`btn${i}`).classList.remove('active')
+          } 
+          this['tab' + tabNum] = true; 
+          selectedTab = document.getElementById(`btn${tabNum}`)
+          selectedTab.className += " active" 
         },
         //所属しているコミュニティを取得 
         getBelongingCommunities(){ this.belongingCommunities=[]; axios.get('/getBelongingCommunities')
         .then(res => {
-              for (let i = 0; i < res.data.length; i++) { if (res.data[i].flag === true) { this.belongingCommunities.push(res.data[i]); } }
-              console.log(this.belongingCommunities);
+          for (let i = 0; i < res.data.length; i++) {
+            if (res.data[i].flag === true) { this.belongingCommunities.push(res.data[i]); } 
+          }
             });
-          }, //退会処理 
+        },
+        //退会処理 
           withdrawal(communityId){ axios.request({ url: '/withdrawal'
           , method: 'post', data: communityId, headers: { 'Content-Type': 'text/plain' }
         }).then(res => {
@@ -179,7 +188,7 @@
             .then(res => {
               this.getBelongingCommunities();
             });
-    },
+        },
 
         //建てたスレッドを取得
         getMyThreads(){
@@ -189,7 +198,7 @@
               this.myThreads = res.data;
               console.log(res.data);
             });
-    },
+        },
 
         //投稿したレビューを取得
         getMyReviews(){
@@ -201,37 +210,39 @@
             })
         },
 
-    //URLをコピー
-    copy(id) {
-      axios.get(`/getUrl?name=${id}`)
-        .then(res => {
-          const url = res.data;
-          console.log(url);
+        //URLをコピー
+        copy(id) {
+          axios.get(`/getUrl?name=${id}`)
+            .then(res => {
+              const url = res.data;
+              console.log(url);
 
-          // 取得したURLをクリップボードにコピーする処理を実行
-          const el = document.createElement('textarea');
-          el.value = url;
-          document.body.appendChild(el);
-          el.select();
-          document.execCommand('copy');
-          document.body.removeChild(el);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    },
-    //コミュニティ作成画面をポップアップ
-    openPopupCommu() {
-      this.isPopupCommunity = true;
-    },
-    closePopupCommu() {
-      this.isPopupCommunity = false;
-    },
+              // 取得したURLをクリップボードにコピーする処理を実行
+              const el = document.createElement('textarea');
+              el.value = url;
+              document.body.appendChild(el);
+              el.select();
+              document.execCommand('copy');
+              document.body.removeChild(el);
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        },
+        //コミュニティ作成画面をポップアップ
+        openPopupCommu() {
+          this.isPopupCommunity = true;
+        },
+        closePopupCommu() {
+          this.isPopupCommunity = false;
+        },
 
     },
 
     created: function() {
       console.log("created");
+      console.log('isPopUo'+ this.isPopupCommunity)
+
       this.getBelongingCommunities();
       this.getMyThreads();
       this.getMyReviews();

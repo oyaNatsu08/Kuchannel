@@ -1,5 +1,7 @@
 body {
-    background-color: #ddd;
+    background-image: url(/images/background.png);
+    background-attachment: fixed;
+    background-size: 100%;
 }
 
 .tab-container {
@@ -9,6 +11,7 @@ body {
     justify-content: center;
     height: 100vh;
 }
+
 
 .tab-buttons {
     display: flex;
