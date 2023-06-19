@@ -1,8 +1,10 @@
 package com.example.Kuchannel.controller;
 
 import com.example.Kuchannel.form.CreateForm;
+import com.example.Kuchannel.form.EditForm;
 import com.example.Kuchannel.form.UserForm;
 import com.example.Kuchannel.record.CreateRecord;
+import com.example.Kuchannel.record.ProfileEditRecord;
 import com.example.Kuchannel.service.AccountServiceImpl;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class AccountController {
@@ -92,6 +95,37 @@ public class AccountController {
         return "redirect:/login";
     }
 //    /*------------------------------------------------------------------------*/
+
+//    /*-------------------------Update(プロフィール編集)--------------------------*/
+    @GetMapping("/profile-edit")
+    public String profileUpdate(@ModelAttribute("EditForm")EditForm editForm){
+        return "profile-edit";
+    }
+
+    @PostMapping("profile-edit")
+    public String profileUpdate(@Validated @ModelAttribute("EditForm") EditForm editForm,
+                                BindingResult bindingResult,
+                                @RequestParam(required = false) String name,
+                                @RequestParam(required = false) String password,
+                                Model model){
+        //バリデーション
+        if(bindingResult.hasErrors()){
+            return "profile-edit";
+        }
+        String loginId = editForm.getLoginId();
+//        String name = editForm.getName();
+//        String password = editForm.getPassword();
+        ProfileEditRecord edit = new ProfileEditRecord(loginId,name,password);
+        accountService.edit(loginId,name,password);
+        System.out.println("aaaaaaa");
+        return "/profile-details";
+    }
+//    /*------------------------------------------------------------------------*/
+
+
+
+
+
 }
 
 

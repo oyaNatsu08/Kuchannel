@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang= "ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>プロフィール編集画面</title>
+    <link href="/css/commons.css" rel="stylesheet">
+</head>
+<body class="create-body">
+<div class="create-form">
+    <h1 class="site_logo">口ゃんねる（口コミ）</h1>
+
+    <div class="error" th:if="${error}">
+        <p class="error" th:text="${error}"></p>
+    </div>
+
+    <form action="profile-edit" method="POST" th:object="${EditForm}">
+        <div class="cp-iptxt">
+            <span class="size">名前</span><input class="base-input" type="name" name="name" th:field="*{name}">
+            <div class="error" th:each="error: ${#fields.errors('name')}">
+                [[ ${error} ]]
+            </div>
+        </div>
+
+        <div class="cp-iptxt">
+            <span class="size">パスワード</span><input class="base-input" type="password" name="password" th:field="*{password}">
+            <div class="error" th:each="error: ${#fields.errors('password')}">
+                [[ ${error} ]]
+            </div>
+        </div>
+        <div>
+            <input type="hidden" id="loginId" name="loginId" th:field="*{loginId}">
+        </div>
+
+        <a th:href="@{/profile-details}" class="custom-btn">戻る</a>
+        <button type="submit" class="custom-btn">編集</button>
+        </button>
+    </form>
+</div>
+<script>
+    'use strict'
+    document.getElementById('login-btn').addEventListener('click', () => {
+      location.href = './menu.html'
+    })
+  </script>
+</body>
+</html>

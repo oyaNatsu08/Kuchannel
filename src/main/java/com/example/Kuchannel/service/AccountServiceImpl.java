@@ -24,7 +24,7 @@ public class AccountServiceImpl implements AccountService {
 
     //プロフィール編集
     @Override
-    public  ProfileEditRecord edit(int id,String name , String password){
-        return accountDao.edit(name,password);
+    public  ProfileEditRecord edit(String loginId,String name , String password){
+        return accountDao.edit(loginId,name,password);
     }
 }

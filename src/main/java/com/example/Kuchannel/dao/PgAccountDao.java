@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import javax.lang.model.element.ModuleElement;
+
 @Repository
 public class PgAccountDao implements AccountDao {
     @Autowired
@@ -56,14 +58,29 @@ public class PgAccountDao implements AccountDao {
 
     //プロフィール編集（start）
     @Override
-    public ProfileEditRecord edit(int id,String name, String password) {
+    public ProfileEditRecord edit(String loginId,String name, String password) {
         //更新のSQL文
-        String sql = "UPDATE users SET name =:name, password = :password WHERE id = :id";
+        String sql = "UPDATE users SET name =:name, password = :password WHERE login_id = :loginId";
 
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("name", name);
+        System.out.println(name);
         param.addValue("password", password);
-        param.addValue("id",id);
+        System.out.println(password);
+        param.addValue("loginId",loginId);
+        System.out.println(loginId);
+        try {
+            jdbcTemplate.update(sql, param);
 
+            ProfileEditRecord editRecord = new ProfileEditRecord(loginId,name, password);
+//            editRecord.setId(id);
+//            editRecord.setName(name);
+//            editRecord.setPassword(password);
+            return editRecord;
+        }catch (DataAccessException  e){
+            e.printStackTrace();
+
+            return null;
+        }
     }
 }
