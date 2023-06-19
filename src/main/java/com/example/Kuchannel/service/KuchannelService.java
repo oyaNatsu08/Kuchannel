@@ -2,6 +2,7 @@ package com.example.Kuchannel.service;
 
 import com.example.Kuchannel.dao.KuchannelDao;
 import com.example.Kuchannel.entity.*;
+import com.example.Kuchannel.form.ThreadAddForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -95,8 +96,8 @@ public class KuchannelService {
     }
 
     //ユーザーIDをもとにレビューをセレクト
-    public ReviewRecord findReviews(Integer review) {
-        return  kuchannelDao.findReviews(review);
+    public ReviewRecord findReviews(Integer reviewId) {
+        return  kuchannelDao.findReviews(reviewId);
     }
 
     //ユーザーのお知らせ一覧(返信)をセレクト
@@ -112,6 +113,28 @@ public class KuchannelService {
     //ユーザーIDを元に、ユーザーを特定する
     public UserRecord findUser(Integer userId) {
         return kuchannelDao.findUser(userId);
+    }
+
+    //コミュニティIDを元にコミュニティを特定する
+    public CommunityRecord findCommunity(Integer communityId) {
+        return kuchannelDao.findCommunity(communityId);
+    }
+
+    //お知らせ詳細情報を取得する
+    public InquiryDetailRecord findInquiry(Integer inquiryId) {
+        return kuchannelDao.findInquiry(inquiryId);
+    }
+
+    /*---------------------------------------------*/
+
+    //threadテーブルにINSERTする処理
+    public int threadInsert(ThreadAddForm threadAddForm) {
+        return kuchannelDao.threadInsert(threadAddForm);
+    }
+
+    //コミュニティIDを元にスレッドを全件取得
+    public List<ThreadRecord> communityThreads(Integer communityId) {
+        return kuchannelDao.communityThreads(communityId);
     }
 
 }

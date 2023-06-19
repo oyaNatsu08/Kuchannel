@@ -56,9 +56,11 @@
 
                 <div v-if="inquiryView">
                     <th:block th:each="inquiry : ${inquires}">
-                        <p class="notice-list" style="background-color: lightcoral;"
-                            th:text="${inquiry.inquiryUserName} + 'さんから' + ${inquiry.communityName} + 'へお問い合わせがありました'">
-                        </p>
+                        <a th:href="@{/inquiry(id=${inquiry.id})}">
+                            <p class="notice-list" style="background-color: lightcoral;"
+                                th:text="${inquiry.inquiryUserName} + 'さんから' + ${inquiry.communityName} + 'へお問い合わせがありました'">
+                            </p>
+                        </a>
                     </th:block>
                 </div>
             </div>

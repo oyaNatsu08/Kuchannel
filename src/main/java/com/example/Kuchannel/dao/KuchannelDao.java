@@ -1,6 +1,7 @@
 package com.example.Kuchannel.dao;
 
 import com.example.Kuchannel.entity.*;
+import com.example.Kuchannel.form.ThreadAddForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class KuchannelDao {
@@ -173,7 +175,8 @@ public class KuchannelDao {
         param.addValue("name", nickName);
         param.addValue("role", role);
 
-        return jdbcTemplate.update("INSERT INTO community_user(user_id, community_id, nick_name, role, flag) " +
+        return jdbcTemplate.update("INSERT INTO " +
+                "community_user(user_id, community_id, nick_name, role, flag) " +
                 "VALUES(:userId, :communityId, :name, :role, 't')", param);
     }
 
@@ -271,7 +274,7 @@ public class KuchannelDao {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
 
-        var list = jdbcTemplate.query("SELECT u.name AS inquiryUserName, co.id AS communityId, co.name AS communityName " +
+        var list = jdbcTemplate.query("SELECT inq.id, u.name AS inquiryUserName, co.id AS communityId, co.name AS communityName " +
                         "FROM inquiries inq JOIN community_user cu ON inq.community_id = cu.community_id " +
                         "JOIN communities co ON cu.community_id = co.id " +
                         "JOIN users u ON inq.user_id = u.id " +
@@ -282,16 +285,65 @@ public class KuchannelDao {
 
     }
 
-
     //ユーザーIDを元に、ユーザーを特定する
     public UserRecord findUser(Integer userId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
 
-        var list = jdbcTemplate.query("SELECT id, login_id, name, password, image_path FROM users WHERE id = :userId", param,
+        var list = jdbcTemplate.query("SELECT id, login_id, name, password, image_path " +
+                        "FROM users WHERE id = :userId", param,
                 new DataClassRowMapper<>(UserRecord.class));
 
         return list.isEmpty() ? null : list.get(0);
+    }
+
+    //コミュニティIDを元にコミュニティを特定する
+    public CommunityRecord findCommunity(Integer communityId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("communityId", communityId);
+
+        var list = jdbcTemplate.query("SELECT id, name, url, delete_date FROM communities WHERE id = :communityId", param,
+                new DataClassRowMapper<>(CommunityRecord.class));
+
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    //お知らせ詳細情報を取得する
+    public InquiryDetailRecord findInquiry(Integer inquiryId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("inquiryId", inquiryId);
+
+        var list = jdbcTemplate.query("SELECT id, user_id, community_id, content, flag FROM inquiries WHERE id = :inquiryId", param,
+                new DataClassRowMapper<>(InquiryDetailRecord.class));
+
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    /*---------------------------------------------*/
+
+    //threadsテーブルにINSERTする処理
+    public int threadInsert(ThreadAddForm threadAddForm) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("threadName", threadAddForm.getThreadName());
+        param.addValue("address", threadAddForm.getAddress());
+        param.addValue("salesTime", threadAddForm.getSalesTime());
+        param.addValue("genre", threadAddForm.getGenre());
+
+        return jdbcTemplate.update("INSERT INTO threads(user_id, community_id, image_path, " +
+                "title, address, sales_time, genre, create_date) VALUES(1, 1, null, :threadName, " +
+                ":address, :salesTime, :genre, now())", param);
+    }
+
+    //コミュニティIDを元にスレッドを全件取得
+    public List<ThreadRecord> communityThreads(Integer communityId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("id", communityId);
+
+        var list = jdbcTemplate.query("SELECT * FROM threads WHERE community_id = :id", param,
+                new DataClassRowMapper<>(ThreadRecord.class));
+
+        return list;
+
     }
 
 }

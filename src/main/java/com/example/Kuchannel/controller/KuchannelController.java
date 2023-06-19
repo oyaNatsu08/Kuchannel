@@ -1,10 +1,7 @@
 package com.example.Kuchannel.controller;
 
 import com.example.Kuchannel.entity.*;
-import com.example.Kuchannel.form.CommunityAddForm;
-import com.example.Kuchannel.form.CommunityJoinForm;
-import com.example.Kuchannel.form.CreateForm;
-import com.example.Kuchannel.form.UserForm;
+import com.example.Kuchannel.form.*;
 import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,7 +149,7 @@ public class KuchannelController {
                 kuchannelService.communityUserInsert(user.id(), communityId, communityAddForm.getNickName(), 2);
             }
 
-            model.addAttribute("code", inviteCode);
+            model.addAttribute("name", inviteCode);
 
             return "thread-list";
         }
@@ -166,7 +163,7 @@ public class KuchannelController {
         return randomString;
     }
 
-    //任意のスレッド一覧にとぶ(コミュニティへ飛ぶ)
+    //任意のスレッド一覧にとぶ(コミュニティへ飛ぶ、URLで飛ぶ場合)
     @GetMapping("/community/{randomString}/{code}")
     public String threadView(@ModelAttribute("communityAdd") CommunityAddForm communityAddForm,
                              @ModelAttribute("communityJoin") CommunityJoinForm communityForm,
@@ -189,7 +186,7 @@ public class KuchannelController {
                 //参加確認画面へ
                 return "community-join";
             } else {
-                model.addAttribute("code", code);
+                model.addAttribute("name", code);
                 return "thread-list";
             }
         }
@@ -197,7 +194,8 @@ public class KuchannelController {
 
     //お知らせ画面遷移
     @GetMapping("/notice")
-    public String noticeView(@ModelAttribute("UserForm") UserForm userForm, Model model) {
+    public String noticeView(@ModelAttribute("UserForm") UserForm userForm,
+                             Model model) {
 
         //ログインしているか確認
         if (session.getAttribute("user") == null) {
@@ -284,11 +282,76 @@ public class KuchannelController {
 
             }
 
-            model.addAttribute("code", community.name());
+            model.addAttribute("name", community.name());
 
             return "thread-list";
 
         }
+    }
+
+    //お問い合わせ詳細画面へ
+    @GetMapping("/inquiry")
+    public String inquiryDetailView(@RequestParam("id") Integer inquiryId,
+                                    @ModelAttribute("UserForm") UserForm userForm,
+                                    Model model) {
+        //ログインしているか確認
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
+
+            InquiryDetailRecord inquiryDetail = kuchannelService.findInquiry(inquiryId);
+            UserRecord user = kuchannelService.findUser(inquiryDetail.userId());
+            CommunityRecord community = kuchannelService.findCommunity(inquiryDetail.communityId());
+
+            model.addAttribute("inquiry", inquiryDetail);
+            model.addAttribute("userName", user.name());
+            model.addAttribute("community", community);
+
+            return "inquiry-detail";
+        }
+    }
+
+    //コミュニティのスレッド一覧へ遷移する(ボタンなどでの遷移)
+    @GetMapping("/community/thread-list")
+    public String threadListView(@RequestParam(name="id")Integer communityId,
+                                 Model model) {
+        //コミュニティIDを元にコミュニティを特定する
+        CommunityRecord community = kuchannelService.findCommunity(communityId);
+
+        model.addAttribute("name", community.name());
+
+        return "thread-list";
+
+    }
+
+    /*------------------------------------------------*/
+
+    //スレッド作成画面へ遷移
+    @GetMapping("/thread-add") //urlで入力する値
+    public String threadAddView(@ModelAttribute("threadForm")ThreadAddForm threadAddForm,
+                                @RequestParam(name="communityId") Integer communityId,
+                                Model model) { //メソッド名(コントローラークラスの中で被らなければok)
+
+        //コミュニティIDをthread-add.htmlに値を渡す
+        model.addAttribute("communityId", communityId);
+
+        return "thread-add"; //開きたいhtmlファイル名
+    }
+
+    //スレッド作成処理
+    @PostMapping("/thread-add")
+    public String addThread(@ModelAttribute("threadForm")ThreadAddForm threadAddForm,
+                            Model model) {
+        //threadsテーブルにINSERT処理
+        kuchannelService.threadInsert(threadAddForm);
+
+        //コミュニティIDを元にスレッドを全件取得(現在は1固定)
+        var threads = kuchannelService.communityThreads(1);
+
+        //thread-list.htmlにthreadsの値を渡す
+        model.addAttribute("threads", threads);
+
+        return "thread-list";
     }
 
 }
