@@ -100,6 +100,8 @@ public class KuchannelRestController {
             //データベースからレビューの画像情報を取得する
             var reviewImages = kuchannelService.getReviewImages(rev.reviewId());
 
+            //画像をbase64にエンコードする
+
             reviews.add(new ReviewAndImages(rev.userId(), rev.userName(), rev.reviewId(), rev.title(),
                     rev.review(), rev.createDate(), reviewImages));
 
@@ -107,6 +109,13 @@ public class KuchannelRestController {
 
         return reviews;
     }
+
+    //画像をbase64にエンコードする処理
+//    public List<ReviewImageRecord> changeBase64(List<ReviewImageRecord> reviewImages) {
+//        for (var image : reviewImages) {
+//
+//        }
+//    }
 
     //レビュー投稿処理
     @PostMapping("/add-review")
@@ -145,7 +154,14 @@ public class KuchannelRestController {
             //アップロード画像をバイト値に変換
             byte[] bytes = image.getBytes();
 
-            //String base64 = Base64.getEncoder().encodeToString(bytes);
+            //String encode = Base64.getEncoder().encodeToString(bytes);
+
+            //System.out.println(encode);
+
+            // Base64デコード
+            //byte[] decodedBytes = Base64.getDecoder().decode(encode);
+
+
 
             //バイト値を書き込むファイルを作成し、指定したパスに格納
             OutputStream stream = Files.newOutputStream(filePath);
