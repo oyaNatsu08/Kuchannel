@@ -1,4 +1,5 @@
 package com.example.Kuchannel.entity;
 
-public record ReviewRecord(Integer id, Integer userId, Integer threadId, String title, String review, String createDate) {
+//レビュー一覧で表示する情報を取得する(画像以外)
+public record ReviewRecord(Integer userId, String userName, Integer reviewId, String title, String review, String createDate) {
 }

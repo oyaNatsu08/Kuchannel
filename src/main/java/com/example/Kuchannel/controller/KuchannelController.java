@@ -10,7 +10,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -352,6 +354,25 @@ public class KuchannelController {
         model.addAttribute("threads", threads);
 
         return "thread-list";
+    }
+
+    //レビュー一覧へ飛ぶ
+    @GetMapping("review-list")
+    public String reviewListView(@ModelAttribute("UserForm") UserForm userForm) {
+
+        //ログインしているか確認
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
+            return "review-list";
+        }
+    }
+
+    //レビュー作成処理
+    @PostMapping("/review-add")
+    public String reviewAdd(Model model) {
+
+        return "review-list";
     }
 
 }

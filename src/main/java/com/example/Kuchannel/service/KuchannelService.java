@@ -125,6 +125,26 @@ public class KuchannelService {
         return kuchannelDao.findInquiry(inquiryId);
     }
 
+    //データベースからレビュー一覧に表示する情報を全件取得
+    public List<ReviewRecord> findReviewAll(Integer threadId) {
+        return kuchannelDao.findReviewAll(threadId);
+    }
+
+    //データベースからレビューの画像情報を取得する
+    public List<ReviewImageRecord> getReviewImages(Integer reviewId) {
+        return kuchannelDao.getReviewImages(reviewId);
+    }
+
+    //reviewsテーブルにインサート処理
+    public int reviewInsert(int userId, int threadId, String title, String review) {
+        return kuchannelDao.reviewInsert(userId, threadId, title, review);
+    }
+
+    //review_Imagesテーブルにインサート処理
+    public int reviewImagesInsert(int reviewId, String imagePath) {
+        return kuchannelDao.reviewImagesInsert(reviewId, imagePath);
+    }
+
     /*---------------------------------------------*/
 
     //threadテーブルにINSERTする処理
