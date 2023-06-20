@@ -133,7 +133,7 @@ public class KuchannelService {
     }
 
     //コミュニティIDを元にスレッドを全件取得
-    public List<ThreadRecord> communityThreads(Integer communityId) {
+    public List<CommunityThread> communityThreads(Integer communityId) {
         return kuchannelDao.communityThreads(communityId);
     }
 

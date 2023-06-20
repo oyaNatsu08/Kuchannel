@@ -1,0 +1,79 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  h3 {
+    margin: 0;
+    font-size: 24px;
+  }
+  
+  .restaurant {
+    margin-bottom: 20px;
+    background-color: #FFECD7; /* 薄いオレンジ色の背景 */
+    display: flex;
+    align-items: center;
+    padding: 10px;
+  }
+  
+  .restaurant-img {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    margin-right: 10px;
+  }
+  
+  .restaurant-name {
+    font-size: 20px;
+  }
+  
+  .genre {
+    font-size: 10px;
+  }
+  
+  .address {
+    font-size: 12px;
+    margin-top: 5px;
+  }
+  
+  .likes {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+  }
+  
+  .likes button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    border: none;
+    background-color: #eaeaea;
+    cursor: pointer;
+  }
+  
+  .likes span {
+    font-size: 12px;
+    font-weight: bold;
+  }
+  
+  .opening-hours {
+    font-size: 10px;
+    margin-top: 5px;
+  }
+  
+  .hashtags {
+    font-size: 10px;
+    margin-top: 5px;
+  }
+  
+  .hashtags a {
+    margin-right: 5px;
+    color: #1e66b8;
+    text-decoration: none;
+  }
+
+  ul{
+    list-style-type: none;
+  }
+

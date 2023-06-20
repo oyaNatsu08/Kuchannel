@@ -115,7 +115,7 @@ public class KuchannelDao {
     public List<MyThread>getMyThreads(Integer userId){
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
-        var result = jdbcTemplate.query("SELECT th.id AS threadId, th.title AS threadTitle, co.name AS communityName, co.url AS communityUrl " +
+        var result = jdbcTemplate.query("SELECT th.id AS threadId, th.title AS threadTitle,co.id AS communityId, co.name AS communityName, co.url AS communityUrl " +
                         "FROM threads th JOIN communities co ON th.community_id = co.id JOIN community_user cu ON co.id = cu.community_id " +
                         "WHERE th.user_id = :userId AND cu.user_id = :userId AND cu.flag = true;", param,
                 new DataClassRowMapper<>(MyThread.class));
@@ -328,19 +328,93 @@ public class KuchannelDao {
         param.addValue("address", threadAddForm.getAddress());
         param.addValue("salesTime", threadAddForm.getSalesTime());
         param.addValue("genre", threadAddForm.getGenre());
+        param.addValue("hashTag",threadAddForm.getHashtag());
 
-        return jdbcTemplate.update("INSERT INTO threads(user_id, community_id, image_path, " +
+        KeyHolder keyHolder1 = new GeneratedKeyHolder();
+
+        var threadAddResult= jdbcTemplate.update("INSERT INTO threads(user_id, community_id, image_path, " +
                 "title, address, sales_time, genre, create_date) VALUES(1, 1, null, :threadName, " +
-                ":address, :salesTime, :genre, now())", param);
+                ":address, :salesTime, :genre, now())", param,keyHolder1);
+
+        //インサートしたIDを受け取る
+        var addThreadId = Integer.parseInt(keyHolder1.getKeys().get("id").toString());
+        System.out.println(addThreadId);
+
+
+        //以下ハッシュタグ追加処理
+
+
+        if(threadAddForm.getHashtag() != null){
+            //ハッシュタグの内容を取得し、「,」でsplitして分ける。
+            String[] inputHashTags = threadAddForm.getHashtag().trim().split(",");
+
+            //それぞれのデータについて、ハッシュタグテーブルに既にあるのかを検索。
+            for(var i =0; i<inputHashTags.length; i++){
+                param.addValue("tagName",inputHashTags[i]);
+                List<HashTag> searchHashTagResult = jdbcTemplate.query("SELECT * FROM hashtags WHERE tag_name = :tagName;", param,
+                        new DataClassRowMapper<>(HashTag.class));
+
+                //もしすでに登録されていた場合、そのハッシュタグをスレッド情報に追加。
+                if(!searchHashTagResult.isEmpty()){
+                    System.out.println("ヌルじゃない"+searchHashTagResult.get(0));
+                    var existingHashTagId =searchHashTagResult.get(0).getId();
+                    param.addValue("hashTagId",existingHashTagId);
+                    param.addValue("thread_id",addThreadId);
+                    var hashTagInsertResult= jdbcTemplate.update("INSERT INTO thread_hashtag(thread_id,hashtag_id)VALUES(:thread_id,:hashTagId);",param);
+                }
+
+                //まだ登録されていなかったら、ハッシュタグテーブルに登録し、そのあとスレッドハッシュタグテーブルにも情報を追加
+                else{
+                    System.out.println("ヌルっぽい！");
+                    KeyHolder keyHolder2 = new GeneratedKeyHolder();
+
+                    var hashTagInsertResult= jdbcTemplate.update("INSERT INTO hashtags(tag_name)VALUES(:tagName);",param,keyHolder2);
+                    var addHashTagId = Integer.parseInt(keyHolder2.getKeys().get("id").toString());
+
+                    param.addValue("add_hashtag_id",addHashTagId);
+                    var insertThreadHashTagResult= jdbcTemplate.update("INSERT INTO thread_hashtag(thread_id,hashtag_id)VALUES(:thread_id,:add_hashtag_id);",param);
+
+
+
+                }
+
+            }
+        }
+
+
+
+
+
+
+        return threadAddResult;
     }
 
+
     //コミュニティIDを元にスレッドを全件取得
-    public List<ThreadRecord> communityThreads(Integer communityId) {
+    public List<CommunityThread> communityThreads(Integer communityId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("id", communityId);
 
-        var list = jdbcTemplate.query("SELECT * FROM threads WHERE community_id = :id", param,
-                new DataClassRowMapper<>(ThreadRecord.class));
+        var list = jdbcTemplate.query("select *\n" +
+                        "from threads t\n" +
+                        "left join (\n" +
+                        "  select thread_id, count(*) good_count\n" +
+                        "  from thread_goods\n" +
+                        "  group by thread_id) g\n" +
+                        "  on t.id = g.thread_id\n" +
+                        "\n" +
+                        "left join \n" +
+                        "(\n" +
+                        "  select thread_id, string_agg(tag_name, ',') AS hashtags\n" +
+                        "  from hashtags h\n" +
+                        "  join thread_hashtag th\n" +
+                        "  on h.id = th.hashtag_id\n" +
+                        "  group by thread_id\n" +
+                        ") h\n" +
+                        "on h.thread_id = t.id\n" +
+                        "where t.community_id = :id ORDER BY t.id", param,
+                new DataClassRowMapper<>(CommunityThread.class));
+        System.out.println(list);
 
         return list;
 
