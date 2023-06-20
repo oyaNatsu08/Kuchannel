@@ -15,7 +15,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.Scanner;
 
 @RestController
 public class KuchannelRestController {
@@ -142,6 +144,8 @@ public class KuchannelRestController {
         try {
             //アップロード画像をバイト値に変換
             byte[] bytes = image.getBytes();
+
+            //String base64 = Base64.getEncoder().encodeToString(bytes);
 
             //バイト値を書き込むファイルを作成し、指定したパスに格納
             OutputStream stream = Files.newOutputStream(filePath);

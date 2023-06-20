@@ -67,7 +67,7 @@
       <div class="image-review-container">
         <p>{{review.review}}</p>
         <div v-for="image in review.reviewImages">
-          <img :src="'/images/reviewImages/' + image.imagePath"
+          <img :src="'data:/images/reviewImages/' + image.imagePath"
             style="width: 50px; height: auto;">
         </div>
       </div>
