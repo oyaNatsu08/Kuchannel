@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>口ゃんねる</title>
+  <link href="css/mypage.css" rel="stylesheet">
+  <link href="css/base.css" rel="stylesheet">
+  <link href="css/popup.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="app0">
+    <th:block th:insert="common/header"></th:block>
+  </div>
+  <div id="app">
+
+    <div class="tab-container">
+      <div class="tab-buttons">
+        <button class="tab-button active" @click="displayTabJudge(1)" id="btn1">コミュニティ一覧</button>
+        <button class="tab-button" @click="displayTabJudge(2)" id="btn2">自分のスレッド</button>
+        <button class="tab-button" @click="displayTabJudge(3)" id="btn3">自分のレビュー</button>
+      </div>
+
+      <div class="tab-content-area">
+        <div id="tab1" v-if="tab1" class="tab-content">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>コミュニティ名</th>
+                <th>共有リンクのコピー</th>
+                <th>ニックネーム</th>
+                <th>退会する</th>
+              </tr>
+            </thead>
+            <tbody>
+              <button type="button" @click="openPopupCommu">コミュニティ作成</button>
+              <tr v-for="com in belongingCommunities">
+                <td>{{com.communityName}}</td>
+                <td><button type="button" @click="copy(com.communityId)">共有</button></td>
+                <td><input type="text" v-model="com.nickName"><button type="button"
+                    @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)">変更</button></button>
+                </td>
+                <td><button type="button" @click="withdrawal(com.communityId)">退会</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- コミュニティ作成画面 -->
+          <div v-if="isPopupCommunity" class="popup-overlay" @click.self="closePopupCommu">
+            <div class="popup">
+              <h1>コミュニティ作成</h1>
+              <form action="community-add" method="post" th:object="${communityAdd}">
+                <p>
+                  コミュニティ名：
+                  <input type="text" th:field="*{communityName}">
+                  <span class="red" th:errors="*{communityName}"></span>
+                </p>
+
+                <p>
+                  ニックネーム：
+                  <input type="text" th:field="*{nickName}">
+                  <span class="red" th:errors="*{nickName}"></span>
+                </p>
+
+                <button type="button" @click.self="closePopupCommu">閉じる</button>
+                <button type="submit" class="btn btn-warning" th:text="作成"></button>
+
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab2" v-if="tab2" class="tab-content">
+          <table>
+
+            <thead>
+              <tr>
+                <th>スレッド名</th>
+                <th>コミュニティ名</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="thread in myThreads">
+                <td><a href="#">{{thread.threadTitle}}</a></td>
+                <td><a href="#">{{thread.communityName}}</a></td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <div id="tab3" v-if="tab3" class="tab-content">
+          <table>
+
+            <thead>
+              <tr>
+                <th>タイトル</th>
+                <th>本文</th>
+                <th>スレッド名</th>
+                <th>コミュニティ名</th>
+                <th>日付</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="review in myReviews">
+                <td><a href="#">{{review.reviewTitle}}</a></td>
+                <td class="review-cell">{{review.review}}</td>
+                <td>{{review.threadTitle}}</td>
+                <td>{{review.communityName}}</td>
+                <td>{{review.createDate}}</td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+  <script src="/js/base.js"></script>
+  <script>
+
+    <!--        const { createApp } = Vue-->
+
+    createApp({
+      data() {
+        return {
+          products: [],
+          searchInput: '',
+          tab1: true,
+          tab2: false,
+          tab3: false,
+          belongingCommunities: [],
+          inputNickName: '',
+          myThreads: [],
+          myReviews: [],
+          isPopupCommunity: false,
+        }
+
+      },
+
+      methods: {
+        //タブが押されたら、それに対応した内容が表示される
+        displayTabJudge(tabNum) {
+          console.log('tabNum' + tabNum);
+
+          for (let i = 1; i < 4; i++) { 
+            this['tab' + i] = false;
+            console.log('isPopUo'+ this.isPopupCommunity)
+            document.getElementById(`btn${i}`).classList.remove('active')
+          } 
+          this['tab' + tabNum] = true; 
+          selectedTab = document.getElementById(`btn${tabNum}`)
+          selectedTab.className += " active" 
+        },
+        //所属しているコミュニティを取得 
+        getBelongingCommunities(){ this.belongingCommunities=[]; axios.get('/getBelongingCommunities')
+        .then(res => {
+          for (let i = 0; i < res.data.length; i++) {
+            if (res.data[i].flag === true) { this.belongingCommunities.push(res.data[i]); } 
+          }
+            });
+        },
+        //退会処理 
+          withdrawal(communityId){ axios.request({ url: '/withdrawal'
+          , method: 'post', data: communityId, headers: { 'Content-Type': 'text/plain' }
+        }).then(res => {
+          this.getBelongingCommunities();
+        });
+          },
+
+        //ニックネームの更新
+        updateNickName(inputNickName, communityId, userId, communityName){
+          const updateInfo = {
+            communityId: communityId,
+            userId: userId,
+            communityName: communityName,
+            nickName: inputNickName,
+            flag: true
+          };
+          axios.post('/updateNickName', updateInfo)
+            .then(res => {
+              this.getBelongingCommunities();
+            });
+        },
+
+        //建てたスレッドを取得
+        getMyThreads(){
+          this.myThreads = [];
+          axios.get('/getMyThreads')
+            .then(res => {
+              this.myThreads = res.data;
+              console.log(res.data);
+            });
+        },
+
+        //投稿したレビューを取得
+        getMyReviews(){
+          this.myReviews = [];
+          axios.get('/getMyReviews')
+            .then(res => {
+              this.myReviews = res.data;
+              console.log(res.data);
+            })
+        },
+
+        //URLをコピー
+        copy(id) {
+          axios.get(`/getUrl?name=${id}`)
+            .then(res => {
+              const url = res.data;
+              console.log(url);
+
+              // 取得したURLをクリップボードにコピーする処理を実行
+              const el = document.createElement('textarea');
+              el.value = url;
+              document.body.appendChild(el);
+              el.select();
+              document.execCommand('copy');
+              document.body.removeChild(el);
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        },
+        //コミュニティ作成画面をポップアップ
+        openPopupCommu() {
+          this.isPopupCommunity = true;
+        },
+        closePopupCommu() {
+          this.isPopupCommunity = false;
+        },
+
+    },
+
+    created: function() {
+      console.log("created");
+      console.log('isPopUo'+ this.isPopupCommunity)
+
+      this.getBelongingCommunities();
+      this.getMyThreads();
+      this.getMyReviews();
+    }
+
+      }).mount('#app')
+
+  </script>
+
+</body>
+
+</html>

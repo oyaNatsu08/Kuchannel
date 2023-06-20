@@ -15,7 +15,7 @@
         <p class="error" th:text="${error}"></p>
     </div>
 
-    <form action="login" method="post" th:object="${UserForm}">
+    <form action="/login" method="post" th:object="${UserForm}">
             <div class="cp_iptxt">
                 <span class="size">ユーザーID</span><input class="base-input" type="text" name="loginId" th:field="*{loginId}">
                 <div class="error" th:each="error: ${#fields.errors('loginId')}">
@@ -32,16 +32,10 @@
         <button id="login-btn" class="custom-btn" type="submit">
             ログイン
         </button>
-        <br>
-        <a href="create-user.html" style="line-height: 70px;">新規作成</a>
+        <a th:href="@{create-user}" class="custom-btn">新規作成</a>
     </form>
 </div>
-<script>
-    'use strict'
-    document.getElementById('login-btn').addEventListener('click', () => {
-      location.href = './menu.html'
-    })
-  </script>
+    <script>
+    </script>
 </body>
 </html>
-

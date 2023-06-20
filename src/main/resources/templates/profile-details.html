@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <title>プロフィール</title>
     <link href="/css/commons.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
+    <div id="app0">
+        <th:block th:insert="common/header"></th:block>
+    </div>
 
     <div class="login-form">
         <form method="post">
@@ -26,8 +30,9 @@
          <span type="text" name="imagePath" th:text="${profile.imagePath}" readonly class="base-text"></span>
      </div>
         </form>
-        <a class="custom-btn">編集</a>
     </div>
+
+    <script src="/js/base.js"></script>
 
 </body>
 </html>
