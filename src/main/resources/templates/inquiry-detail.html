@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>口ゃんねる</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+
+<body>
+
+<div id="app0">
+
+  <th:block th:insert="common/header"></th:block>
+
+  <h3>[[ ${community.name} ]]の、[[ ${userName} ]]さんからの問い合わせ</h3>
+  <p>[[ ${inquiry.content} ]]</p>
+
+  <a th:href="@{/notice}" th:text="戻る"></a>
+  <a th:href="@{/community/thread-list(id=${community.id})}" th:text="該当コミュニティへ"></a>
+
+</div>
+
+<script src="/js/base.js"></script>
+
+<script>
+
+</script>
+
+</body>
+
+</html>

@@ -1,14 +1,13 @@
 package com.example.Kuchannel.form;
 
-import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import lombok.Data;
 
-@Data
+@Data //自動的にgetterとsetterを生成してくれるなど
 public class ThreadAddForm {
     //入力値をフィールドとして作る
     //入力値を受け取るため
 
-    //スレッド名（店名）
+    //スレッド名(店名)
     String threadName;
 
     //フリガナ
@@ -25,4 +24,5 @@ public class ThreadAddForm {
 
     //ハッシュタグ
     String hashtag;
+
 }

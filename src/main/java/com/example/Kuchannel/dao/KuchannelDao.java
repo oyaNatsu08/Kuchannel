@@ -2,8 +2,8 @@ package com.example.Kuchannel.dao;
 
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
-import com.example.Kuchannel.record.InformatonRecord;
-import com.example.Kuchannel.record.ThreadRecord;
+import com.example.Kuchannel.entity.InformatonRecord;
+import com.example.Kuchannel.entity.ThreadRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -296,6 +296,84 @@ KuchannelDao {
                 new DataClassRowMapper<>(UserRecord.class));
 
         return list.isEmpty() ? null : list.get(0);
+    }
+
+    //お知らせ詳細情報を取得する
+    public InquiryDetailRecord findInquiry(Integer inquiryId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("inquiryId", inquiryId);
+
+        var list = jdbcTemplate.query("SELECT id, user_id, community_id, content, flag FROM inquiries WHERE id = :inquiryId", param,
+                new DataClassRowMapper<>(InquiryDetailRecord.class));
+
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    //コミュニティIDを元にコミュニティを特定する
+    public CommunityRecord findCommunity(Integer communityId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("communityId", communityId);
+
+        var list = jdbcTemplate.query("SELECT id, name, url, delete_date FROM communities WHERE id = :communityId", param,
+                new DataClassRowMapper<>(CommunityRecord.class));
+
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    //データベースからレビュー一覧に表示する情報を全件取得
+    public List<ReviewRecord> findReviewAll(Integer threadId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("threadId", threadId);
+
+        var list = jdbcTemplate.query("SELECT u.id AS userId, u.name AS userName, " +
+                        "r.id AS reviewId, r.title, r.review, r.create_date " +
+                        "FROM users u JOIN reviews r ON u.id = r.user_id " +
+                        "WHERE r.thread_id = :threadId", param,
+                new DataClassRowMapper<>(ReviewRecord.class));
+
+        return list;
+
+    }
+
+    //データベースからレビューの画像情報を取得する
+    public List<ReviewImageRecord> getReviewImages(Integer reviewId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("reviewId", reviewId);
+
+        var list = jdbcTemplate.query("SELECT review_id, image_path FROM review_images WHERE review_id = :reviewId",
+                param, new DataClassRowMapper<>(ReviewImageRecord.class));
+
+        return list;
+
+    }
+
+    //reviewsテーブルにインサート処理
+    public int reviewInsert(int userId, int threadId, String title, String review) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", userId);
+        param.addValue("threadId", threadId);
+        param.addValue("title", title);
+        param.addValue("review", review);
+
+        //インサートしたidを受け取るために必要
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update("INSERT INTO reviews(user_id, thread_id, title, review, create_date) " +
+                "VALUES(:userId, :threadId, :title, :review, now())", param, keyHolder);
+
+        //インサートしたIDを返す
+        return Integer.parseInt(keyHolder.getKeys().get("id").toString());
+
+    }
+
+    //review_Imagesテーブルにインサート処理
+    public int reviewImagesInsert(int reviewId, String imagePath) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("reviewId", reviewId);
+        param.addValue("imagePath", imagePath);
+
+        return jdbcTemplate.update("INSERT INTO review_images(review_id, image_path) " +
+                "VALUES(:reviewId, :imagePath)", param);
     }
 
     /*-------------------------------------------------*/

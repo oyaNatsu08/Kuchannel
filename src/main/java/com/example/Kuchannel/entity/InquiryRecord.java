@@ -1,4 +1,4 @@
 package com.example.Kuchannel.entity;
 
-public record InquiryRecord(String inquiryUserName, Integer communityId, String communityName) {
+public record InquiryRecord(Integer id, String inquiryUserName, Integer communityId, String communityName) {
 }

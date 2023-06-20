@@ -2,35 +2,37 @@
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-  <meta charset="UTF-8">
-  <title>口ゃんねる</title>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <meta charset="UTF-8">
+    <title>口ゃんねる</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 
 <body>
 
-<div id="app0">
+    <div id="app0">
 
-  <th:block th:insert="~{common/header} "></th:block>
-  <h1 th:text="${name} + 'へようこそ！'"></h1>
+        <th:block th:insert="common/header"></th:block>
 
-  <form action="/thread-add" method="get">
-    <button type="submit" th:text="スレッドの新規作成"></button>
-    <input type="hidden" name="communityId" th:value="1">
-  </form>
+    </div>
+<!--        <h1 th:text="${name} + 'へようこそ！'"></h1>-->
 
-  <th:block th:each="thread : ${threads}">
-    <h3><a href="#">[[ ${thread.title} }}</a></h3>
-    <p th:text="${thread.address}"></p>
-  </th:block>
+        <form action="/thread-add" method="get">
+            <button type="submit" th:text="スレッドの新規作成"></button>
+            <input type="hidden" name="communityId" th:value="1">
+        </form>
 
-</div>
+        <th:block th:each="thread : ${threads}">
+            <h3><a href="#">[[ ${thread.title} ]]</a></h3>
+            <p th:text="${thread.address}"></p>
+        </th:block>
 
-<script src="/js/base.js"></script>
 
-<script>
 
-</script>
+    <script src="/js/base.js"></script>
+
+    <script>
+
+    </script>
 
 </body>
 

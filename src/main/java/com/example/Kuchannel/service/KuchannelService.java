@@ -3,8 +3,8 @@ package com.example.Kuchannel.service;
 import com.example.Kuchannel.dao.KuchannelDao;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
-import com.example.Kuchannel.record.InformatonRecord;
-import com.example.Kuchannel.record.ThreadRecord;
+import com.example.Kuchannel.entity.InformatonRecord;
+import com.example.Kuchannel.entity.ThreadRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -115,6 +115,36 @@ public class KuchannelService {
     //ユーザーIDを元に、ユーザーを特定する
     public UserRecord findUser(Integer userId) {
         return kuchannelDao.findUser(userId);
+    }
+
+    //お知らせ詳細情報を取得する
+    public InquiryDetailRecord findInquiry(Integer inquiryId) {
+        return kuchannelDao.findInquiry(inquiryId);
+    }
+
+    //コミュニティIDを元にコミュニティを特定する
+    public CommunityRecord findCommunity(Integer communityId) {
+        return kuchannelDao.findCommunity(communityId);
+    }
+
+    //データベースからレビュー一覧に表示する情報を全件取得
+    public List<ReviewRecord> findReviewAll(Integer threadId) {
+        return kuchannelDao.findReviewAll(threadId);
+    }
+
+    //データベースからレビューの画像情報を取得する
+    public List<ReviewImageRecord> getReviewImages(Integer reviewId) {
+        return kuchannelDao.getReviewImages(reviewId);
+    }
+
+    //reviewsテーブルにインサート処理
+    public int reviewInsert(int userId, int threadId, String title, String review) {
+        return kuchannelDao.reviewInsert(userId, threadId, title, review);
+    }
+
+    //review_Imagesテーブルにインサート処理
+    public int reviewImagesInsert(int reviewId, String imagePath) {
+        return kuchannelDao.reviewImagesInsert(reviewId, imagePath);
     }
 
     /*-------------------------------------------------*/
