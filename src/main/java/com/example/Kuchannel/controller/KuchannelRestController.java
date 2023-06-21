@@ -118,12 +118,12 @@ public class KuchannelRestController {
 //    }
 
     //レビューの編集・更新機能処理
-    @PostMapping("/api/update")
-    public ResponseEntity<String> update(@RequestParam("title") String title,
-                                         @RequestParam("content") String content,
-                                         @RequestParam("images") List<MultipartFile> images){
-
-    }
+//    @PostMapping("/api/update")
+//    public ResponseEntity<String> update(@RequestParam("title") String title,
+//                                         @RequestParam("content") String content,
+//                                         @RequestParam("images") List<MultipartFile> images){
+//
+//    }
 
 
     //レビュー投稿処理
