@@ -29,77 +29,89 @@
 
 <body>
 
-  <div id="app0">
+<div id="app0">
 
-    <th:block th:insert="common/header"></th:block>
+  <th:block th:insert="common/header"></th:block>
 
+</div>
+
+<div id="app">
+  <h2>登録したお店の情報</h2>
+  <hr>
+
+  <div class="review">
+    <p>
+      タイトル：
+      <input type="text" v-model="reviewTitle">
+    </p>
+    <p>
+      本文：
+      <textarea cols="30" rows="10" v-model="content"></textarea>
+    </p>
+    <p>
+      写真の追加：
+      <input type="file" ref="fileInput" multiple />
+    </p>
+
+    <button type="button" @click="addReview">投稿</button>
   </div>
 
-  <div id="app">
-    <h2>登録したお店の情報</h2>
-    <hr>
+  <div class="review" v-for="review in reviews">
+    <p>{{ review.userName }}さん</p>
+    <h3>{{ review.title }}</h3>
+    <p>レビューID: {{ review.reviewId }}</p>
 
-    <div class="review">
-      <p>
-        タイトル：
-        <input type="text" v-model="reviewTitle">
-      </p>
-      <p>
-        本文：
-        <textarea cols="30" rows="10" v-model="content"></textarea>
-      </p>
-      <p>
-        写真の追加：
-        <input type="file" ref="fileInput" multiple />
-      </p>
+    <!-- 一枚だけ表示(未) -->
+    <!-- <img :src="'/images/reviewImages/' + review.reviewImages[0].imagePath" style="width: 60px; height: auto;"> -->
 
-      <button type="button" @click="addReview">投稿</button>
-    </div>
-
-    <div class="review" v-for="review in reviews">
-      <p>{{ review.userName }}さん</p>
-      <h3>{{review.title}}</h3>
-      <p>レビューID: {{ review.reviewId }}</p>
-
-      <!-- 一枚だけ表示(未) -->
-      <!-- <img :src="'/images/reviewImages/' + review.reviewImages[0].imagePath" style="width: 60px; height: auto;"> -->
-
-      <!-- 複数表示 -->
-      <div class="image-review-container">
-        <p>{{review.review}}</p>
-        <div v-for="image in review.reviewImages">
-          <img :src="'/images/reviewImages/' + image.imagePath"
-            style="width: 50px; height: auto;">
-        </div>
+    <!-- 複数表示 -->
+    <div class="image-review-container">
+      <p>{{ review.review }}</p>
+      <div v-for="image in review.reviewImages">
+        <img :src="'/images/reviewImages/' + image.imagePath" style="width: 50px; height: auto;">
       </div>
-
-      <!-- 投稿ユーザーだけ表示される(後でやる) -->
-      <!-- ここを修正(富永＆宮城) -->
-      <button type="button" @click="delete(review.reviewId)">削除</button>
-      <button type="button">編集</button>
-
-
     </div>
 
-    <!-- <p th:text="'クリックされたレビューは、' + ${review} + 'です。'"></p> -->
+    <!-- 投稿ユーザーだけ表示される(後でやる) -->
+    <!-- ここを修正(富永＆宮城) -->
+    <button type="button" @click="deleteReview(review.reviewId)">削除</button>
+    <button type="button" @click="showEditPopup(review)">編集</button>
+
   </div>
 
-  <script src="/js/base.js"></script>
+  <!-- <p th:text="'クリックされたレビューは、' + ${review} + 'です。'"></p> -->
 
-  <script>
+  <!-- 編集ポップアップ -->
+  <div v-if="showPopup">
+    <h2>編集</h2>
+    <p>タイトル：<input type="text" v-model="editingReview.title"></p>
+    <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
+    <button type="button" @click="updateReview">更新</button>
+    <button type="button" @click="closePopup">キャンセル</button>
+  </div>
 
+</div>
+
+<script src="/js/base.js"></script>
+
+<script>
     createApp({
       data() {
         return {
           reviewTitle: '',
           content: '',
           reviews: [],
+          showPopup: false,
+          editingReview: {
+            id: '',
+            title: '',
+            content: ''
+          }
         }
       },
       methods: {
         // レビュー投稿処理
         addReview() {
-
           console.log(this.reviewTitle, this.content);
           const formData = new FormData();
           formData.append("title", this.reviewTitle);
@@ -127,12 +139,41 @@
               this.reviews = res.data;
               console.log(this.reviews);
               console.log(this.reviews[0].reviewImages[0].imagePath);
+            }
+          );
+        },
+
+       //編集・更新
+        showEditPopup(review) {
+          this.showPopup = true;
+          this.editingReview.id = review.reviewId;
+          this.editingReview.title = review.title;
+          this.editingReview.content = review.content;
+        },
+        updateReview() {
+          const updatedReview = {
+            id: this.editingReview.id,
+            title: this.editingReview.title,
+            content: this.editingReview.content
+          };
+
+          axios.put('/api/update', updatedReview)
+            .then(res => {
+              this.getReviews();
+              this.closePopup();
+              console.log(res);
             });
+        },
+        closePopup() {
+          this.showPopup = false;
+          this.editingReview.id = '';
+          this.editingReview.title = '';
+          this.editingReview.content = '';
         }
       },
-      created: function () {
+      created() {
         this.getReviews();
-      },
+      }
     }).mount('#app')
   </script>
 

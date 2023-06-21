@@ -142,6 +142,11 @@ public class KuchannelService {
         return kuchannelDao.reviewInsert(userId, threadId, title, review);
     }
 
+    //reviewsテーブルのレコードのupdate処理
+    public int reviewUpdate(int reviewId, String title, String review) {
+        return kuchannelDao.reviewUpdate(reviewId,title,review);
+    }
+
     //review_Imagesテーブルにインサート処理
     public int reviewImagesInsert(int reviewId, String imagePath) {
         return kuchannelDao.reviewImagesInsert(reviewId, imagePath);

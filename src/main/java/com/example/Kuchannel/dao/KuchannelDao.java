@@ -366,6 +366,17 @@ KuchannelDao {
 
     }
 
+    //reviewsテーブルのレコードのupdate処理
+    public int reviewUpdate(int reviewId, String title, String review) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", reviewId);
+        param.addValue("title", title);
+        param.addValue("review", review);
+
+        var update = jdbcTemplate.update("UPDATE reviews SET title = :title, review = :review WHERE id = :userId",param);
+        return update;
+    }
+
     //review_Imagesテーブルにインサート処理
     public int reviewImagesInsert(int reviewId, String imagePath) {
         MapSqlParameterSource param = new MapSqlParameterSource();
