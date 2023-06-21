@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>口ゃんねる(口コミ)</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        .review {
+            border: 1px solid orangered;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            margin-left: 20%;
+            margin-right: 20%;
+        }
+
+        .reply {
+            border: 1px solid lightgreen;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            margin-left: 20%;
+            margin-right: 20%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app0">
+        <th:block th:insert="common/header"></th:block>
+    </div>
+
+    <div id="app">
+        <div class="review">
+            <h3>投稿者：[[ ${review.userName} ]]</h3>
+            <p>投稿日：[[ ${review.createDate} ]]</p>
+            <h2>[[ ${review.title} ]]</h2>
+            <hr>
+            <p>[[ ${review.review} ]]</p>
+
+            <th:block th:each="image : ${review.reviewImages}">
+                <img th:src="@{ '/images/reviewImages/' + ${image.imagePath} }" style="width: 100px; height: auto;">
+            </th:block>
+
+        </div>
+
+        <p>このレビューへのコメント</p>
+        <div class="reply">
+            <th:block th:each="reply : ${review.reviewReplies}">
+                <div class="review">
+                    <h4>投稿者：[[ ${reply.userName} ]]</h4>
+                    <p>投稿日：[[ ${reply.createDate} ]]</p>
+                    <p>[[ ${reply.reply} ]]</p>
+                </div>
+            </th:block>
+            <div class="review" v-for="reply in replies">
+                <h4>投稿者：{{ reply.userName }}</h4>
+                <p>投稿日：{{ reply.createDate }}</p>
+                <p> {{ reply.reply }}</p>
+            </div>
+
+
+            <div v-if="isReplyView">
+                <h3>返信</h3>
+                <p>
+                    本文：
+                    <textarea cols="30" rows="10" v-model="replyContent"></textarea>
+                </p>
+                <button type="button" @click="closeReply">閉じる</button>
+                <button type="button" @click="addReply(reviewId)">送信</button>
+            </div>
+
+        </div>
+
+        <form action="/review-list" method="get">
+            <button type="submit">戻る</button>
+            <button type="button" @click="openReply(reviewId)">返信する</button>
+        </form>
+
+    </div>
+
+    <script src="/js/base.js"></script>
+    <script>
+        createApp({
+            data() {
+                return {
+                    isReplyView: false,
+                    replies: [],
+                    replyContent: '',
+                    reviewId: 0,
+                }
+            },
+            methods: {
+                //返信画面表示
+                openReply(reviewId) {
+                    this.isReplyView = true;
+                    this.reviewId = reviewId;
+                },
+                //返信画面非表示
+                closeReply() {
+                    this.isReplyView = false;
+                },
+                //返信送信
+                addReply(reviewId) {
+                    console.log(reviewId);
+                    const formData = new FormData();
+                    formData.append("id", reviewId);
+                    formData.append("content", this.replyContent);
+                    axios.post('/add-reply', formData)
+                        .then(res => {
+                            // アップロードが成功した場合の処理
+                            this.isReplyView = false;
+                            this.replies.push(res.data);
+                        })
+                        .catch(error => {
+                            // エラーが発生した場合の処理
+                        });
+                }
+            },
+            created: function () {
+                //構文エラー出ているけど問題ない。(thymeleafの値をjavascriptで受け取っているため、構文エラーが出ている)
+                this.reviewId = `[[ ${reviewId} ]]`;
+            },
+        }).mount('#app')
+    </script>
+
+</body>
+
+</html>

@@ -54,3 +54,56 @@ body {
     color: white;
     margin: 35px;
   }
+
+.error {
+    color: red;
+    text-align: center;
+}
+
+.login-form {
+    background-color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    display: block;
+    padding: 20px;
+    margin: 60px;
+}
+
+.size {
+    font-size: 20px;
+    margin: 40px;
+    width: 130px;
+    font-weight: bold;
+    display: inline-block;
+}
+.base-input {
+    width: 300px;
+    height: 20px;
+}
+
+.site_logo {
+    text-align: center;
+    width: auto;
+    font-size: 45px;
+    line-height: 60px;
+
+}
+
+.custom-btn {
+    border: none;
+    border-radius: 5px;
+    background-color: #FFA629;
+    padding: auto;
+    line-height: 2;
+    padding: 10px;
+    cursor: pointer;
+    color: white;
+    margin: 35px;
+  }
+
+.logout-comment {
+    font-size: 50px;
+    text-align: center;
+    font-weight: bold;
+    margin: 60px;
+    line-height: 130px;
+  }

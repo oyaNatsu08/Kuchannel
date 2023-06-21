@@ -3,15 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>ログイン</title>
-    <link href="css/commons.css" rel="stylesheet">
+    <link href="/css/commons.css" rel="stylesheet">
 </head>
-
-<style>
-    .login-body {
-        background-image: url(../static/images/background.png);
-
-    }
-</style>
 
 <body class="login-body">
 
@@ -22,33 +15,27 @@
         <p class="error" th:text="${error}"></p>
     </div>
 
-    <form action="login" method="post" th:object="${UserForm}">
-        <fieldset>
+    <form action="/login" method="post" th:object="${UserForm}">
             <div class="cp_iptxt">
-                <span>ユーザーID</span><input class="base-input" type="text" name="loginId" th:field="*{loginId}">
+                <span class="size">ユーザーID</span><input class="base-input" type="text" name="loginId" th:field="*{loginId}">
                 <div class="error" th:each="error: ${#fields.errors('loginId')}">
                     [[ ${error} ]]
                 </div>
             </div>
 
-            <div>
-                <span>パスワード</span><input class="base-input" type="password" name="password" th:field="*{password}">
+            <div class="cp_iptxt">
+                <span class="size">パスワード</span><input class="base-input" type="password" name="password" th:field="*{password}">
                 <div class="error" th:each="error: ${#fields.errors('password')}">
                     [[ ${error} ]]
                 </div>
             </div>
-        </fieldset>
         <button id="login-btn" class="custom-btn" type="submit">
             ログイン
         </button>
         <a th:href="@{create-user}" class="custom-btn">新規作成</a>
     </form>
 </div>
-<script>
-    'use strict'
-    document.getElementById('login-btn').addEventListener('click', () => {
-      location.href = './menu.html'
-    })
-  </script>
+    <script>
+    </script>
 </body>
 </html>
