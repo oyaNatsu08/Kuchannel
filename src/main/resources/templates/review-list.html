@@ -80,7 +80,7 @@
 
       <div class="review">
 
-        <p>{{ review.userName }}さん</p>
+        <p><a :href="getUserReviewLink(review.userId)">{{ review.userName }}さん</a></p>
         <h3>{{review.title}}</h3>
         <p>投稿日：{{ review.createDate }}</p>
 
@@ -100,7 +100,7 @@
       <hr>
 
       <div class="reply" v-for="reply in review.reviewReplies">
-        <p>{{ reply.userName }}さん</p>
+        <p><a :href="getUserReviewLink(reply.userId)">{{ reply.userName }}さん</a></p>
         <p>{{ reply.reply }}</p>
         <p>投稿日：{{ reply.createDate }}</p>
       </div>
@@ -203,7 +203,11 @@
             .catch(error => {
               // エラーが発生した場合の処理
             });
-        }
+        },
+        //ユーザーのレビュー一覧に遷移
+        getUserReviewLink(userId) {
+            return `/user-review/${userId}`;
+        },
       },
       created: function () {
         this.getReviews();

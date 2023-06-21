@@ -155,6 +155,11 @@ public class KuchannelService {
         return kuchannelDao.findReview(reviewId);
     }
 
+    //ユーザーのレビュー一覧に必要な情報を取得する
+    public List<UserReviewList> getUserReview(Integer userId) {
+        return kuchannelDao.getUserReview(userId);
+    }
+
     /*---------------------------------------------*/
 
     //threadテーブルにINSERTする処理

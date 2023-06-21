@@ -349,6 +349,19 @@ public class KuchannelController {
 
     }
 
+    //ユーザーのレビュー一覧画面に遷移
+    @GetMapping("/user-review/{userId}")
+    public String userReviewView(@PathVariable("userId") Integer userId,
+                                 Model model) {
+
+        //ユーザーのレビュー一覧に必要な情報を取得する
+        var reviews = kuchannelService.getUserReview(userId);
+
+        model.addAttribute("reviews", reviews);
+
+        return "user-review-list";
+    }
+
 
     /*------------------------------------------------*/
 

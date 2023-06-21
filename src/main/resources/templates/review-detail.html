@@ -54,7 +54,7 @@
         <div class="reply">
             <th:block th:each="reply : ${review.reviewReplies}">
                 <div class="review">
-                    <h4>投稿者：[[ ${reply.userName} ]]</h4>
+                    <h4>投稿者：[[ ${reply.userName} ]]</a></h4>
                     <p>投稿日：[[ ${reply.createDate} ]]</p>
                     <p>[[ ${reply.reply} ]]</p>
                 </div>
