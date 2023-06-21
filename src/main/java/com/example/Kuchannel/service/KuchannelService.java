@@ -3,6 +3,8 @@ package com.example.Kuchannel.service;
 import com.example.Kuchannel.dao.KuchannelDao;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
+import com.example.Kuchannel.entity.InformatonRecord;
+import com.example.Kuchannel.entity.ThreadRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -140,6 +142,11 @@ public class KuchannelService {
         return kuchannelDao.reviewInsert(userId, threadId, title, review);
     }
 
+    //reviewsテーブルのレコードのupdate処理
+    public int reviewUpdate(int reviewId, String title, String review) {
+        return kuchannelDao.reviewUpdate(reviewId,title,review);
+    }
+
     //review_Imagesテーブルにインサート処理
     public int reviewImagesInsert(int reviewId, String imagePath) {
         return kuchannelDao.reviewImagesInsert(reviewId, imagePath);
@@ -167,4 +174,8 @@ public class KuchannelService {
         return kuchannelDao.communityThreads(communityId);
     }
 
+    //お問い合わせ
+    public int information(InformatonRecord informatonRecord){
+        return kuchannelDao.information(informatonRecord);
+    }
 }

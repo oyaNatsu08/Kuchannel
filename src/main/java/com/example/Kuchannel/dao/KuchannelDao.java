@@ -3,6 +3,8 @@ package com.example.Kuchannel.dao;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
 import jakarta.servlet.http.HttpSession;
+import com.example.Kuchannel.entity.InformatonRecord;
+import com.example.Kuchannel.entity.ThreadRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -179,8 +181,7 @@ public class KuchannelDao {
         param.addValue("name", nickName);
         param.addValue("role", role);
 
-        return jdbcTemplate.update("INSERT INTO " +
-                "community_user(user_id, community_id, nick_name, role, flag) " +
+        return jdbcTemplate.update("INSERT INTO community_user(user_id, community_id, nick_name, role, flag) " +
                 "VALUES(:userId, :communityId, :name, :role, 't')", param);
     }
 
@@ -371,6 +372,17 @@ public class KuchannelDao {
 
     }
 
+    //reviewsテーブルのレコードのupdate処理
+    public int reviewUpdate(int reviewId, String title, String review) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", reviewId);
+        param.addValue("title", title);
+        param.addValue("review", review);
+
+        var update = jdbcTemplate.update("UPDATE reviews SET title = :title, review = :review WHERE id = :userId",param);
+        return update;
+    }
+
     //review_Imagesテーブルにインサート処理
     public int reviewImagesInsert(int reviewId, String imagePath) {
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -446,7 +458,20 @@ public class KuchannelDao {
                 new DataClassRowMapper<>(ThreadRecord.class));
 
         return list;
+    }
 
+    //お問い合わせ
+    public int information(InformatonRecord informatonRecord){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", informatonRecord.userId());
+        param.addValue("communityId", informatonRecord.communityId());
+        param.addValue("content", informatonRecord.content());
+        param.addValue("flag", informatonRecord.flag());
+
+        var result = jdbcTemplate.update("INSERT INTO inquiries (user_id,community_id,content,flag) VALUES(:userId,:communityId,:content,:flag);",
+                param);
+
+        return result;
     }
 
 }
