@@ -59,6 +59,11 @@
                     <p>[[ ${reply.reply} ]]</p>
                 </div>
             </th:block>
+            <div class="review" v-for="reply in replies">
+                <h4>投稿者：{{ reply.userName }}</h4>
+                <p>投稿日：{{ reply.createDate }}</p>
+                <p> {{ reply.reply }}</p>
+            </div>
 
 
             <div v-if="isReplyView">
@@ -68,9 +73,8 @@
                     <textarea cols="30" rows="10" v-model="replyContent"></textarea>
                 </p>
                 <button type="button" @click="closeReply">閉じる</button>
-                <button type="button" @click="addReply(review.reviewId)">送信</button>
+                <button type="button" @click="addReply(reviewId)">送信</button>
             </div>
-
 
         </div>
 
@@ -89,7 +93,7 @@
                     isReplyView: false,
                     replies: [],
                     replyContent: '',
-                    reviewId: '',
+                    reviewId: 0,
                 }
             },
             methods: {
@@ -112,6 +116,7 @@
                         .then(res => {
                             // アップロードが成功した場合の処理
                             this.isReplyView = false;
+                            this.replies.push(res.data);
                         })
                         .catch(error => {
                             // エラーが発生した場合の処理
@@ -120,7 +125,7 @@
             },
             created: function () {
                 //構文エラー出ているけど問題ない。(thymeleafの値をjavascriptで受け取っているため、構文エラーが出ている)
-                this.reviewId = [[ ${review.reviewId} ]];
+                this.reviewId = `[[ ${reviewId} ]]`;
             },
         }).mount('#app')
     </script>

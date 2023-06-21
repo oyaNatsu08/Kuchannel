@@ -2,6 +2,7 @@ package com.example.Kuchannel.dao;
 
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -19,6 +20,9 @@ public class KuchannelDao {
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private HttpSession session;
 
     //ログイン
     public UserRecord Login(String loginId, String password) {
@@ -378,14 +382,30 @@ public class KuchannelDao {
     }
 
     //repliesテーブルにインサート処理
-    public int replyInsert(int userId, int reviewId, String content) {
+    public ReviewReplyRecord replyInsert(int userId, int reviewId, String content) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
         param.addValue("reviewId", reviewId);
         param.addValue("content", content);
 
-        return jdbcTemplate.update("INSERT INTO replies(user_id, review_id, reply, create_date) " +
-                "VALUES(:userId, :reviewId, :content, now())", param);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update("INSERT INTO replies(user_id, review_id, reply, create_date) " +
+                "VALUES(:userId, :reviewId, :content, now())", param, keyHolder);
+
+        var user = (UserRecord)session.getAttribute("user");
+
+        var reply = new ReviewReplyRecord(
+                        Integer.parseInt(keyHolder.getKeys().get("id").toString()),
+                        Integer.parseInt(keyHolder.getKeys().get("user_id").toString()),
+                        user.name(),
+                        Integer.parseInt(keyHolder.getKeys().get("review_id").toString()),
+                        keyHolder.getKeys().get("reply").toString(),
+                        keyHolder.getKeys().get("create_date").toString()
+                );
+
+        return reply;
+
     }
 
     //レビューIDを元にreviewsテーブルから情報を取得する

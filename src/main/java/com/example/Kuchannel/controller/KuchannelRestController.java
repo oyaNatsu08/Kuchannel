@@ -178,13 +178,13 @@ public class KuchannelRestController {
 
     //レビュー返信登録処理
     @PostMapping("add-reply")
-    public ResponseEntity<String> addReply(@RequestParam("id") Integer reviewId,
+    public ReviewReplyRecord addReply(@RequestParam("id") Integer reviewId,
                                            @RequestParam("content") String content) {
         //repliesテーブルにインサート処理
         var user = (UserRecord)session.getAttribute("user");
-        kuchannelService.replyInsert(user.id(), reviewId, content);
+        var reply = kuchannelService.replyInsert(user.id(), reviewId, content);
 
-        return ResponseEntity.ok("登録処理に成功しました。");
+        return reply;
 
     }
 

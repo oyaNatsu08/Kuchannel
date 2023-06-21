@@ -146,7 +146,7 @@ public class KuchannelService {
     }
 
     //repliesテーブルにインサート処理
-    public int replyInsert(int userId, int reviewId, String content) {
+    public ReviewReplyRecord replyInsert(int userId, int reviewId, String content) {
         return kuchannelDao.replyInsert(userId, reviewId, content);
     }
 

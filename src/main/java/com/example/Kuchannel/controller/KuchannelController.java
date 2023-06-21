@@ -343,6 +343,7 @@ public class KuchannelController {
 
         model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
                 review.review(), review.createDate(), reviewImages, reviewReplies));
+        model.addAttribute("reviewId", reviewId);
 
         return "review-detail";
 
