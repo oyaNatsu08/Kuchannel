@@ -105,22 +105,24 @@ public class AccountController {
     @PostMapping("profile-edit")
     public String profileUpdate(@Validated @ModelAttribute("EditForm") EditForm editForm,
                                 BindingResult bindingResult,
-                                @RequestParam(required = false) String name,
-                                @RequestParam(required = false) String password,
                                 Model model){
         //バリデーション
         if(bindingResult.hasErrors()){
             return "profile-edit";
         }
         String loginId = editForm.getLoginId();
-//        String name = editForm.getName();
-//        String password = editForm.getPassword();
-        ProfileEditRecord edit = new ProfileEditRecord(loginId,name,password);
-        accountService.edit(loginId,name,password);
+        String name = editForm.getName();
+        String password = editForm.getPassword();
+        ProfileEditRecord edit = new ProfileEditRecord(loginId, name, password);
+        accountService.edit(loginId, name, password);
         System.out.println("aaaaaaa");
         return "/profile-details";
     }
 //    /*------------------------------------------------------------------------*/
+
+
+
+
 
 
 

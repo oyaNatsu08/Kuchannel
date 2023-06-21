@@ -58,7 +58,7 @@ public class PgAccountDao implements AccountDao {
 
     //プロフィール編集（start）
     @Override
-    public ProfileEditRecord edit(String loginId,String name, String password) {
+    public ProfileEditRecord edit(String loginId, String name, String password) {
         //更新のSQL文
         String sql = "UPDATE users SET name =:name, password = :password WHERE login_id = :loginId";
 
@@ -73,14 +73,13 @@ public class PgAccountDao implements AccountDao {
             jdbcTemplate.update(sql, param);
 
             ProfileEditRecord editRecord = new ProfileEditRecord(loginId,name, password);
-//            editRecord.setId(id);
-//            editRecord.setName(name);
-//            editRecord.setPassword(password);
             return editRecord;
         }catch (DataAccessException  e){
             e.printStackTrace();
-
             return null;
         }
     }
+
+
+
 }
