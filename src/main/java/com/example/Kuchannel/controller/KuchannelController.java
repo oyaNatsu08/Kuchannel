@@ -226,24 +226,6 @@ public class KuchannelController {
         }
     }
 
-    //レビュー一覧へ(仮)
-    @GetMapping("/review")
-    public String reviewView(@RequestParam("id") Integer reviewId,
-                             @ModelAttribute("UserForm") UserForm userForm,
-                             Model model) {
-        //ログインしているか確認
-        if (session.getAttribute("user") == null) {
-            return "login";
-        } else {
-
-            ReviewRecord review = kuchannelService.findReviews(reviewId);
-
-            model.addAttribute("review", review);
-
-            return "review";
-        }
-    }
-
     //コミュニティに参加する処理
     @PostMapping("/join")
     public String join(@Validated @ModelAttribute("communityJoin") CommunityJoinForm communityForm,
@@ -326,6 +308,47 @@ public class KuchannelController {
 
     }
 
+    //レビュー一覧へ飛ぶ
+    @GetMapping("review-list")
+    public String reviewListView(@ModelAttribute("UserForm") UserForm userForm) {
+
+        //ログインしているか確認
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
+            return "review-list";
+        }
+    }
+
+    //レビュー作成処理
+    @PostMapping("/review-add")
+    public String reviewAdd(Model model) {
+
+        return "review-list";
+    }
+
+    //レビュー詳細画面へ
+    @GetMapping("/review-detail")
+    public String reviewDetail(@RequestParam("reviewId") Integer reviewId,
+                               Model model) {
+
+        //レビューIDを元にreviewsテーブルから情報を取得する
+        var review = kuchannelService.findReview(reviewId);
+
+        //データベースからレビューの画像情報を取得する
+        var reviewImages = kuchannelService.getReviewImages(reviewId);
+
+        //データベースからレビューの返信情報を取得する
+        var reviewReplies = kuchannelService.getReviewReply(reviewId);
+
+        model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
+                review.review(), review.createDate(), reviewImages, reviewReplies));
+
+        return "review-detail";
+
+    }
+
+
     /*------------------------------------------------*/
 
     //スレッド作成画面へ遷移
@@ -354,25 +377,6 @@ public class KuchannelController {
         model.addAttribute("threads", threads);
 
         return "thread-list";
-    }
-
-    //レビュー一覧へ飛ぶ
-    @GetMapping("review-list")
-    public String reviewListView(@ModelAttribute("UserForm") UserForm userForm) {
-
-        //ログインしているか確認
-        if (session.getAttribute("user") == null) {
-            return "login";
-        } else {
-            return "review-list";
-        }
-    }
-
-    //レビュー作成処理
-    @PostMapping("/review-add")
-    public String reviewAdd(Model model) {
-
-        return "review-list";
     }
 
 }

@@ -95,11 +95,6 @@ public class KuchannelService {
         return kuchannelDao.communityUserUpdate(userId, communityId, nickName);
     }
 
-    //ユーザーIDをもとにレビューをセレクト
-    public ReviewRecord findReviews(Integer reviewId) {
-        return  kuchannelDao.findReviews(reviewId);
-    }
-
     //ユーザーのお知らせ一覧(返信)をセレクト
     public List<NoticeReplyRecord> userNotice(Integer userId) {
         return kuchannelDao.userNotice(userId);
@@ -135,6 +130,11 @@ public class KuchannelService {
         return kuchannelDao.getReviewImages(reviewId);
     }
 
+    //データベースからレビューの返信情報を取得する
+    public List<ReviewReplyRecord> getReviewReply(Integer reviewId) {
+        return kuchannelDao.getReviewReply(reviewId);
+    }
+
     //reviewsテーブルにインサート処理
     public int reviewInsert(int userId, int threadId, String title, String review) {
         return kuchannelDao.reviewInsert(userId, threadId, title, review);
@@ -143,6 +143,16 @@ public class KuchannelService {
     //review_Imagesテーブルにインサート処理
     public int reviewImagesInsert(int reviewId, String imagePath) {
         return kuchannelDao.reviewImagesInsert(reviewId, imagePath);
+    }
+
+    //repliesテーブルにインサート処理
+    public int replyInsert(int userId, int reviewId, String content) {
+        return kuchannelDao.replyInsert(userId, reviewId, content);
+    }
+
+    //レビューIDを元にreviewsテーブルから情報を取得する
+    public ReviewRecord findReview(Integer reviewId) {
+        return kuchannelDao.findReview(reviewId);
     }
 
     /*---------------------------------------------*/

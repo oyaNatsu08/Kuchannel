@@ -11,7 +11,7 @@
       text-align: center;
     }
 
-    .review {
+    .review-all {
       border: 1px solid black;
       border-radius: 8px;
       padding: 10px;
@@ -24,6 +24,25 @@
       display: flex;
       margin-top: 10px;
     }
+
+    .reply {
+      border: 1px solid orange;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      margin-left: 20%;
+      margin-right: 20%;
+    }
+
+    .review {
+      border: 1px solid orangered;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      margin-left: 20%;
+      margin-right: 20%;
+    }
+
   </style>
 </head>
 
@@ -37,9 +56,10 @@
 
   <div id="app">
     <h2>登録したお店の情報</h2>
+    <button type="button">情報編集</button>
     <hr>
 
-    <div class="review">
+    <div class="review-all">
       <p>
         タイトル：
         <input type="text" v-model="reviewTitle">
@@ -56,28 +76,55 @@
       <button type="button" @click="addReview">投稿</button>
     </div>
 
-    <div class="review" v-for="review in reviews">
-      <p>{{ review.userName }}さん</p>
-      <h3>{{review.title}}</h3>
+    <div class="review-all" v-for="review in reviews">
 
-      <!-- 一枚だけ表示(未) -->
-      <!-- <img :src="'/images/reviewImages/' + review.reviewImages[0].imagePath" style="width: 60px; height: auto;"> -->
+      <div class="review">
 
-      <!-- 複数表示 -->
-      <div class="image-review-container">
-        <p>{{review.review}}</p>
-        <div v-for="image in review.reviewImages">
-          <img :src="'data:image/png;base64, /images/reviewImages/' + image.imagePath"
-            style="width: 50px; height: auto;">
+        <p>{{ review.userName }}さん</p>
+        <h3>{{review.title}}</h3>
+        <p>投稿日：{{ review.createDate }}</p>
+
+        <!-- 一枚だけ表示(未) -->
+        <!-- <img :src="'/images/reviewImages/' + review.reviewImages[0].imagePath" style="width: 60px; height: auto;"> -->
+
+        <!-- 複数表示 -->
+        <div class="image-review-container">
+          <p>{{review.review}}</p>
+          <div v-for="image in review.reviewImages">
+            <img :src="'/images/reviewImages/' + image.imagePath" style="width: 50px; height: auto;">
+          </div>
         </div>
+
+      </div>
+
+      <hr>
+
+      <div class="reply" v-for="reply in review.reviewReplies">
+        <p>{{ reply.userName }}さん</p>
+        <p>{{ reply.reply }}</p>
+        <p>投稿日：{{ reply.createDate }}</p>
       </div>
 
       <!-- 投稿ユーザーだけ表示される(後でやる) -->
       <!-- ここを修正(富永＆宮城) -->
       <button type="button">削除</button>
       <button type="button">編集</button>
+      <button type="button" @click="openReply(review.reviewId)">返信</button>
+      
+      <form action="/review-detail" method="get">
+        <input type="hidden" name="reviewId" :value="review.reviewId"/>
+        <button type="submit">詳細画面へ</button>
+      </form>
 
-
+      <div v-if="isReplyView && reviewId == review.reviewId">
+        <h3>返信</h3>
+        <p>
+          本文：
+          <textarea cols="30" rows="10" v-model="replyContent"></textarea>
+        </p>
+        <button type="button" @click="closeReply">閉じる</button>
+        <button type="button" @click="addReply(review.reviewId)">送信</button>
+      </div>
     </div>
 
     <!-- <p th:text="'クリックされたレビューは、' + ${review} + 'です。'"></p> -->
@@ -93,6 +140,10 @@
           reviewTitle: '',
           content: '',
           reviews: [],
+          isReplyView: false,
+          replies: [],
+          replyContent: '',
+          reviewId: '',
         }
       },
       methods: {
@@ -126,6 +177,31 @@
               this.reviews = res.data;
               console.log(this.reviews);
               console.log(this.reviews[0].reviewImages[0].imagePath);
+            });
+        },
+        //返信画面表示
+        openReply(reviewId) {
+          this.isReplyView = true;
+          this.reviewId = reviewId;
+        },
+        //返信画面非表示
+        closeReply() {
+          this.isReplyView = false;
+        },
+        //返信送信
+        addReply(reviewId) {
+          const formData = new FormData();
+          formData.append("id", reviewId);
+          formData.append("content", this.replyContent);
+          axios.post('/add-reply', formData)
+            .then(res => {
+              // アップロードが成功した場合の処理
+              this.isReplyView = false;
+              this.getReviews();
+              console.log(res);
+            })
+            .catch(error => {
+              // エラーが発生した場合の処理
             });
         }
       },

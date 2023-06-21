@@ -1,6 +1,5 @@
 package com.example.Kuchannel.controller;
 
-import com.example.Kuchannel.KuchannelApplication;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
@@ -15,9 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-import java.util.Scanner;
 
 @RestController
 public class KuchannelRestController {
@@ -88,13 +85,13 @@ public class KuchannelRestController {
 
     //レビュー一覧取得
     @GetMapping("/getReviews")
-    public List<ReviewAndImages> getReviews() {
+    public List<ReviewElementAll> getReviews() {
 
         //データベースからレビュー一覧に表示する情報を全件取得(スレッドID 1 固定)
         var revs = kuchannelService.findReviewAll(1);
 
         //画像込みのレビュー情報を受け取るリスト
-        List<ReviewAndImages> reviews = new ArrayList<>();
+        List<ReviewElementAll> reviews = new ArrayList<>();
 
         for (var rev : revs) {
             //データベースからレビューの画像情報を取得する
@@ -102,8 +99,11 @@ public class KuchannelRestController {
 
             //画像をbase64にエンコードする
 
-            reviews.add(new ReviewAndImages(rev.userId(), rev.userName(), rev.reviewId(), rev.title(),
-                    rev.review(), rev.createDate(), reviewImages));
+            //データベースからレビューの返信情報を取得する
+            var reviewReplies = kuchannelService.getReviewReply(rev.reviewId());
+
+            reviews.add(new ReviewElementAll(rev.userId(), rev.userName(), rev.reviewId(), rev.title(),
+                    rev.review(), rev.createDate(), reviewImages, reviewReplies));
 
         }
 
@@ -123,8 +123,9 @@ public class KuchannelRestController {
                             @RequestParam("content") String content,
                             @RequestParam("images") List<MultipartFile> images) {
 
-        //reviewsテーブルにインサート処理かつインサートしたIDを取得(user_id, thread_id 固定)
-        int reviewId = kuchannelService.reviewInsert(1, 1, title, content);
+        //reviewsテーブルにインサート処理かつインサートしたIDを取得(thread_id 固定)
+        var user = (UserRecord)session.getAttribute("user");
+        int reviewId = kuchannelService.reviewInsert(user.id(), 1, title, content);
 
         for (MultipartFile image : images) {
             // 画像を1枚ずつ保存処理
@@ -172,6 +173,18 @@ public class KuchannelRestController {
         }
 
         return currentTimeMillis;
+
+    }
+
+    //レビュー返信登録処理
+    @PostMapping("add-reply")
+    public ResponseEntity<String> addReply(@RequestParam("id") Integer reviewId,
+                                           @RequestParam("content") String content) {
+        //repliesテーブルにインサート処理
+        var user = (UserRecord)session.getAttribute("user");
+        kuchannelService.replyInsert(user.id(), reviewId, content);
+
+        return ResponseEntity.ok("登録処理に成功しました。");
 
     }
 

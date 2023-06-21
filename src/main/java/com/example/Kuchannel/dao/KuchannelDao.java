@@ -241,17 +241,6 @@ public class KuchannelDao {
         return jdbcTemplate.update("UPDATE community_user SET nick_name = :nickName, flag = 't' WHERE user_id = :userId AND community_id = :communityId", param);
     }
 
-    //ユーザーIDをもとにレビューをセレクト
-    public ReviewRecord findReviews(Integer reviewId) {
-        MapSqlParameterSource param = new MapSqlParameterSource();
-        param.addValue("reviewId", reviewId);
-        var list = jdbcTemplate.query("SELECT id, user_id, thread_id, title, review, create_date FROM reviews WHERE id = :reviewId", param,
-                new DataClassRowMapper<>(ReviewRecord.class));
-
-        return list.isEmpty() ? null : list.get(0);
-
-    }
-
     //ユーザーのお知らせ一覧をセレクト
     public List<NoticeReplyRecord> userNotice(Integer userId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -325,9 +314,9 @@ public class KuchannelDao {
         param.addValue("threadId", threadId);
 
         var list = jdbcTemplate.query("SELECT u.id AS userId, u.name AS userName, " +
-                        "r.id AS reviewId, r.title, r.review, r.create_date " +
+                        "r.id AS reviewId, r.title, r.review, to_char(r.create_date, 'YYYY-MM-DD HH24:MI') AS createDate " +
                         "FROM users u JOIN reviews r ON u.id = r.user_id " +
-                        "WHERE r.thread_id = :threadId", param,
+                        "WHERE r.thread_id = :threadId ORDER BY r.id", param,
                         new DataClassRowMapper<>(ReviewRecord.class));
 
         return list;
@@ -341,6 +330,19 @@ public class KuchannelDao {
 
         var list = jdbcTemplate.query("SELECT review_id, image_path FROM review_images WHERE review_id = :reviewId",
                 param, new DataClassRowMapper<>(ReviewImageRecord.class));
+
+        return list;
+
+    }
+
+    //データベースからレビューの返信情報を取得する
+    public List<ReviewReplyRecord> getReviewReply(Integer reviewId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("reviewId", reviewId);
+
+        var list = jdbcTemplate.query("SELECT rep.id AS replyId, rep.user_id, u.name AS userName, rep.review_id, " +
+                "rep.reply, to_char(rep.create_date, 'YYYY-MM-DD HH24:MI') AS createDate FROM replies rep JOIN users u ON rep.user_id = u.id " +
+                "WHERE rep.review_id = :reviewId ORDER BY rep.id", param, new DataClassRowMapper<>(ReviewReplyRecord.class));
 
         return list;
 
@@ -373,6 +375,31 @@ public class KuchannelDao {
 
         return jdbcTemplate.update("INSERT INTO review_images(review_id, image_path) " +
                 "VALUES(:reviewId, :imagePath)", param);
+    }
+
+    //repliesテーブルにインサート処理
+    public int replyInsert(int userId, int reviewId, String content) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", userId);
+        param.addValue("reviewId", reviewId);
+        param.addValue("content", content);
+
+        return jdbcTemplate.update("INSERT INTO replies(user_id, review_id, reply, create_date) " +
+                "VALUES(:userId, :reviewId, :content, now())", param);
+    }
+
+    //レビューIDを元にreviewsテーブルから情報を取得する
+    public ReviewRecord findReview(Integer reviewId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("reviewId", reviewId);
+
+        var list = jdbcTemplate.query("SELECT u.id AS userId, u.name AS userName, " +
+                        "r.id AS reviewId, r.title, r.review, to_char(r.create_date, 'YYYY-MM-DD HH24:MI') AS createDate " +
+                        "FROM users u JOIN reviews r ON u.id = r.user_id " +
+                        "WHERE r.id = :reviewId", param,
+                new DataClassRowMapper<>(ReviewRecord.class));
+
+        return list.isEmpty() ? null : list.get(0);
     }
 
     /*---------------------------------------------*/
