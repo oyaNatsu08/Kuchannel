@@ -92,7 +92,7 @@
   <div class="review" v-for="review in reviews">
     <p>{{ review.userName }}さん</p>
     <h3>{{ review.title }}</h3>
-    <p>レビューID: {{ review.reviewId }}</p>
+    <p style="display: none;">レビューID: {{ review.reviewId }}</p>
 
     <!-- 一枚だけ表示(未) -->
     <!-- <img :src="'/images/reviewImages/' + review.reviewImages[0].imagePath" style="width: 60px; height: auto;"> -->
@@ -120,6 +120,8 @@
       <h2>編集</h2>
       <p>タイトル：<input type="text" v-model="editingReview.title"></p>
       <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
+      <p>写真の追加：<input type="file" ref="fileInput" multiple />
+      </p>
       <button type="button" @click="closePopup">キャンセル</button>
       <button type="button" @click="updateReview">更新</button>
     </div>

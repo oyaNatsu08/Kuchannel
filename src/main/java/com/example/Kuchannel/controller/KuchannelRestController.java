@@ -101,7 +101,6 @@ public class KuchannelRestController {
 
             reviews.add(new ReviewAndImages(rev.userId(), rev.userName(), rev.reviewId(), rev.title(),
                     rev.review(), rev.createDate(), reviewImages));
-
         }
 
         return reviews;
