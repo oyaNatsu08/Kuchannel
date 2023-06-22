@@ -15,13 +15,20 @@
     </div>
 
     <h1  class="community-name" th:text="${name} + 'へようこそ！'"></h1>
-    <!-- <form action="/thread-add" method="get">
-      <button type="submit" th:text="スレッドの新規作成" @click="openPopup"></button>
-      <input type="hidden" name="communityId" th:value="1">
-    </form> -->
+    <button  v-if="isCommunityMemberPopup" class="popup-overlay" type="button" @click.self="confirmCommunityMember">コミュニティメンバーの確認</button>
+    <div class="popup">
+      <table>
+        <tr v-for="membar in communityMembers"></tr>
+          <td></td>
+          <td><button type="button" @click="copy(com.communityId)">共有</button></td>
+        </tr>
+      </table>
+
+    </div>
+
+
+
     <button type="button" @click="openPopup('ThreadAdd')" >スレッドの新規作成</button>
-
-
     <div v-if="isThreadAddPopup" class="popup-overlay" @click.self="closePopup('ThreadAdd')">
       <div class="popup">
         <h1>スレッド新規作成</h1>
@@ -133,6 +140,11 @@
           updateThreadSalesTime:'',
           updateThreadGenre:'',
           updateThreadHashtags:'',
+
+          //コミュニティメンバー参照用
+          isCommunityMemberPopup:false,
+          communityMembers:[],
+
 
         }
 
@@ -272,6 +284,9 @@
           };
           
         },
+        confirmCommunityMember(){
+          this.openPopup('CommunityMember')
+        }
       },
 
       created:function(){
