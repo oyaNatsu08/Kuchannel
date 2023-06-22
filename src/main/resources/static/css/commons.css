@@ -107,3 +107,8 @@ body {
     margin: 60px;
     line-height: 130px;
   }
+
+textarea.information {
+        width: 510px;
+        height: 350px;
+}

@@ -2,6 +2,8 @@ package com.example.Kuchannel.entity;
 
 import lombok.Data;
 
+
+//マイページ用。コミュニティ一覧を表示する用のエンティティ
 @Data
 public class BelongingCommunities {
 

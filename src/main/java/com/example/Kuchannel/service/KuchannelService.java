@@ -3,6 +3,8 @@ package com.example.Kuchannel.service;
 import com.example.Kuchannel.dao.KuchannelDao;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
+import com.example.Kuchannel.entity.InformatonRecord;
+//import com.example.Kuchannel.entity.ThreadRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -140,6 +142,11 @@ public class KuchannelService {
         return kuchannelDao.reviewInsert(userId, threadId, title, review);
     }
 
+    //reviewsテーブルのレコードのupdate処理
+    public int reviewUpdate(int reviewId, String title, String review) {
+        return kuchannelDao.reviewUpdate(reviewId,title,review);
+    }
+
     //review_Imagesテーブルにインサート処理
     public int reviewImagesInsert(int reviewId, String imagePath) {
         return kuchannelDao.reviewImagesInsert(reviewId, imagePath);
@@ -168,8 +175,30 @@ public class KuchannelService {
     }
 
     //コミュニティIDを元にスレッドを全件取得
-    public List<ThreadRecord> communityThreads(Integer communityId) {
+    public List<CommunityThread> communityThreads(Integer communityId) {
         return kuchannelDao.communityThreads(communityId);
     }
+
+    //お問い合わせ
+    public int information(InformatonRecord informatonRecord){
+        return kuchannelDao.information(informatonRecord);
+    }
+
+    /*-----------------------------------------------------*/
+
+    //プロフィール編集
+    public  ProfileEditRecord edit(String loginId,String name , String password){
+        return kuchannelDao.edit(loginId, name, password);
+    }
+
+    public int goodDeal(Integer thread_id, Integer user_id){
+        return kuchannelDao.goodDeal(thread_id,user_id);
+    }
+
+    public boolean deleteThread(Integer thread_id){
+        return kuchannelDao.deleteThread(thread_id);
+    }
+
+    public int threadUpdate(ThreadAddForm inputData,Integer thread_id){return kuchannelDao.threadUpdate(inputData,thread_id);}
 
 }
