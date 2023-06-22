@@ -438,39 +438,6 @@ public class KuchannelController {
         return "thread-add"; //開きたいhtmlファイル名
     }
 
-    //お問い合わせページ
-    @GetMapping("/Information")
-    public String info(@ModelAttribute("informationForm") InformationForm informationForm) {
-        return "Information";
-    }
-
-    @PostMapping("/Information")
-    public String information(@Validated @ModelAttribute("informationForm") InformationForm informationForm,
-                              BindingResult bindingResult,
-//                              @RequestParam(name="communityId") Integer communityId,
-                              Model model){
-
-        //バリデーション
-        if (bindingResult.hasErrors()){
-            return "Information";
-        }
-
-        var userData = (UserRecord)session.getAttribute("user");
-        //セッションのユーザーID
-//        var userId = userData.id();
-        var userId = 1;
-        var communityId = 1;
-        String content = informationForm.getInformation();
-        boolean flag = false;
-
-        //お問い合わせ情報の処理を行う
-        InformatonRecord informatonRecord = new  InformatonRecord(userId,communityId,content,flag);
-
-        var informationDetails = kuchannelService.information(informatonRecord);
-
-        return "thread-list";
-    }
-
     //    /*-------------------------Update(プロフィール編集)--------------------------*/
     @GetMapping("/profile-edit")
     public String profileUpdate(@RequestParam("name") String name,
