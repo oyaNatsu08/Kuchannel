@@ -309,7 +309,7 @@ public class KuchannelController {
         CommunityRecord community = kuchannelService.findCommunity(communityId);
         model.addAttribute("name", community.name());
         //コミュニティIDを元にスレッドを全件取得(現在は1固定)
-        var threads = kuchannelService.communityThreads(1);
+        var threads = kuchannelService.communityThreads(communityId);
 
         //thread-list.htmlにthreadsの値を渡す
         model.addAttribute("threads", threads);
@@ -317,14 +317,22 @@ public class KuchannelController {
         return "thread-list";
 
     }
-    //レビュー一覧へ飛ぶ
-    @GetMapping("review-list")
-    public String reviewListView(@ModelAttribute("UserForm") UserForm userForm) {
+    //スレッドのレビュー一覧へ飛ぶ
+    @GetMapping("/thread-review/{threadId}")
+    public String reviewListView(@PathVariable("threadId") Integer threadId,
+                                 @ModelAttribute("UserForm") UserForm userForm,
+                                 Model model) {
 
         //ログインしているか確認
         if (session.getAttribute("user") == null) {
             return "login";
         } else {
+
+            //スレッドIDをもとに、スレッド情報を取得する
+            var thread = kuchannelService.getThread(threadId);
+
+            model.addAttribute("thread", thread);
+
             return "review-list";
         }
     }
@@ -339,6 +347,7 @@ public class KuchannelController {
     //レビュー詳細画面へ
     @GetMapping("/review-detail")
     public String reviewDetail(@RequestParam("reviewId") Integer reviewId,
+                               @RequestParam("threadId") Integer threadId,
                                Model model) {
 
         //レビューIDを元にreviewsテーブルから情報を取得する
@@ -350,9 +359,13 @@ public class KuchannelController {
         //データベースからレビューの返信情報を取得する
         var reviewReplies = kuchannelService.getReviewReply(reviewId);
 
+        //データベースからレビューのいいね件数を取得する
+        var goodCount = kuchannelService.getGoodReview(reviewId);
+
         model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
-                review.review(), review.createDate(), reviewImages, reviewReplies));
+                review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
         model.addAttribute("reviewId", reviewId);
+        model.addAttribute("threadId", threadId);
 
         return "review-detail";
 
@@ -374,8 +387,6 @@ public class KuchannelController {
 
     /*------------------------------------------------*/
 
-
-
     //スレッド作成画面
     //RequestParamは、遷移する前のページから受け取る。今はコメントアウト
     @GetMapping("/thread-add") //urlで入力する値
@@ -388,8 +399,6 @@ public class KuchannelController {
 
         return "thread-add"; //開きたいhtmlファイル名
     }
-
-
 
     //お問い合わせページ
     @GetMapping("/Information")

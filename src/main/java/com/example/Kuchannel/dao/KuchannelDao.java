@@ -437,6 +437,17 @@ public class KuchannelDao {
 
     }
 
+    //データベースからレビューのいいね件数を取得する
+    public int getGoodReview(Integer reviewId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("reviewId", reviewId);
+
+        var list = jdbcTemplate.query("SELECT COUNT(*) AS goodCount FROM review_goods WHERE review_id = :reviewId " +
+                "GROUP BY review_id", param, new DataClassRowMapper<>(GoodCount.class));
+
+        return list.isEmpty() ? 0 : list.get(0).getGoodCount();
+    }
+
     /*---------------------------------------------*/
 
     //threadsテーブルにINSERTする処理
@@ -585,6 +596,35 @@ public class KuchannelDao {
         return list;
     }
 
+    //スレッドIDをもとに、スレッド情報を取得する
+    public CommunityThread getThread(Integer threadId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("threadId", threadId);
+
+        var list = jdbcTemplate.query("select *\n" +
+                        "from threads t\n" +
+                        "left join (\n" +
+                        "  select thread_id, count(*) good_count\n" +
+                        "  from thread_goods\n" +
+                        "  group by thread_id) g\n" +
+                        "  on t.id = g.thread_id\n" +
+                        "\n" +
+                        "left join \n" +
+                        "(\n" +
+                        "  select thread_id, string_agg(tag_name, ',') AS hashtags\n" +
+                        "  from hashtags h\n" +
+                        "  join thread_hashtag th\n" +
+                        "  on h.id = th.hashtag_id\n" +
+                        "  group by thread_id\n" +
+                        ") h\n" +
+                        "on h.thread_id = t.id\n" +
+                        "where t.id = :threadId ORDER BY t.id", param,
+                new DataClassRowMapper<>(CommunityThread.class));
+
+        return list.isEmpty() ? null : list.get(0);
+
+    }
+
     //お問い合わせ
     public int information(InformatonRecord informatonRecord){
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -625,12 +665,12 @@ public class KuchannelDao {
     }
 
     //言い値ボタンが押されたとき、そのユーザーがそのスレッドへいいねを押していない場合インサート、すでに押している場合は削除。そののちにその時のいいね数をCOUNTして数字で返したい。
-    public int goodDeal(Integer thread_id,Integer user_id){
+    public int goodDealThread(Integer thread_id,Integer user_id){
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("thread_id",thread_id);
         param.addValue("user_id",user_id);
         //すでにいいねされているかを検索。
-        List<Good> searchGoodResult = jdbcTemplate.query("SELECT *FROM thread_goods WHERE user_id=:user_id AND thread_id =:thread_id;", param,
+        List<Good> searchGoodResult = jdbcTemplate.query("SELECT id, user_id, thread_id AS thread_review_id FROM thread_goods WHERE user_id=:user_id AND thread_id =:thread_id;", param,
                 new DataClassRowMapper<>(Good.class));
         //そのデータがが存在する場合
         if(!searchGoodResult.isEmpty()){
@@ -644,6 +684,31 @@ public class KuchannelDao {
             //データが存在しない場合、threadGoodテーブルにインサート。
             System.out.println("ヌルと思う");
             var deleteGoodResult= jdbcTemplate.update("INSERT INTO thread_goods(user_id,thread_id)VALUES(:user_id,:thread_id);",param);
+            return deleteGoodResult;
+        }
+
+    }
+
+    //レビューのいいね
+    public int goodDealReview(Integer reviewId,Integer userId){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("reviewId", reviewId);
+        param.addValue("userId", userId);
+        //すでにいいねされているかを検索。
+        List<Good> searchGoodResult = jdbcTemplate.query("SELECT id, user_id, review_id AS thread_review_id FROM review_goods " +
+                        "WHERE user_id = :userId AND review_id = :reviewId", param,
+                new DataClassRowMapper<>(Good.class));
+        //そのデータがが存在する場合
+        if(!searchGoodResult.isEmpty()){
+            //データが存在する場合、searchGoodResultからidを取得し、それを消す。
+            var existingGoodId = searchGoodResult.get(0).getId();
+            param.addValue("good_id",existingGoodId);
+            var deleteGoodResult= jdbcTemplate.update("DELETE FROM review_goods WHERE id = :good_id", param);
+            return deleteGoodResult;
+        }else{
+            //データが存在しない場合、テーブルにインサート。
+            var deleteGoodResult= jdbcTemplate.update("INSERT INTO review_goods(user_id, review_id) " +
+                    "VALUES (:userId, :reviewId);", param);
             return deleteGoodResult;
         }
 
