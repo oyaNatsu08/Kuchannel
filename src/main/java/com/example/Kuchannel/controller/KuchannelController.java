@@ -331,7 +331,11 @@ public class KuchannelController {
             //スレッドIDをもとに、スレッド情報を取得する
             var thread = kuchannelService.getThread(threadId);
 
+            //ユーザー情報を取得
+            var user = (UserRecord)session.getAttribute("user");
+
             model.addAttribute("thread", thread);
+            model.addAttribute("userId", user.id());
 
             return "review-list";
         }

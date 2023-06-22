@@ -156,8 +156,8 @@
 
       <!-- 投稿ユーザーだけ表示される(後でやる) -->
       <!-- ここを修正(富永＆宮城) -->
-      <button type="button">削除</button>
-      <button type="button">編集</button>
+      <button type="button" v-if="review.userId == userId">削除</button>
+      <button type="button" v-if="review.userId == userId">編集</button>
       <button type="button" @click="openReply(review.reviewId)">返信</button>
 
       <form action="/review-detail" method="get" style="margin-top: 20px;">
@@ -219,6 +219,9 @@
           updateThreadGenre: '',
           updateThreadHashtags: '',
           thread: [],
+
+          //ログインしているユーザーID
+          userId: '',
 
         }
       },
@@ -418,6 +421,8 @@
         this.updateThreadSalesTime = `[[ ${thread.sales_time} ]]`;
         this.updateThreadGenre = `[[ ${thread.genre} ]]`;
         this.updateThreadHashtags = `[[ ${thread.hashtags} ]]`;
+
+        this.userId = `[[ ${userId} ]]`;
 
       },
     }).mount('#app')
