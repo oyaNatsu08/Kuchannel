@@ -487,6 +487,7 @@ public class KuchannelDao {
         return threadAddResult;
     }
 
+
     public int threadUpdate(ThreadAddForm inputData,Integer thread_id) {
         //ハッシュタグ以外のアップデート処理
         MapSqlParameterSource param = new MapSqlParameterSource();
