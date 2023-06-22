@@ -26,9 +26,89 @@ CREATE TABLE SPRING_SESSION_ATTRIBUTES (
 	CONSTRAINT SPRING_SESSION_ATTRIBUTES_FK FOREIGN KEY (SESSION_PRIMARY_ID) REFERENCES SPRING_SESSION(PRIMARY_ID) ON DELETE CASCADE
 );
 
+
+--各テーブルの全件検索
+SELECT * FROM users;
+
+SELECT * FROM communities;
+
+SELECT * FROM community_user;
+
+SELECT * FROM threads;
+
+SELECT * FROM hashtags;
+
+SELECT * FROM thread_hashtag;
+
+SELECT * FROM reviews;
+
+SELECT * FROM replies;
+
+SELECT * FROM notices;
+
+SELECT * FROM review_images;
+
+SELECT * FROM thread_goods;
+
+SELECT * FROM review_goods;
+
+SELECT * FROM inquiries;
+
+
+
+
+--マイページでコミュニティ表示用
+SELECT c.name AS community_name,c_u.nick_name
+FROM comunity_user c_u
+JOIN comunities c
+ON c_u.comunity_id = c.id
+WHERE c_u.user_id =1
+
+SELECT c.name AS community_name,c_u.nick_name FROM comunity_user c_u JOIN comunities c ON c_u.comunity_id = c.id WHERE c_u.user_id =1
+
+
+
+UPDATE community_user 
+SET nick_name = 'test3'
+WHERE user_id =1  AND community_id = 4
+
+
+
+UPDATE community_user SET nick_name = ':nickName' WHERE user_id = 1 AND community_id = 4
+
+UPDATE community_user SET nick_name = ':nickName2' WHERE user_id = 1 AND community_id = 4
+
+
+--DROP TABLE集
+DROP TABLE inquiries;
+
+DROP TABLE review_goods;
+
+DROP TABLE thread_goods;
+
+DROP TABLE review_images;
+
+DROP TABLE notices;
+
+DROP TABLE replies;
+
+DROP TABLE reviews;
+
+DROP TABLE thread_hashtag;
+
+DROP TABLE hashtags;
+
+DROP TABLE threads;
+
+DROP TABLE comunity_user;
+
+DROP TABLE comunities;
+
+DROP TABLE users;
+
 CREATE TABLE users(
 id SERIAL PRIMARY KEY,
-user_id VARCHAR(50) NOT NULL UNIQUE,
+login_id VARCHAR(50) NOT NULL UNIQUE,
 name VARCHAR(50) NOT NULL,
 password VARCHAR(50) NOT NULL,
 image_path VARCHAR(255)
@@ -140,32 +220,56 @@ comunity_id INT NOT NULL REFERENCES comunities(id),
 content TEXT NOT NULL,
 flag BOOLEAN NOT NULL
 );
---DROP TABLE inquiries;
 
---各テーブルの全件検索
-SELECT * FROM users;
 
-SELECT * FROM comunities;
 
-SELECT * FROM comunity_user;
 
-SELECT * FROM threads;
+--ユーザーがどのコミュニティに参加しているか検索
+SELECT community_id
+FROM community_user
+WHERE user_id =1 AND flag =true
 
-SELECT * FROM hashtags;
+--自分が建てたスレッド、かつ今所属しているコミュニティのものだけを表示①
+SELECT th.id AS thread_id,th.title, co.name AS community_name
+FROM threads th
+JOIN communities co
+ON th.community_id = co.id
+WHERE user_id=1 AND community_id IN(
+                        SELECT community_id
+                        FROM community_user
+                        WHERE user_id =1 AND flag =true
+                                            )
 
-SELECT * FROM thread_hashtag;
+--②
+SELECT th.id, th.title, co.name
+from threads th join communities co on th.community_id = co.id 
+join community_user cu on co.id = cu.community_id 
+where th.user_id = 1 and cu.flag = true;
+
+
+
+
+--②一行バージョン
+
+SELECT th.id AS threadId, th.title AS threadTitle, co.name AS communityName, co.url AS communityUrl FROM threads th JOIN communities co ON th.community_id = co.id JOIN community_user cu ON co.id = cu.community_id WHERE th.user_id = 1 AND cu.flag = true;
+
+
+
+
+
+--マイページでレビュー表示する用
+SELECT rev.title, rev.review, th.title, co.name
+FROM reviews rev
+JOIN threads th ON rev.thread_id = th.id
+JOIN communities co ON th.community_id = co.id 
+JOIN community_user cu on co.id = cu.community_id 
+WHERE th.user_id = 1 AND cu.flag = true;
+
+--上の１行版
+SELECT rev.title AS reviewTitle, rev.review, th.title AS threadTitle, co.name AS communityName,rev.create_date AS createDate FROM reviews rev JOIN threads th ON rev.thread_id = th.id JOIN communities co ON th.community_id = co.id JOIN community_user cu on co.id = cu.community_id WHERE th.user_id = 1 AND cu.flag = true;
+
 
 SELECT * FROM reviews;
 
-SELECT * FROM replies;
 
-SELECT * FROM notices;
-
-SELECT * FROM review_images;
-
-SELECT * FROM thread_goods;
-
-SELECT * FROM review_goods;
-
-SELECT * FROM inquiries;
-
+DELETE FROM reviews WHERE id BETWEEN 11 AND 16

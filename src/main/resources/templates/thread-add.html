@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>口ゃんねる</title>
+</head>
+
+<body>
+<!--
+   action : java側で情報を受け取る先を指定する
+   method : 情報を受け取る通信方式を指定する
+   th:object : formの情報をjava側のformクラス(入力値を受け取るクラス)を指定する
+-->
+<form action="/thread-add" method="post" th:object="${threadForm}">
+    <p>
+      スレッド名(店名)：
+      <input type="text" th:field="*{threadName}"> <!-- String threadName;と対応させる -->
+    </p>
+    <p>
+      フリガナ：
+      <input type="text" th:field="*{furigana}">
+    </p>
+    <p>
+      お店の住所：
+      <input type="text" th:field="*{address}">
+    </p>
+    <p>
+      営業時間：
+      <input type="text" th:field="*{salesTime}">
+    </p>
+    <p>
+      ジャンル：
+      <select th:field="*{genre}">
+        <option value="和食" selected>和食</option>
+        <option value="中華">中華</option>
+        <option value="イタリアン">イタリアン</option>
+      </select>
+    </p>
+    <p>
+      ハッシュタグ：
+      <input type="text" th:field="*{hashtag}">
+    </p>
+    <input type="hidden" name="communityId" th:value="1">
+
+    <button type="submit" th:text="作成"></button>
+  </form>
+</body>
+
+</html>

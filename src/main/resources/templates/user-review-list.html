@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>口ゃんねる</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <style>
+    body {
+      background-image: url(/images/background.png);
+      background-size: cover;
+    }
+
+    .review-container {
+      margin-left: 10%;
+      margin-right: 10%;
+      background-color: #fff;
+      padding: 20px;
+    }
+
+    .review-cell {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app0">
+    <th:block th:insert="common/header"></th:block>
+  </div>
+
+  <div class="review-container">
+
+    <h2>[[ ${reviews[0].userName} ]]さんのレビュー</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>タイトル</th>
+          <th>本文</th>
+          <th>スレッド名</th>
+          <th>コミュニティ名</th>
+          <th>日付</th>
+        </tr>
+      </thead>
+      <tbody>
+        <th:block th:each="review : ${reviews}">
+          <tr>
+            <td><a th:href="@{/review-detail(reviewId=${review.reviewId})}">[[ ${review.reviewTitle} ]]</a></td>
+            <td class="review-cell" style="width: 200px;">[[ ${review.content} ]]</td>
+            <td>[[ ${review.threadTitle} ]]</td>
+            <td>[[ ${review.communityName} ]]</td>
+            <td>[[ ${review.createDate} ]]</td>
+          </tr>
+        </th:block>
+      </tbody>
+    </table>
+
+  </div>
+
+  <script src="/js/base.js"></script>
+
+  <script>
+
+  </script>
+
+</body>
+
+</html>
