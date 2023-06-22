@@ -423,4 +423,42 @@ public class KuchannelController {
         return "thread-list";
     }
 
+    //    /*-------------------------Update(プロフィール編集)--------------------------*/
+    @GetMapping("/profile-edit")
+    public String profileUpdate(@RequestParam("name") String name,
+                                @RequestParam("loginId") String loginId,
+                                @RequestParam("password") String password,
+                                @RequestParam("imagePath") String imagePath,
+                                @ModelAttribute("EditForm")EditForm editForm,
+                                Model model){
+
+        UserRecord user = new UserRecord(null, loginId, name, password, imagePath);
+
+        model.addAttribute("user", user);
+
+        return "profile-edit";
+    }
+
+    @PostMapping("profile-edit")
+    public String profileUpdate(@Validated @ModelAttribute("EditForm") EditForm editForm,
+                                BindingResult bindingResult,
+                                Model model){
+        //バリデーション
+        if(bindingResult.hasErrors()){
+            return "profile-edit";
+        }
+        String loginId = editForm.getLoginId();
+        String name = editForm.getName();
+        String password = editForm.getPassword();
+
+        kuchannelService.edit(loginId, name, password);
+        UserRecord userData = (UserRecord) session.getAttribute("user");
+        var user_id = userData.loginId();
+
+        model.addAttribute("profile", kuchannelService.detail(user_id));
+
+        return "/profile-details";
+    }
+//    /*------------------------------------------------------------------------*/
+
 }

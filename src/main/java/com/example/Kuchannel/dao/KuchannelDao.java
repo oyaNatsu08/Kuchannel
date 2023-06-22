@@ -75,18 +75,6 @@ public class KuchannelDao {
     }
     //新規作成（end）
 
-    //プロフィール編集（start）
-//    public ProfileEditRecord edit(int id,String name, String password) {
-//        //更新のSQL文
-//        String sql = "UPDATE users SET name =:name, password = :password WHERE id = :id";
-//
-//        MapSqlParameterSource param = new MapSqlParameterSource();
-//        param.addValue("name", name);
-//        param.addValue("password", password);
-//        param.addValue("id",id);
-//
-//    }
-
     /*-------------------------------------------*/
 
     //マイページ用で、所属しているコミュニティを取得する処理
@@ -472,6 +460,31 @@ public class KuchannelDao {
                 param);
 
         return result;
+    }
+
+    /*------------------------------------*/
+
+    //プロフィール編集（start）
+    public ProfileEditRecord edit(String loginId, String name, String password) {
+        //更新のSQL文
+        String sql = "UPDATE users SET name = :name, password = :password WHERE login_id = :loginId";
+
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("name", name);
+        System.out.println(name);
+        param.addValue("password", password);
+        System.out.println(password);
+        param.addValue("loginId",loginId);
+        System.out.println(loginId);
+        try {
+            jdbcTemplate.update(sql, param);
+
+            ProfileEditRecord editRecord = new ProfileEditRecord(loginId,name, password);
+            return editRecord;
+        }catch (DataAccessException  e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

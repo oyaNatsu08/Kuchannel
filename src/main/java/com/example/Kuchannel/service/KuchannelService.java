@@ -178,4 +178,12 @@ public class KuchannelService {
     public int information(InformatonRecord informatonRecord){
         return kuchannelDao.information(informatonRecord);
     }
+
+    /*-----------------------------------------------------*/
+
+    //プロフィール編集
+    public  ProfileEditRecord edit(String loginId,String name , String password){
+        return kuchannelDao.edit(loginId, name, password);
+    }
+
 }

@@ -196,6 +196,17 @@
             }
           );
         },
+        deleteReview(reviewId) {
+          axios.delete('/api/delete', {
+              params: {
+                id: reviewId
+              }
+            })
+            .then(res => {
+              this.getReviews();
+              console.log(res);
+            });
+        },
 
        //編集・更新
         showEditPopup(review) {
