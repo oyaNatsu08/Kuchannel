@@ -44,6 +44,14 @@
       margin-left: 20%;
       margin-right: 20%;
     }
+
+    .review-cell {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
   </style>
 </head>
 
@@ -56,7 +64,7 @@
   </div>
 
   <div id="app">
-    <h2>スレッド名：[[ ${thread.title} ]]</h2>
+    <h2>スレッド名：{{ updateThreadTitle }}</h2>
 
     <button type="button" @click="openUpdateThread()">情報編集</button>
 
@@ -114,14 +122,13 @@
         <h3>{{review.title}}</h3>
         <p>投稿日：{{ review.createDate }}</p>
 
-        <!-- 一枚だけ表示(未) -->
-        <!-- <img :src="'/images/reviewImages/' + review.reviewImages[0].imagePath" style="width: 60px; height: auto;"> -->
-
         <!-- 複数表示 -->
         <div class="image-review-container">
-          <p>{{review.review}}</p>
-          <div v-for="image in review.reviewImages">
-            <img :src="'/images/reviewImages/' + image.imagePath" style="width: 50px; height: auto;">
+          <p class="review-cell" style="width: 300px; margin-right: 20px;">{{review.review}}</p>
+          <div v-for="(image, index) in review.reviewImages">
+            <div v-if="index === 0">
+              <img :src="'/images/reviewImages/' + image.imagePath" style="width: 50px; height: auto;">
+            </div>
           </div>
         </div>
 
@@ -129,10 +136,12 @@
 
       <hr>
 
-      <div class="reply" v-for="reply in review.reviewReplies">
-        <p><a :href="getUserReviewLink(reply.userId)">{{ reply.userName }}さん</a></p>
-        <p>{{ reply.reply }}</p>
-        <p>投稿日：{{ reply.createDate }}</p>
+      <div v-for="(reply, index) in review.reviewReplies">
+        <div v-if="index === 0" class="reply">
+          <p><a :href="getUserReviewLink(reply.userId)">{{ reply.userName }}さん</a></p>
+          <p class="review-cell" style="width: 300px;">{{ reply.reply }}</p>
+          <p>投稿日：{{ reply.createDate }}</p>
+        </div>
       </div>
 
       <div v-if="isReplyView && reviewId == review.reviewId" style="margin-bottom: 20px;">
@@ -209,6 +218,7 @@
           updateThreadSalesTime: '',
           updateThreadGenre: '',
           updateThreadHashtags: '',
+          thread: [],
 
         }
       },
@@ -246,7 +256,7 @@
             }
           })
             .then(res => {
-              console.log("レビューを取得しました！");
+              //console.log("レビューを取得しました！");
               this.reviews = res.data;
             }
             );
@@ -345,13 +355,6 @@
         //スレッド編集画面ポップアップを開く
         openUpdateThread() {
           this.isThreadUpdatePopup = true;
-          
-          this.updateThreadId = `[[ ${thread.id} ]]`;
-          this.updateThreadTitle = `[[ ${thread.title} ]]`;
-          this.updateThreadAddress = `[[ ${thread.address} ]]`;
-          this.updateThreadSalesTime = `[[ ${thread.sales_time} ]]`;
-          this.updateThreadGenre = `[[ ${thread.genre} ]]`;
-          this.updateThreadHashtags = `[[ ${thread.hashtags} ]]`;
 
         },
         //スレッド編集画面ポップアップを閉じる
@@ -375,21 +378,47 @@
 
             axios.put(`/updateThread/${this.updateThreadId}`, updataInfo)
               .then(res => {
-                //ここに更新後のスレッド情報を取得する処理
-
-
-
-                this.closePopup();
+                this.findThread(this.updateThreadId)
+                this.closeUpdateThread();
               });
+
           };
 
         },
+
+        //任意のスレッド情報を取得する
+        findThread(threadId) {
+          axios.get('/getThread', {
+            params: {
+              threadId: threadId
+            }
+          })
+            .then(res => {
+              this.thread = res.data;
+              console.log(this.thread);
+              console.log(this.thread.title, this.thread.address, this.thread.genre, this.thread.hashtags);
+              this.updateThreadTitle = this.thread.title;
+              this.updateThreadFurigana = this.thread.furigana;
+              this.updateThreadAddress = this.thread.address;
+              this.updateThreadGenre = this.thread.genre;
+              this.updateThreadHashtags = this.thread.hashtags;
+            }
+            );
+        }
 
       },
       created: function () {
         // this.threadId = `[[ ${threadId} ]]`;
         // this.getReviews(this.threadId);
         this.getReviews(`[[ ${threadId} ]]`);
+
+        this.updateThreadId = `[[ ${thread.id} ]]`;
+        this.updateThreadTitle = `[[ ${thread.title} ]]`;
+        this.updateThreadAddress = `[[ ${thread.address} ]]`;
+        this.updateThreadSalesTime = `[[ ${thread.sales_time} ]]`;
+        this.updateThreadGenre = `[[ ${thread.genre} ]]`;
+        this.updateThreadHashtags = `[[ ${thread.hashtags} ]]`;
+
       },
     }).mount('#app')
   </script>

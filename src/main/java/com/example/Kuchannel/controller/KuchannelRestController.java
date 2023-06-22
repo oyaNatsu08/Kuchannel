@@ -124,7 +124,10 @@ public class KuchannelRestController {
 
     @PutMapping("/updateThread/{id}")
     public int threadUpdate(@RequestBody ThreadAddForm inputData,@PathVariable("id") Integer thread_id){
-        var result =kuchannelService.threadUpdate(inputData ,thread_id);
+        var result = kuchannelService.threadUpdate(inputData ,thread_id);
+
+        var thread = kuchannelService.getThread(result);
+
         return result;
     }
 
@@ -263,6 +266,14 @@ public class KuchannelRestController {
 
         return reply;
 
+    }
+
+    //スレッド情報を取得する
+    @GetMapping("/getThread")
+    public CommunityThread getThread(@RequestParam("threadId") Integer threadId) {
+        var thread = kuchannelService.getThread(threadId);
+
+        return thread;
     }
 
 }
