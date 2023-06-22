@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>お問い合わせ</title>
+  <link href="/css/commons.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="login-form">
+  <h1>お問い合わせ</h1>
+  <form action="/Information" method="post" th:object="${informationForm}">
+    <textarea name="information" placeholder="入力してください" th:field="*{information}" class="information"></textarea></br>
+    <div class="error" th:each="error: ${#fields.errors('information')}">
+      [[ ${error} ]]
+    </div>
+
+    <a href="" class="custom-btn">戻る</a>
+    <button type="submit" class="custom-btn">送信</button>
+
+  </form>
+</div>
+</body>
+</html>

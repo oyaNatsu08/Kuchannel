@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>レビュー一覧</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+  <style>
+    body {
+      text-align: center;
+    }
+
+    .review-all {
+      border: 1px solid black;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      margin-left: 20%;
+      margin-right: 20%;
+    }
+
+    .image-review-container {
+      display: flex;
+      margin-top: 10px;
+    }
+
+    .reply {
+      border: 1px solid orange;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      margin-left: 20%;
+      margin-right: 20%;
+    }
+
+    .review {
+      border: 1px solid orangered;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      margin-left: 20%;
+      margin-right: 20%;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div id="app0">
+
+    <th:block th:insert="common/header"></th:block>
+
+  </div>
+
+  <div id="app">
+    <h2>登録したお店の情報</h2>
+    <button type="button">情報編集</button>
+    <hr>
+
+    <div class="review-all">
+      <p>
+        タイトル：
+        <input type="text" v-model="reviewTitle">
+      </p>
+      <p>
+        本文：
+        <textarea cols="30" rows="10" v-model="content"></textarea>
+      </p>
+      <p>
+        写真の追加：
+        <input type="file" ref="fileInput" multiple />
+      </p>
+
+      <button type="button" @click="addReview">投稿</button>
+    </div>
+
+    <div class="review-all" v-for="review in reviews">
+
+      <div class="review">
+
+        <p><a :href="getUserReviewLink(review.userId)">{{ review.userName }}さん</a></p>
+        <h3>{{review.title}}</h3>
+        <p>投稿日：{{ review.createDate }}</p>
+
+        <!-- 一枚だけ表示(未) -->
+        <!-- <img :src="'/images/reviewImages/' + review.reviewImages[0].imagePath" style="width: 60px; height: auto;"> -->
+
+        <!-- 複数表示 -->
+        <div class="image-review-container">
+          <p>{{review.review}}</p>
+          <div v-for="image in review.reviewImages">
+            <img :src="'/images/reviewImages/' + image.imagePath" style="width: 50px; height: auto;">
+          </div>
+        </div>
+
+      </div>
+
+      <hr>
+
+      <div class="reply" v-for="reply in review.reviewReplies">
+        <p><a :href="getUserReviewLink(reply.userId)">{{ reply.userName }}さん</a></p>
+        <p>{{ reply.reply }}</p>
+        <p>投稿日：{{ reply.createDate }}</p>
+      </div>
+
+      <div v-if="isReplyView && reviewId == review.reviewId" style="margin-bottom: 20px;">
+        <h3>返信</h3>
+        <p>
+          本文：
+          <textarea cols="30" rows="10" v-model="replyContent"></textarea>
+        </p>
+        <button type="button" @click="closeReply">閉じる</button>
+        <button type="button" @click="addReply(review.reviewId)">送信</button>
+      </div>
+
+      <!-- 投稿ユーザーだけ表示される(後でやる) -->
+      <!-- ここを修正(富永＆宮城) -->
+      <button type="button">削除</button>
+      <button type="button">編集</button>
+      <button type="button" @click="openReply(review.reviewId)">返信</button>
+
+      <form action="/review-detail" method="get" style="margin-top: 20px;">
+        <input type="hidden" name="reviewId" :value="review.reviewId"/>
+        <button type="submit">詳細画面へ</button>
+      </form>
+    </div>
+
+  <!-- <p th:text="'クリックされたレビューは、' + ${review} + 'です。'"></p> -->
+
+  <!-- 編集ポップアップ -->
+  <div v-if="showPopup">
+    <h2>編集</h2>
+    <p>タイトル：<input type="text" v-model="editingReview.title"></p>
+    <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
+    <button type="button" @click="updateReview">更新</button>
+    <button type="button" @click="closePopup">キャンセル</button>
+  </div>
+
+</div>
+
+  <script src="/js/base.js"></script>
+
+  <script>
+
+    createApp({
+      data() {
+        return {
+          reviewTitle: '',
+          content: '',
+          reviews: [],
+          isReplyView: false,
+          replies: [],
+          replyContent: '',
+          reviewId: '',
+          showPopup: false,
+          editingReview: {
+            id: '',
+            title: '',
+            content: ''
+          }
+        }
+      },
+      methods: {
+        // レビュー投稿処理
+        addReview() {
+
+          console.log(this.reviewTitle, this.content);
+          const formData = new FormData();
+          formData.append("title", this.reviewTitle);
+          formData.append("content", this.content);
+
+          // 複数の画像をFormDataに追加
+          for (let i = 0; i < this.$refs.fileInput.files.length; i++) {
+            formData.append('images', this.$refs.fileInput.files[i]);
+          }
+
+          axios.post('/add-review', formData)
+            .then(res => {
+              // アップロードが成功した場合の処理
+              this.getReviews();
+              console.log(res);
+            })
+            .catch(error => {
+              // エラーが発生した場合の処理
+            });
+        },
+        getReviews() {
+          this.reviews = [];
+          axios.get('/getReviews')
+            .then(res => {
+              this.reviews = res.data;
+              console.log(this.reviews);
+              console.log(this.reviews[0].reviewImages[0].imagePath);
+            }
+          );
+        },
+        deleteReview(reviewId) {
+          axios.delete('/api/delete', {
+              params: {
+                id: reviewId
+              }
+            })
+            .then(res => {
+              this.getReviews();
+              console.log(res);
+            });
+        },
+
+       //編集・更新
+        showEditPopup(review) {
+          this.showPopup = true;
+          this.editingReview.id = review.reviewId;
+          this.editingReview.title = review.title;
+          this.editingReview.content = review.content;
+        },
+        updateReview() {
+          const updatedReview = {
+            id: this.editingReview.id,
+            title: this.editingReview.title,
+            content: this.editingReview.content
+          };
+
+          axios.put('/api/update', updatedReview)
+            .then(res => {
+              this.getReviews();
+              this.closePopup();
+              console.log(res);
+            });
+        },
+        //返信画面表示
+        openReply(reviewId) {
+          this.isReplyView = true;
+          this.reviewId = reviewId;
+        },
+        //返信画面非表示
+        closeReply() {
+          this.isReplyView = false;
+        },
+        //返信送信
+        addReply(reviewId) {
+          const formData = new FormData();
+          formData.append("id", reviewId);
+          formData.append("content", this.replyContent);
+          axios.post('/add-reply', formData)
+            .then(res => {
+              // アップロードが成功した場合の処理
+              this.isReplyView = false;
+              this.getReviews();
+              console.log(res);
+            })
+            .catch(error => {
+              // エラーが発生した場合の処理
+            });
+        },
+        closePopup() {
+          this.showPopup = false;
+          this.editingReview.id = '';
+          this.editingReview.title = '';
+          this.editingReview.content = '';
+        }
+        },
+        //ユーザーのレビュー一覧に遷移
+        getUserReviewLink(userId) {
+            return `/user-review/${userId}`;
+        },
+      },
+      created: function () {
+        this.getReviews();
+      },
+    }).mount('#app')
+  </script>
+
+</body>
+
+</html>

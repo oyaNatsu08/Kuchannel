@@ -1,14 +1,22 @@
 package com.example.Kuchannel.controller;
 
-import com.example.Kuchannel.entity.BelongingCommunities;
-import com.example.Kuchannel.entity.MyReview;
-import com.example.Kuchannel.entity.MyThread;
-import com.example.Kuchannel.entity.UserRecord;
+import com.example.Kuchannel.entity.*;
+import com.example.Kuchannel.entity.*;
+import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -70,12 +78,170 @@ public class KuchannelRestController {
         return result;
     }
 
+//    スレッド一覧ページ用。スレッドの情報を取得
+    @GetMapping("getThreads")
+    public List<CommunityThread> getThreads(){
+//        コミュニティidを渡すようにする（今は1で固定）
+        var threads = kuchannelService.communityThreads(1);
+        return threads;
+    }
+
+    @GetMapping("/goodDeal/{id}")
+    public int GoodDeal(@PathVariable("id")Integer thread_id){
+//        セッションからuser_idをもらう一旦1で固定
+//        var user = (UserRecord)session.getAttribute("user");
+        return kuchannelService.goodDeal(thread_id,1);
+    }
+
+    //スレッド削除用
+    @DeleteMapping("/deleteThread/{threadId}")
+    public boolean deleteThread(@PathVariable("threadId")Integer thread_id){
+        return kuchannelService.deleteThread(thread_id);
+    }
+
+    //セッション情報返せるつもり。
+    @GetMapping("getSessionInfo")
+    public UserRecord getSessionInfo(){
+        var user = (UserRecord)session.getAttribute("user");
+        return user;
+    }
+
+    //スレッド作成処理
+    @PostMapping("/thread-add")
+    public int addThread(@RequestBody ThreadAddForm inputData) {
+        //threadsテーブルにINSERT処理
+        var result =kuchannelService.threadInsert(inputData);
+        return result;
+    }
+
+    @PutMapping("/updateThread/{id}")
+    public int threadUpdate(@RequestBody ThreadAddForm inputData,@PathVariable("id") Integer thread_id){
+        var result =kuchannelService.threadUpdate(inputData ,thread_id);
+        return result;
+    }
+
+
+
     /*----------------------------------------*/
 
     @GetMapping("/getUrl")
     public String getUrl(@RequestParam("name") Integer id) {
         //System.out.println("コミュニティURL:" + kuchannelService.getUrl(id).url());
         return kuchannelService.getUrl(id).url();
+    }
+
+    //レビュー一覧取得
+    @GetMapping("/getReviews")
+    public List<ReviewElementAll> getReviews() {
+
+        //データベースからレビュー一覧に表示する情報を全件取得(スレッドID 1 固定)
+        var revs = kuchannelService.findReviewAll(1);
+
+        //画像込みのレビュー情報を受け取るリスト
+        List<ReviewElementAll> reviews = new ArrayList<>();
+
+        for (var rev : revs) {
+            //データベースからレビューの画像情報を取得する
+            var reviewImages = kuchannelService.getReviewImages(rev.reviewId());
+
+            //画像をbase64にエンコードする
+
+            //データベースからレビューの返信情報を取得する
+            var reviewReplies = kuchannelService.getReviewReply(rev.reviewId());
+
+            reviews.add(new ReviewElementAll(rev.userId(), rev.userName(), rev.reviewId(), rev.title(),
+                    rev.review(), rev.createDate(), reviewImages, reviewReplies));
+
+        }
+
+        return reviews;
+    }
+
+    //画像をbase64にエンコードする処理
+//    public List<ReviewImageRecord> changeBase64(List<ReviewImageRecord> reviewImages) {
+//        for (var image : reviewImages) {
+//
+//        }
+//    }
+
+    //レビューの編集・更新機能処理
+//    @PostMapping("/api/update")
+//    public ResponseEntity<String> update(@RequestParam("title") String title,
+//                                         @RequestParam("content") String content,
+//                                         @RequestParam("images") List<MultipartFile> images){
+//
+//    }
+
+
+    //レビュー投稿処理
+    @PostMapping("/add-review")
+    public ResponseEntity<String> addReview(@RequestParam("title") String title,
+                            @RequestParam("content") String content,
+                            @RequestParam("images") List<MultipartFile> images) {
+
+        //reviewsテーブルにインサート処理かつインサートしたIDを取得(thread_id 固定)
+        var user = (UserRecord)session.getAttribute("user");
+        int reviewId = kuchannelService.reviewInsert(user.id(), 1, title, content);
+
+        for (MultipartFile image : images) {
+            // 画像を1枚ずつ保存処理
+            var num = uploadImage(image);
+
+            //review_Imagesテーブルにインサート処理
+            kuchannelService.reviewImagesInsert(reviewId, num + image.getOriginalFilename());
+
+        }
+
+        return ResponseEntity.ok("登録処理に成功しました。");
+
+    }
+
+    //画像アップロード処理 戻り値に画像の名前が被らないように現在時刻を返す
+    private long uploadImage(MultipartFile image) {
+        //ファイル名を取得
+        String fileName = image.getOriginalFilename();
+
+        //現在時刻を取得(画像の名前が被らないようにするため)
+        long currentTimeMillis = System.currentTimeMillis();
+
+        //格納先パスを指定(ひとまず絶対パス)
+        Path filePath = Paths.get("src/main/resources/static/images/reviewImages/" + currentTimeMillis + fileName);
+
+        try {
+            //アップロード画像をバイト値に変換
+            byte[] bytes = image.getBytes();
+
+            //String encode = Base64.getEncoder().encodeToString(bytes);
+
+            //System.out.println(encode);
+
+            // Base64デコード
+            //byte[] decodedBytes = Base64.getDecoder().decode(encode);
+
+
+
+            //バイト値を書き込むファイルを作成し、指定したパスに格納
+            OutputStream stream = Files.newOutputStream(filePath);
+            stream.write(bytes);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return currentTimeMillis;
+
+    }
+
+    //レビュー返信登録処理
+    @PostMapping("add-reply")
+    public ReviewReplyRecord addReply(@RequestParam("id") Integer reviewId,
+                                           @RequestParam("content") String content) {
+        //repliesテーブルにインサート処理
+        var user = (UserRecord)session.getAttribute("user");
+        var reply = kuchannelService.replyInsert(user.id(), reviewId, content);
+
+        return reply;
+
     }
 
 }
