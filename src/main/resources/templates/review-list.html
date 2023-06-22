@@ -42,7 +42,6 @@
       margin-left: 20%;
       margin-right: 20%;
     }
-
   </style>
 </head>
 
@@ -122,23 +121,23 @@
       <button type="button" @click="openReply(review.reviewId)">返信</button>
 
       <form action="/review-detail" method="get" style="margin-top: 20px;">
-        <input type="hidden" name="reviewId" :value="review.reviewId"/>
+        <input type="hidden" name="reviewId" :value="review.reviewId" />
         <button type="submit">詳細画面へ</button>
       </form>
     </div>
 
-  <!-- <p th:text="'クリックされたレビューは、' + ${review} + 'です。'"></p> -->
+    <!-- <p th:text="'クリックされたレビューは、' + ${review} + 'です。'"></p> -->
 
-  <!-- 編集ポップアップ -->
-  <div v-if="showPopup">
-    <h2>編集</h2>
-    <p>タイトル：<input type="text" v-model="editingReview.title"></p>
-    <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
-    <button type="button" @click="updateReview">更新</button>
-    <button type="button" @click="closePopup">キャンセル</button>
+    <!-- 編集ポップアップ -->
+    <div v-if="showPopup">
+      <h2>編集</h2>
+      <p>タイトル：<input type="text" v-model="editingReview.title"></p>
+      <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
+      <button type="button" @click="updateReview">更新</button>
+      <button type="button" @click="closePopup">キャンセル</button>
+    </div>
+
   </div>
-
-</div>
 
   <script src="/js/base.js"></script>
 
@@ -194,21 +193,21 @@
               console.log(this.reviews);
               console.log(this.reviews[0].reviewImages[0].imagePath);
             }
-          );
+            );
         },
         deleteReview(reviewId) {
           axios.delete('/api/delete', {
-              params: {
-                id: reviewId
-              }
-            })
+            params: {
+              id: reviewId
+            }
+          })
             .then(res => {
               this.getReviews();
               console.log(res);
             });
         },
 
-       //編集・更新
+        //編集・更新
         showEditPopup(review) {
           this.showPopup = true;
           this.editingReview.id = review.reviewId;
@@ -259,11 +258,10 @@
           this.editingReview.id = '';
           this.editingReview.title = '';
           this.editingReview.content = '';
-        }
         },
         //ユーザーのレビュー一覧に遷移
         getUserReviewLink(userId) {
-            return `/user-review/${userId}`;
+          return `/user-review/${userId}`;
         },
       },
       created: function () {
