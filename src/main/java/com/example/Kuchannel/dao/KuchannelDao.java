@@ -4,7 +4,7 @@ import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
 import jakarta.servlet.http.HttpSession;
 import com.example.Kuchannel.entity.InformatonRecord;
-import com.example.Kuchannel.entity.ThreadRecord;
+//import com.example.Kuchannel.entity.ThreadRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
