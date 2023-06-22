@@ -4,6 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <title>レビュー一覧</title>
+  <link href="/css/base.css" rel="stylesheet">
+  <link href="/css/popup.css" rel="stylesheet">
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
   <style>
@@ -43,6 +45,13 @@
       margin-right: 20%;
     }
 
+    .review-cell {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
   </style>
 </head>
 
@@ -55,17 +64,45 @@
   </div>
 
   <div id="app">
-    <h2>登録したお店の情報</h2>
-    <button type="button">情報編集</button>
+    <h2>スレッド名：{{ updateThreadTitle }}</h2>
+
+    <button type="button" @click="openUpdateThread()">情報編集</button>
+
+    <div v-if="isThreadUpdatePopup" class="popup-overlay" @click.self="closeUpdateThread()">
+      <div class="popup">
+        <h1>スレッド情報編集</h1>
+        <p>スレッド名(店名)：<input type="text" v-model="updateThreadTitle"> <!-- String threadName;と対応させる --></p>
+        <p>フリガナ：<input type="text" v-model="updateThreadFurigana"></p>
+        <p>お店の住所：<input type="text" v-model="updateThreadAddress"></p>
+        <p>営業時間：<input type="text" v-model="updateThreadSalesTime"></p>
+        <p>ジャンル：
+          <select v-model="updateThreadGenre">
+            <option value="和食" selected>和食</option>
+            <option value="中華">中華</option>
+            <option value="イタリアン">イタリアン</option>
+          </select>
+        </p>
+        <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags"></p>
+        <button @click.self="updateThread">更新</button>
+        <button @click.self="closeUpdateThread()">閉じる</button>
+      </div>
+    </div>
+
+    <div>
+      <label><input type="radio" name="sortSelect" @click="sortItems('id')"></button>投稿の新しい順にする</label>
+      <label><input type="radio" name="sortSelect" @click="sortItems('good_count')"></button>いいねの多い順にする</label>
+    </div>
+
     <hr>
 
     <div class="review-all">
+      <span class="red">{{ addError }}</span>
       <p>
         タイトル：
         <input type="text" v-model="reviewTitle">
       </p>
       <p>
-        本文：
+        本文<span class="red">(必須)</span>：
         <textarea cols="30" rows="10" v-model="content"></textarea>
       </p>
       <p>
@@ -76,6 +113,7 @@
       <button type="button" @click="addReview">投稿</button>
     </div>
 
+    <!-- レビュー一覧を表示する -->
     <div class="review-all" v-for="review in reviews">
 
       <div class="review">
@@ -84,14 +122,13 @@
         <h3>{{review.title}}</h3>
         <p>投稿日：{{ review.createDate }}</p>
 
-        <!-- 一枚だけ表示(未) -->
-        <!-- <img :src="'/images/reviewImages/' + review.reviewImages[0].imagePath" style="width: 60px; height: auto;"> -->
-
         <!-- 複数表示 -->
         <div class="image-review-container">
-          <p>{{review.review}}</p>
-          <div v-for="image in review.reviewImages">
-            <img :src="'/images/reviewImages/' + image.imagePath" style="width: 50px; height: auto;">
+          <p class="review-cell" style="width: 300px; margin-right: 20px;">{{review.review}}</p>
+          <div v-for="(image, index) in review.reviewImages">
+            <div v-if="index === 0">
+              <img :src="'/images/reviewImages/' + image.imagePath" style="width: 50px; height: auto;">
+            </div>
           </div>
         </div>
 
@@ -99,10 +136,12 @@
 
       <hr>
 
-      <div class="reply" v-for="reply in review.reviewReplies">
-        <p><a :href="getUserReviewLink(reply.userId)">{{ reply.userName }}さん</a></p>
-        <p>{{ reply.reply }}</p>
-        <p>投稿日：{{ reply.createDate }}</p>
+      <div v-for="(reply, index) in review.reviewReplies">
+        <div v-if="index === 0" class="reply">
+          <p><a :href="getUserReviewLink(reply.userId)">{{ reply.userName }}さん</a></p>
+          <p class="review-cell" style="width: 300px;">{{ reply.reply }}</p>
+          <p>投稿日：{{ reply.createDate }}</p>
+        </div>
       </div>
 
       <div v-if="isReplyView && reviewId == review.reviewId" style="margin-bottom: 20px;">
@@ -122,23 +161,28 @@
       <button type="button" @click="openReply(review.reviewId)">返信</button>
 
       <form action="/review-detail" method="get" style="margin-top: 20px;">
-        <input type="hidden" name="reviewId" :value="review.reviewId"/>
+        <input type="hidden" name="reviewId" :value="review.reviewId" />
+        <input type="hidden" name="threadId" th:value="${threadId}" />
         <button type="submit">詳細画面へ</button>
       </form>
+      <!-- いいねボタン -->
+      <div>
+        <button @click="goodDeal(review.reviewId)">いいね</button>
+        <span>{{ review.goodCount }}</span>
+      </div>
+
     </div>
 
-  <!-- <p th:text="'クリックされたレビューは、' + ${review} + 'です。'"></p> -->
+    <!-- 編集ポップアップ -->
+    <div v-if="showPopup">
+      <h2>編集</h2>
+      <p>タイトル：<input type="text" v-model="editingReview.title"></p>
+      <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
+      <button type="button" @click="updateReview">更新</button>
+      <button type="button" @click="closePopup">キャンセル</button>
+    </div>
 
-  <!-- 編集ポップアップ -->
-  <div v-if="showPopup">
-    <h2>編集</h2>
-    <p>タイトル：<input type="text" v-model="editingReview.title"></p>
-    <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
-    <button type="button" @click="updateReview">更新</button>
-    <button type="button" @click="closePopup">キャンセル</button>
   </div>
-
-</div>
 
   <script src="/js/base.js"></script>
 
@@ -159,7 +203,23 @@
             id: '',
             title: '',
             content: ''
-          }
+          },
+          threadId: '',
+          addError: '',
+          sortKey: 'id',
+          sortOrder: 'asc',
+
+          //スレッド情報編集用
+          isThreadUpdatePopup: false,
+          updateThreadId: '',
+          updateThreadTitle: '',
+          updateThreadFurigana: '',
+          updateThreadAddress: '',
+          updateThreadSalesTime: '',
+          updateThreadGenre: '',
+          updateThreadHashtags: '',
+          thread: [],
+
         }
       },
       methods: {
@@ -179,36 +239,41 @@
           axios.post('/add-review', formData)
             .then(res => {
               // アップロードが成功した場合の処理
-              this.getReviews();
+              this.getReviews(`[[ ${threadId} ]]`);
               console.log(res);
             })
             .catch(error => {
               // エラーが発生した場合の処理
+              this.addError = "エラーが発生しました。正しい値を入力してください";
             });
         },
-        getReviews() {
-          this.reviews = [];
-          axios.get('/getReviews')
-            .then(res => {
-              this.reviews = res.data;
-              console.log(this.reviews);
-              console.log(this.reviews[0].reviewImages[0].imagePath);
+        getReviews(threadId) {
+          // this.reviews = [];
+
+          axios.get('/getReviews', {
+            params: {
+              threadId: threadId
             }
-          );
+          })
+            .then(res => {
+              //console.log("レビューを取得しました！");
+              this.reviews = res.data;
+            }
+            );
         },
         deleteReview(reviewId) {
           axios.delete('/api/delete', {
-              params: {
-                id: reviewId
-              }
-            })
+            params: {
+              id: reviewId
+            }
+          })
             .then(res => {
               this.getReviews();
               console.log(res);
             });
         },
 
-       //編集・更新
+        //編集・更新
         showEditPopup(review) {
           this.showPopup = true;
           this.editingReview.id = review.reviewId;
@@ -247,7 +312,7 @@
             .then(res => {
               // アップロードが成功した場合の処理
               this.isReplyView = false;
-              this.getReviews();
+              this.getReviews(`[[ ${threadId} ]]`);
               console.log(res);
             })
             .catch(error => {
@@ -259,15 +324,101 @@
           this.editingReview.id = '';
           this.editingReview.title = '';
           this.editingReview.content = '';
-        }
         },
         //ユーザーのレビュー一覧に遷移
         getUserReviewLink(userId) {
-            return `/user-review/${userId}`;
+          return `/user-review/${userId}`;
         },
+        //いいねボタン押された時の挙動
+        goodDeal(reviewId) {
+          //いいねテーブルへの制御はjavaで行っている
+          axios.get(`/goodDeal/review/${reviewId}`)
+            .then(res => {
+              this.getReviews(`[[ ${threadId} ]]`);
+            });
+        },
+        //レビューの並び替えonclickで並び替えたいキーの名前を入れる。
+        sortItems(key) {
+
+          const modifier = this.sortOrder === 'asc' ? 1 : -1;
+          this.reviews.sort((a, b) => {
+            if (key === 'id') {
+              return (b.reviewId - a.reviewId) * modifier;
+            } else if (key === 'good_count') {
+              return (b.goodCount - a.goodCount) * modifier;
+            }
+            return 0;
+          });
+
+        },
+
+        //スレッド編集画面ポップアップを開く
+        openUpdateThread() {
+          this.isThreadUpdatePopup = true;
+
+        },
+        //スレッド編集画面ポップアップを閉じる
+        closeUpdateThread() {
+          this.isThreadUpdatePopup = false;
+        },
+
+        //スレッド編集
+        updateThread() {
+          if (this.updateThreadTitle == '') {
+            alert('お店の名前は必須入力です')
+          } else {
+            const updataInfo = {
+              threadName: this.updateThreadTitle,
+              furigana: this.updateThreadFurigana,
+              address: this.updateThreadAddress,
+              salesTime: this.updateThreadSalesTime,
+              genre: this.updateThreadGenre,
+              hashtag: this.updateThreadHashtags
+            }
+
+            axios.put(`/updateThread/${this.updateThreadId}`, updataInfo)
+              .then(res => {
+                this.findThread(this.updateThreadId)
+                this.closeUpdateThread();
+              });
+
+          };
+
+        },
+
+        //任意のスレッド情報を取得する
+        findThread(threadId) {
+          axios.get('/getThread', {
+            params: {
+              threadId: threadId
+            }
+          })
+            .then(res => {
+              this.thread = res.data;
+              console.log(this.thread);
+              console.log(this.thread.title, this.thread.address, this.thread.genre, this.thread.hashtags);
+              this.updateThreadTitle = this.thread.title;
+              this.updateThreadFurigana = this.thread.furigana;
+              this.updateThreadAddress = this.thread.address;
+              this.updateThreadGenre = this.thread.genre;
+              this.updateThreadHashtags = this.thread.hashtags;
+            }
+            );
+        }
+
       },
       created: function () {
-        this.getReviews();
+        // this.threadId = `[[ ${threadId} ]]`;
+        // this.getReviews(this.threadId);
+        this.getReviews(`[[ ${threadId} ]]`);
+
+        this.updateThreadId = `[[ ${thread.id} ]]`;
+        this.updateThreadTitle = `[[ ${thread.title} ]]`;
+        this.updateThreadAddress = `[[ ${thread.address} ]]`;
+        this.updateThreadSalesTime = `[[ ${thread.sales_time} ]]`;
+        this.updateThreadGenre = `[[ ${thread.genre} ]]`;
+        this.updateThreadHashtags = `[[ ${thread.hashtags} ]]`;
+
       },
     }).mount('#app')
   </script>

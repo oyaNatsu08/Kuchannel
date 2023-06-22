@@ -78,7 +78,7 @@ body {
     text-decoration: none;
   }
 
-  ul{
+  .hashUl{
     list-style-type: none;
     display: flex;
     padding:0px 5px

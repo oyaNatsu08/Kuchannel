@@ -79,7 +79,7 @@
 
         </div>
 
-        <form action="/review-list" method="get">
+        <form th:action="@{/thread-review/{threadId}(threadId=${threadId})}" method="get">
             <button type="submit">戻る</button>
             <button type="button" @click="openReply(reviewId)">返信する</button>
         </form>
@@ -129,7 +129,6 @@
                 },
             },
             created: function () {
-                //構文エラー出ているけど問題ない。(thymeleafの値をjavascriptで受け取っているため、構文エラーが出ている)
                 this.reviewId = `[[ ${reviewId} ]]`;
             },
         }).mount('#app')
