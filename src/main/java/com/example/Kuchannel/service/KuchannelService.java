@@ -5,6 +5,8 @@ import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.entity.InformatonRecord;
 //import com.example.Kuchannel.entity.ThreadRecord;
+import com.example.Kuchannel.entity.InformatonRecord;
+import com.example.Kuchannel.entity.ThreadRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

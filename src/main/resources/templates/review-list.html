@@ -52,6 +52,39 @@
       overflow: hidden;
     }
 
+    .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(150, 150, 150, 0.5);
+    display: flex;
+    justify-content: center;
+    /* align-items: center; */
+    animation: fade-in 0.5s ease-in;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.popup {
+    width: 60%;
+    height: 80%;
+    text-align: center;
+    margin-top: 30px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+}
+/*ここまでポップアップのcss*/
   </style>
 </head>
 
@@ -156,8 +189,8 @@
 
       <!-- 投稿ユーザーだけ表示される(後でやる) -->
       <!-- ここを修正(富永＆宮城) -->
-      <button type="button">削除</button>
-      <button type="button">編集</button>
+      <button type="button" @click="deleteReview(review.reviewId)">削除</button>
+      <button type="button" @click="showEditPopup(review)">編集</button>
       <button type="button" @click="openReply(review.reviewId)">返信</button>
 
       <form action="/review-detail" method="get" style="margin-top: 20px;">
@@ -173,15 +206,19 @@
 
     </div>
 
-    <!-- 編集ポップアップ -->
-    <div v-if="showPopup">
+  <!-- <p th:text="'クリックされたレビューは、' + ${review} + 'です。'"></p> -->
+
+  <!-- 編集ポップアップ -->
+  <div v-if="showPopup" class="popup-overlay">
+    <div class="popup">
       <h2>編集</h2>
       <p>タイトル：<input type="text" v-model="editingReview.title"></p>
       <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
-      <button type="button" @click="updateReview">更新</button>
+      <p>写真の追加：<input type="file" ref="fileInput" multiple />
+      </p>
       <button type="button" @click="closePopup">キャンセル</button>
+      <button type="button" @click="updateReview">更新</button>
     </div>
-
   </div>
 
   <script src="/js/base.js"></script>
@@ -225,7 +262,6 @@
       methods: {
         // レビュー投稿処理
         addReview() {
-
           console.log(this.reviewTitle, this.content);
           const formData = new FormData();
           formData.append("title", this.reviewTitle);
@@ -270,6 +306,33 @@
             .then(res => {
               this.getReviews();
               console.log(res);
+              console.log(this.reviews);
+              console.log(this.reviews[0].reviewImages[0].imagePath);
+            }
+          );
+        },
+
+       //編集・更新
+        showEditPopup(review) {
+          this.showPopup = true;
+          this.editingReview.id = review.reviewId;
+          this.editingReview.title = review.title;
+          this.editingReview.content = review.review;
+        },
+        updateReview() {
+          const updatedReview = {
+            id: this.editingReview.id,
+            title: this.editingReview.title,
+            content: this.editingReview.content
+          };
+
+          axios.put('/review-update', updatedReview)
+            .then(res => {
+              this.getReviews();
+              this.closePopup();
+              console.log(updatedReview)
+              console.log(res);
+
             });
         },
 
@@ -420,6 +483,17 @@
         this.updateThreadHashtags = `[[ ${thread.hashtags} ]]`;
 
       },
+        },
+        closePopup() {
+          this.showPopup = false;
+          this.editingReview.id = '';
+          this.editingReview.title = '';
+          this.editingReview.content = '';
+        }
+      },
+      created() {
+        this.getReviews();
+      }
     }).mount('#app')
   </script>
 

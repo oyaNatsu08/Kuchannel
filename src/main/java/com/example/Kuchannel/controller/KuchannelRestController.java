@@ -1,8 +1,10 @@
 package com.example.Kuchannel.controller;
 
+import com.example.Kuchannel.KuchannelApplication;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
+import com.example.Kuchannel.form.ReviewUpdateForm;
 import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,6 +187,18 @@ public class KuchannelRestController {
 //                                         @RequestParam("images") List<MultipartFile> images){
 //
 //    }
+
+
+    //レビューの編集・更新機能処理
+    @PutMapping("/review-update")
+    public int update(@RequestBody ReviewUpdateForm reviewUpdateForm){
+
+        //reviewsテーブルのレコードの更新処理
+        var reviewUpdate = kuchannelService.reviewUpdate(reviewUpdateForm.getId(),reviewUpdateForm.getTitle(),reviewUpdateForm.getContent());
+
+        return reviewUpdate;
+
+    }
 
 
     //レビュー投稿処理
