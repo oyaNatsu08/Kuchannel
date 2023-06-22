@@ -422,6 +422,21 @@ public class KuchannelDao {
         return list.isEmpty() ? null : list.get(0);
     }
 
+    //ユーザーのレビュー一覧に必要な情報を取得する
+    public List<UserReviewList> getUserReview(Integer userId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", userId);
+
+        var list = jdbcTemplate.query("SELECT u.name AS userName, r.id AS reviewId, r.title AS reviewTitle, " +
+                "r.review AS content, t.title AS threadTitle, c.name AS communityName, " +
+                "DATE(r.create_date) AS createDate FROM reviews r JOIN users u ON r.user_id = u.id " +
+                "JOIN threads t ON r.thread_id = t.id JOIN communities c ON t.community_id = c.id " +
+                "WHERE r.user_id = :userId", param, new DataClassRowMapper<>(UserReviewList.class));
+
+        return list;
+
+    }
+
     /*---------------------------------------------*/
 
     //threadsテーブルにINSERTする処理

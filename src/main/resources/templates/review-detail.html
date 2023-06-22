@@ -38,7 +38,7 @@
 
     <div id="app">
         <div class="review">
-            <h3>投稿者：[[ ${review.userName} ]]</h3>
+            <h3>投稿者：<a th:href="@{/user-review/{userId}(userId=${review.userId})}">[[ ${review.userName} ]]</a></h3>
             <p>投稿日：[[ ${review.createDate} ]]</p>
             <h2>[[ ${review.title} ]]</h2>
             <hr>
@@ -54,13 +54,14 @@
         <div class="reply">
             <th:block th:each="reply : ${review.reviewReplies}">
                 <div class="review">
-                    <h4>投稿者：[[ ${reply.userName} ]]</h4>
+                    <h4>投稿者：<a th:href="@{/user-review/{userId}(userId=${reply.userId})}">[[ ${reply.userName} ]]</a>
+                    </h4>
                     <p>投稿日：[[ ${reply.createDate} ]]</p>
                     <p>[[ ${reply.reply} ]]</p>
                 </div>
             </th:block>
             <div class="review" v-for="reply in replies">
-                <h4>投稿者：{{ reply.userName }}</h4>
+                <h4>投稿者：<a :href="getUserReviewLink(reply.userId)">{{ reply.userName }}</a></h4>
                 <p>投稿日：{{ reply.createDate }}</p>
                 <p> {{ reply.reply }}</p>
             </div>
@@ -121,7 +122,11 @@
                         .catch(error => {
                             // エラーが発生した場合の処理
                         });
-                }
+                },
+                //ユーザーのレビュー一覧に遷移
+                getUserReviewLink(userId) {
+                    return `/user-review/${userId}`;
+                },
             },
             created: function () {
                 //構文エラー出ているけど問題ない。(thymeleafの値をjavascriptで受け取っているため、構文エラーが出ている)
