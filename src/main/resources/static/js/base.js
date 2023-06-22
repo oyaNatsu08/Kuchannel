@@ -1,14 +1,14 @@
-const app = Vue.createApp({
-  data() {
-    return {
-      showMenu: false,
-    }
-  },
-  methods: {
-    toggleMenu() {
-      this.showMenu = !this.showMenu;
-    }
-  },
-});
+const { createApp } = Vue
 
-app.mount('#app0');
+createApp({
+    data() {
+        return {
+            showMenu: false,
+        }
+    },
+    methods: {
+        toggleMenu() {
+            this.showMenu = !this.showMenu;
+        }
+    },
+}).mount('#app0')

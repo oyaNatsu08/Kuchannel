@@ -5,6 +5,7 @@ import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -146,5 +147,12 @@ public class KuchannelService {
     }
 
     public int threadUpdate(ThreadAddForm inputData,Integer thread_id){return kuchannelDao.threadUpdate(inputData,thread_id);}
+
+    //コミュニティメンバー表示用。所属コミュニティメンバーを返す
+    public List<AccountInformation> getCommunityMember(Integer communityId){return kuchannelDao.getCommunityMember(communityId);}
+
+    public AccountInformation getAccountInfo(Integer user_id, Integer community_id){return kuchannelDao.getAccountInfo(user_id,community_id);}
+
+    public int memberSetting(List<AccountInformation> updateInfo){return kuchannelDao.memberSetting(updateInfo);}
 
 }

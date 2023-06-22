@@ -332,12 +332,9 @@ public class KuchannelController {
                                  Model model) {
         //コミュニティIDを元にコミュニティを特定する
         CommunityRecord community = kuchannelService.findCommunity(communityId);
-        model.addAttribute("name", community.name());
-        //コミュニティIDを元にスレッドを全件取得(現在は1固定)
-        var threads = kuchannelService.communityThreads(1);
-
-        //thread-list.htmlにthreadsの値を渡す
-        model.addAttribute("threads", threads);
+        model.addAttribute("communityId",communityId );
+        model.addAttribute("communityName", community.name());
+        System.out.println(community.name());
 
         return "thread-list";
 

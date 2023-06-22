@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Map;
@@ -510,4 +511,42 @@ public class KuchannelDao {
 
     }
 
+    //スレッド一覧の、コミュニティ詳細用。コミュニティIDからメンバー一覧取得
+    public List<AccountInformation> getCommunityMember(Integer communityId){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("community_id",communityId);
+        List<AccountInformation> members = jdbcTemplate.query("SELECT u.id,\n" +
+                        "CASE\n" +
+                        "  WHEN cu.nick_name IS NULL THEN u.name\n" +
+                        "        ELSE cu.nick_name\n" +
+                        "    END AS name,\n" +
+                        "cu.role\n" +
+                        "FROM users u\n" +
+                        "JOIN community_user cu\n" +
+                        "ON u.id = cu.user_id\n" +
+                        "WHERE cu.community_id=:community_id AND flag=true;", param,
+                new DataClassRowMapper<>(AccountInformation.class));
+        return members;
+    }
+
+    public AccountInformation getAccountInfo(Integer user_id,Integer community_id){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("community_id",community_id);
+        param.addValue("user_id",user_id);
+        List<AccountInformation> list = jdbcTemplate.query("SELECT u.id,u.name,cu.role\n" +
+                        "FROM users u\n" +
+                        "JOIN community_user cu\n" +
+                        "On u.id = cu.user_id\n" +
+                        "WHERE cu.community_id = :community_id AND user_id = :user_id;", param,
+                new DataClassRowMapper<>(AccountInformation.class));
+        System.out.println(list.get(0));
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    //管理者が退会させられる用の奴。アカウント情報のListが渡されるので、ここでflagがtrueのやつは退会させる（逆なことに注意）
+    public int memberSetting(List<AccountInformation> updateInfo){
+//        for(var i =0;updateInfo.length;)
+//        return 1;
+//
+//    }
 }

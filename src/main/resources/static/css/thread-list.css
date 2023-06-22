@@ -93,3 +93,17 @@ body {
     text-align: center;
   }
 
+.member-container{
+  margin: 0 auto;
+}
+
+.pagetop{
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+  justify-content: center;
+}
+.pagetop button{
+  height: 30px;
+  width: 200px;
+}

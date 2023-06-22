@@ -1,3 +1,4 @@
+<!-- 管理用ページと分ける可能性を鑑みて、一般ユーザー視点ができた時点のものをコピーしてます。 -->
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -23,25 +24,15 @@
     <div v-if="isCommunityMemberPopup" @click.self="closePopup('CommunityMember')" class="popup-overlay" type="button">
       <div class="popup">
         <h2>{{communityName}}のメンバー</h2>
-        <div v-if="sessionInfo.role ===2"><button>コミュニティを削除する</button></div>
         <table  class="member-container">
-          
-          <tr v-for="member in communityMembers" V-bind:id="member.id">
+          <tr v-for="member in communityMembers">
             <!-- リンクからその人のレビュー一覧に飛べるように -->
             <td><a href="#">{{member.name}}</a></td>
-            <td v-if="sessionInfo.role ===2"><form name="form"><input type="checkbox" v-model="member.flag"></form></td>
-            <td v-if="sessionInfo.role ===2">
-              
-                <select name="roleSelect" v-model="member.role">
-                  <option value=1 :selected="member.role === 1">一般</option>
-                  <option value=2 :selected="member.role === 2">管理者</option>
-                </select>
-              
-            </td>
+            
+
           </tr>
         </table>
-        <button type="button" v-if="sessionInfo.role ===1">問い合わせ</button>
-        <button type="button" v-if="sessionInfo.role ===2" @click="applyChenge">この内容で変更する</button>
+        <button type="button">問い合わせ</button>
         <button @click.self="closePopup('CommunityMember')">閉じる</button>
 
 
@@ -314,29 +305,18 @@
           axios.get(`/getCommunityMember/${this.communityId}`)
           .then(res =>{
             this.communityMembers =res.data;
-            console.log(this.communityMembers[0].role);
+            console.log(this.communityMembers);
           });
 
-        },
-        applyChenge(){
-          console.log(this.communityMembers);
-          // for(let i=0; this.communityMembers.length; i++){
-          //   // parseInt(this.communityMembers[i].role);
-          //   console.log(this.communityMembers[i].role);
-          // };
-          console.log(this.communityMembers);
-          axios.put('/memberSetting',this.communityMembers)
-          .then(res =>{
-            this.confirmCommunityMember();
-          });
-
-        },
+        }
       },
 
       created:function(){
         console.log("created");
         this.communityName =`[[${communityName}]]`;
+        console.log('comName'+this.communityName)
         this.communityId =`[[${communityId}]]`;
+
         this.getThreads();
         this.getSessionInfo();
 

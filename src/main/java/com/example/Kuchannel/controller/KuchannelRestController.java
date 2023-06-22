@@ -70,10 +70,10 @@ public class KuchannelRestController {
     }
 
 //    スレッド一覧ページ用。スレッドの情報を取得
-    @GetMapping("getThreads")
-    public List<CommunityThread> getThreads(){
-//        コミュニティidを渡すようにする（今は1で固定）
-        var threads = kuchannelService.communityThreads(1);
+    @GetMapping("getThreads/{communityId}")
+    public List<CommunityThread> getThreads(@PathVariable("communityId")Integer communityId){
+//        コミュニティidを渡すようにする（今は1で固定）->修正
+        var threads = kuchannelService.communityThreads(communityId);
         return threads;
     }
 
@@ -90,11 +90,14 @@ public class KuchannelRestController {
         return kuchannelService.deleteThread(thread_id);
     }
 
-    //セッション情報返せるつもり。
-    @GetMapping("getSessionInfo")
-    public UserRecord getSessionInfo(){
+    //セッション情報から、ユーザーidとroleを持った情報を返す。
+    //getThreadと同じで、コミュニティidを渡すようにする。今は１で固定。
+    @GetMapping("/getSessionInfo/{communityId}")
+    public AccountInformation getSessionInfo(@PathVariable("communityId")Integer communityId){
         var user = (UserRecord)session.getAttribute("user");
-        return user;
+        var accountInfo = kuchannelService.getAccountInfo(user.id(),communityId);
+
+        return accountInfo;
     }
 
     //スレッド作成処理
@@ -111,6 +114,13 @@ public class KuchannelRestController {
         return result;
     }
 
+    @PutMapping("/memberSetting")
+    public int memberSetting(@RequestBody List<AccountInformation> updateInfo){
+        System.out.println(updateInfo);
+        var result =kuchannelService.memberSetting(updateInfo);
+        return result;
+    }
+
 
 
     /*----------------------------------------*/
@@ -120,5 +130,20 @@ public class KuchannelRestController {
         //System.out.println("コミュニティURL:" + kuchannelService.getUrl(id).url());
         return kuchannelService.getUrl(id).url();
     }
+
+    //スレッド一覧でコミュニティ名を出す用。すでにあったfindCommunityを利用。
+    @GetMapping("/getCommunityName/{communityId}")
+    public CommunityRecord getCommunityName(@PathVariable Integer communityId) {
+        return kuchannelService.findCommunity(communityId);
+    }
+
+    //スレッド一覧でコミュニティ名を出す用。すでにあったfindCommunityを利用。
+    @GetMapping("/getCommunityMember/{communityId}")
+    public List<AccountInformation> getCommunityMember(@PathVariable Integer communityId) {
+        return kuchannelService.getCommunityMember(communityId);
+    }
+
+
+
 
 }
