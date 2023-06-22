@@ -469,7 +469,7 @@ public class KuchannelDao {
 
     }
 
-    //言い値ボタンが押されたとき、そのユーザーがそのスレッドへいいねを押していない場合インサート、すでに押している場合は削除。そののちにその時のいいね数をCOUNTして数字で返したい。
+    //いいねボタンが押されたとき、そのユーザーがそのスレッドへいいねを押していない場合インサート、すでに押している場合は削除。そののちにその時のいいね数をCOUNTして数字で返したい。
     public int goodDeal(Integer thread_id,Integer user_id){
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("thread_id",thread_id);
@@ -494,6 +494,7 @@ public class KuchannelDao {
 
     }
 
+    //スレッド一覧用。スレッド削除(もしデータがあったら消せない。)。
     public boolean deleteThread(Integer thread_id){
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("thread_id",thread_id);
@@ -529,6 +530,7 @@ public class KuchannelDao {
         return members;
     }
 
+    //セッションと権限確認する用＆管理社機能の際に必要な情報（権限、退会フラッグ）渡せる用。
     public AccountInformation getAccountInfo(Integer user_id,Integer community_id){
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("community_id",community_id);
@@ -544,9 +546,38 @@ public class KuchannelDao {
     }
 
     //管理者が退会させられる用の奴。アカウント情報のListが渡されるので、ここでflagがtrueのやつは退会させる（逆なことに注意）
-    public int memberSetting(List<AccountInformation> updateInfo){
-//        for(var i =0;updateInfo.length;)
-//        return 1;
-//
-//    }
+    public int memberSetting(List<AccountInformation> updateInfo, Integer communityId){
+
+        for(var i =0;i<updateInfo.size();i++){
+            var target = updateInfo.get(i);
+            if(target.getRole() ==1){
+                MapSqlParameterSource param =new MapSqlParameterSource();
+                param.addValue("community_id",communityId);
+                param.addValue("user_id",target.getId());
+                int result = jdbcTemplate.update("UPDATE community_user SET role = 1 WHERE user_id =:user_id AND community_id = :community_id;",param);
+
+            }else{
+                MapSqlParameterSource param =new MapSqlParameterSource();
+                param.addValue("community_id",communityId);
+                param.addValue("user_id",target.getId());
+                int result = jdbcTemplate.update("UPDATE community_user SET role = 2 WHERE user_id =:user_id AND community_id = :community_id;",param);
+            }
+            if(target.isFlag()){
+                MapSqlParameterSource param =new MapSqlParameterSource();
+                param.addValue("community_id",communityId);
+                param.addValue("user_id",target.getId());
+                int result = jdbcTemplate.update("UPDATE community_user SET flag = false WHERE user_id =:user_id AND community_id = :community_id;",param);
+            }
+
+        }
+        return 1;
+    }
+
+    public int deleteCommunity(Integer communityId){
+        MapSqlParameterSource param =new MapSqlParameterSource();
+        param.addValue("community_id",communityId);
+        int result = jdbcTemplate.update("UPDATE community_user SET flag = false WHERE community_id = :community_id;",param);
+        int result2 = jdbcTemplate.update("UPDATE communities SET delete_date = now() WHERE id = :community_id;",param);
+        return result2;
+    };
 }

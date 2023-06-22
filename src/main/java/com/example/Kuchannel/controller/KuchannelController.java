@@ -312,18 +312,6 @@ public class KuchannelController {
         }
     }
 
-//    //コミュニティのスレッド一覧へ遷移する(ボタンなどでの遷移)
-//    @GetMapping("/community/thread-list")
-//    public String threadListView(@RequestParam(name="id")Integer communityId,
-//                                 Model model) {
-//        //コミュニティIDを元にコミュニティを特定する
-//        CommunityRecord community = kuchannelService.findCommunity(communityId);
-//
-//        model.addAttribute("name", community.name());
-//
-//        return "thread-list";
-//
-//    }
 
 
     //コミュニティのスレッド一覧へ遷移する(ボタンなどでの遷移)

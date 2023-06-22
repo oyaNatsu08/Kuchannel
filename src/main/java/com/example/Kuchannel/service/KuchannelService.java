@@ -153,6 +153,8 @@ public class KuchannelService {
 
     public AccountInformation getAccountInfo(Integer user_id, Integer community_id){return kuchannelDao.getAccountInfo(user_id,community_id);}
 
-    public int memberSetting(List<AccountInformation> updateInfo){return kuchannelDao.memberSetting(updateInfo);}
+    public int memberSetting(List<AccountInformation> updateInfo, Integer communityId){return kuchannelDao.memberSetting(updateInfo,communityId);}
+
+    public int deleteCommunity(Integer communityId){return kuchannelDao.deleteCommunity(communityId);}
 
 }

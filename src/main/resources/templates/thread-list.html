@@ -18,38 +18,48 @@
 
     <div class="pagetop">
       <h1>{{communityName}}へようこそ！</h1>
-      <button  @click.self="confirmCommunityMember">コミュニティメンバーの確認</button>
+      <button  @click.self="getCommunityMember">コミュニティメンバーの確認</button>
     </div>
+
+
+    <!-- メンバー確認 -->
     <div v-if="isCommunityMemberPopup" @click.self="closePopup('CommunityMember')" class="popup-overlay" type="button">
       <div class="popup">
         <h2>{{communityName}}のメンバー</h2>
-        <div v-if="sessionInfo.role ===2"><button>コミュニティを削除する</button></div>
+        <div v-if="sessionInfo.role ===2"><button @click="deleteCommunity">コミュニティを削除する</button></div>
         <table  class="member-container">
-          
-          <tr v-for="member in communityMembers" V-bind:id="member.id">
-            <!-- リンクからその人のレビュー一覧に飛べるように -->
-            <td><a href="#">{{member.name}}</a></td>
-            <td v-if="sessionInfo.role ===2"><form name="form"><input type="checkbox" v-model="member.flag"></form></td>
-            <td v-if="sessionInfo.role ===2">
-              
-                <select name="roleSelect" v-model="member.role">
-                  <option value=1 :selected="member.role === 1">一般</option>
-                  <option value=2 :selected="member.role === 2">管理者</option>
-                </select>
-              
-            </td>
-          </tr>
+          <thead>
+            <tr>
+              <th>メンバー名</th>
+              <th v-if="sessionInfo.role ===2">退会</th>
+              <th v-if="sessionInfo.role ===2">権限</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="member in communityMembers" V-bind:id="member.id">
+              <!-- リンクからその人のレビュー一覧に飛べるように -->
+              <td><a href="#">{{member.name}}</a></td>
+              <td v-if="sessionInfo.role ===2"><form name="form"><input type="checkbox" v-model="member.flag" v-bind:disabled="member.id == sessionInfo.id" ></form></td>
+              <td v-if="sessionInfo.role ===2">
+                
+                  <select name="roleSelect" v-model="member.role" v-bind:disabled="member.id == sessionInfo.id">
+                    <option value=1 :selected="member.role === 1">一般</option>
+                    <option value=2 :selected="member.role === 2">管理者</option>
+                  </select>
+                
+              </td>
+            </tr>
+          </tbody>
         </table>
         <button type="button" v-if="sessionInfo.role ===1">問い合わせ</button>
         <button type="button" v-if="sessionInfo.role ===2" @click="applyChenge">この内容で変更する</button>
         <button @click.self="closePopup('CommunityMember')">閉じる</button>
 
-
       </div>
     </div>
 
 
-
+<!-- スレッドの新規作成 -->
     <button type="button" @click="openPopup('ThreadAdd')" >スレッドの新規作成</button>
     <div v-if="isThreadAddPopup" class="popup-overlay" @click.self="closePopup('ThreadAdd')">
       <div class="popup">
@@ -72,6 +82,8 @@
     </div>
 
 
+
+    <!-- 並べ替えのところ -->
     <div class ="sorting">
       <label><input type="radio" name="sortSelect" @click="sortItems('id')"></button>投稿の新しい順にする</label>
       <label><input type="radio" name="sortSelect" @click="sortItems('good_count')"></button>いいねの多い順にする</label>
@@ -79,9 +91,42 @@
 
 
 
+    <!-- スレッドの統合 -->
+    <button type="button" v-if="sessionInfo.role ===2" @click="integrateThread" >スレッドの統合</button>
+    <div v-if="isIntegrateThreadsPopup" class="popup-overlay" @click.self="closePopup('integrateThread')">
+      <div class="popup">
+        <h1>スレッド統合（採用するお店の情報を選択してください。）</h1>
+        <p>スレッド名(店名)：
+          <select v-model="selectedThreadName">
+            <option v-for="thread in selectedThreads" :value="thread.id" :key="thread.id" selected>
+              {{thread.title}}
+            </option>
+          </select>
+        </p>
+        <p><input type="text" v-model="addThreadTitle"> <!-- String threadName;と対応させる --></p>
+        <!-- <p>フリガナ：<input type="text"v-model="addThreadFurigana"></p>
+        <p>お店の住所：<input type="text"v-model="addThreadAddress"></p>
+        <p>営業時間：<input type="text"v-model="addThreadSalesTime"></p>
+        <p>ジャンル：
+          <select v-model="addThreadGenre">
+            <option value="和食" selected>和食</option>
+            <option value="中華">中華</option>
+            <option value="イタリアン">イタリアン</option>
+          </select>
+        </p>
+        <p>ハッシュタグ：<input type="text" v-model="addThreadHashtags"></p>
+        <button @click.self="addThread">作成</button> -->
+        <button @click.self="closePopup('integrateThread')">閉じる</button>
+      </div>
+    </div>
+
+
+
+<!-- スレッドの表示。 -->
     <div class="restaurant" v-for="thread in threads">
       <img src="restaurant-a.jpg" alt="飲食店A" class="restaurant-img">
       <div>
+        <input type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2">
         <a href="#" class="restaurant-name"><h3>{{thread.title}}</h3></a>
         <div class="genre">ジャンル：{{thread.genre}}</div>
         <div class="address">住所：{{thread.address}}</div>
@@ -167,7 +212,12 @@
           isCommunityMemberPopup:false,
           communityMembers:[],
           communityName:'',
-          communityId:''
+          communityId:'',
+
+          //コミュニティの統合用。
+          isIntegrateThreadsPopup:false,
+          selectedThreads:[],
+          selectedThreadName:'',
 
 
         }
@@ -308,29 +358,41 @@
           };
           
         },
-        confirmCommunityMember(){
+        getCommunityMember(){
           this.openPopup('CommunityMember');
-          
           axios.get(`/getCommunityMember/${this.communityId}`)
           .then(res =>{
             this.communityMembers =res.data;
-            console.log(this.communityMembers[0].role);
           });
 
         },
+
+        // 管理者の、変更適用ボタンのメソッド。メンバーの退会と権限の編集
         applyChenge(){
-          console.log(this.communityMembers);
-          // for(let i=0; this.communityMembers.length; i++){
-          //   // parseInt(this.communityMembers[i].role);
-          //   console.log(this.communityMembers[i].role);
-          // };
-          console.log(this.communityMembers);
-          axios.put('/memberSetting',this.communityMembers)
+          axios.put(`/memberSetting/${this.communityId}`,this.communityMembers)
           .then(res =>{
-            this.confirmCommunityMember();
+            this.getCommunityMember();
           });
 
         },
+        //コミュニティ削除
+        deleteCommunity(){
+          if(window.confirm(`${this.communityName}を本当に削除してもよいですか？`)){
+            if(window.confirm('公開しませんか?')){
+              axios.delete(`/deleteCommunity/${this.communityId}`)
+              .then(res=>{
+                window.location.href = "http://localhost:8080/mypage";
+              });
+            }
+          }
+        },
+        integrateThread(){
+          console.log(this.threads);
+          this.openPopup('IntegrateThreads');
+          this.selectedThreads = this.threads.filter(thread =>thread.isSelected === true);
+          console.log(this.selectedThreads);
+        }
+
       },
 
       created:function(){

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -114,10 +115,16 @@ public class KuchannelRestController {
         return result;
     }
 
-    @PutMapping("/memberSetting")
-    public int memberSetting(@RequestBody List<AccountInformation> updateInfo){
+    @PutMapping("/memberSetting/{communityId}")
+    public int memberSetting(@PathVariable("communityId") Integer communityId,@RequestBody List<AccountInformation> updateInfo){
         System.out.println(updateInfo);
-        var result =kuchannelService.memberSetting(updateInfo);
+        var result =kuchannelService.memberSetting(updateInfo, communityId);
+        return result;
+    }
+
+    @DeleteMapping("/deleteCommunity/{communityId}")
+    public int deleteCommunity(@PathVariable("communityId")Integer communityId){
+        var result =kuchannelService.deleteCommunity(communityId);
         return result;
     }
 

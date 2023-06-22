@@ -22,6 +22,7 @@ public class CommunityThread {
     Integer good_count;
     String hashtags;
     List<HashTag> hashTagList;
+    boolean isSelected;
 
 //スレッド一覧のページ用。スレッドの情報のエンティティ
 //スレッドの情報と、いいね、ハッシュタグを取得している。
