@@ -332,6 +332,7 @@ public class KuchannelDao {
 
         KeyHolder keyHolder1 = new GeneratedKeyHolder();
 
+        //user_idとコミュニティid今は1で固定。後で修正。
         var threadAddResult= jdbcTemplate.update("INSERT INTO threads(user_id, community_id, image_path, " +
                 "title, address, sales_time, genre, create_date) VALUES(1, 1, null, :threadName, " +
                 ":address, :salesTime, :genre, now())", param,keyHolder1);
@@ -372,22 +373,69 @@ public class KuchannelDao {
                     var addHashTagId = Integer.parseInt(keyHolder2.getKeys().get("id").toString());
 
                     param.addValue("add_hashtag_id",addHashTagId);
+                    param.addValue("thread_id",addThreadId);
                     var insertThreadHashTagResult= jdbcTemplate.update("INSERT INTO thread_hashtag(thread_id,hashtag_id)VALUES(:thread_id,:add_hashtag_id);",param);
-
-
 
                 }
 
             }
         }
 
-
-
-
-
-
         return threadAddResult;
     }
+
+    public int threadUpdate(ThreadAddForm inputData,Integer thread_id) {
+        //ハッシュタグ以外のアップデート処理
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("thread_id", thread_id);
+        param.addValue("title", inputData.getThreadName());
+//        param.addValue("furigana",inputData.getFurigana());
+        param.addValue("address", inputData.getAddress());
+        param.addValue("sales_time", inputData.getSalesTime());
+        param.addValue("genre", inputData.getGenre());
+        param.addValue("hashtags", inputData.getHashtag());
+
+        var updateThreadResult = jdbcTemplate.update("UPDATE threads SET title=:title,address=:address,sales_time=:sales_time,genre=:genre WHERE id = :thread_id", param);
+
+
+        //ハッシュタグの処理。一度スレッドハッシュタグをリセットして、再度インサートする。
+        var resetThreadHashtag = jdbcTemplate.update("DELETE FROM thread_hashtag WHERE thread_id = :thread_id", param);
+
+        if (inputData.getHashtag() != null) {
+            //ハッシュタグの内容を取得し、「,」でsplitして分ける。
+            String[] inputHashTags = inputData.getHashtag().trim().split(",");
+
+            //それぞれのデータについて、ハッシュタグテーブルに既にあるのかを検索。
+            for (var i = 0; i < inputHashTags.length; i++) {
+                param.addValue("tagName", inputHashTags[i]);
+                List<HashTag> searchHashTagResult = jdbcTemplate.query("SELECT * FROM hashtags WHERE tag_name = :tagName;", param,
+                        new DataClassRowMapper<>(HashTag.class));
+
+                //もしすでに登録されていた場合、そのハッシュタグをスレッド情報に追加。
+                if (!searchHashTagResult.isEmpty()) {
+                    System.out.println("ヌルじゃない" + searchHashTagResult.get(0));
+                    var existingHashTagId = searchHashTagResult.get(0).getId();
+                    param.addValue("hashTagId", existingHashTagId);
+                    var hashTagInsertResult = jdbcTemplate.update("INSERT INTO thread_hashtag(thread_id,hashtag_id)VALUES(:thread_id,:hashTagId);", param);
+                }
+
+                //まだ登録されていなかったら、ハッシュタグテーブルに登録し、そのあとスレッドハッシュタグテーブルにも情報を追加
+                else {
+                    System.out.println("ヌルっぽい！");
+                    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+                    var hashTagInsertResult = jdbcTemplate.update("INSERT INTO hashtags(tag_name)VALUES(:tagName);", param, keyHolder);
+                    var addHashTagId = Integer.parseInt(keyHolder.getKeys().get("id").toString());
+
+                    param.addValue("add_hashtag_id", addHashTagId);
+                    var insertThreadHashTagResult = jdbcTemplate.update("INSERT INTO thread_hashtag(thread_id,hashtag_id)VALUES(:thread_id,:add_hashtag_id);", param);
+
+                }
+            }
+        }
+        return resetThreadHashtag;
+    }
+
 
 
     //コミュニティIDを元にスレッドを全件取得
@@ -417,6 +465,48 @@ public class KuchannelDao {
         System.out.println(list);
 
         return list;
+
+    }
+
+    //言い値ボタンが押されたとき、そのユーザーがそのスレッドへいいねを押していない場合インサート、すでに押している場合は削除。そののちにその時のいいね数をCOUNTして数字で返したい。
+    public int goodDeal(Integer thread_id,Integer user_id){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("thread_id",thread_id);
+        param.addValue("user_id",user_id);
+        //すでにいいねされているかを検索。
+        List<Good> searchGoodResult = jdbcTemplate.query("SELECT *FROM thread_goods WHERE user_id=:user_id AND thread_id =:thread_id;", param,
+                new DataClassRowMapper<>(Good.class));
+        //そのデータがが存在する場合
+        if(!searchGoodResult.isEmpty()){
+            //データが存在する場合、searchGoodResultからidを取得し、それを消す。
+            System.out.println("ヌルじゃない"+searchGoodResult.get(0));
+            var existingGoodId =searchGoodResult.get(0).getId();
+            param.addValue("good_id",existingGoodId);
+            var deleteGoodResult= jdbcTemplate.update("DELETE FROM thread_goods WHERE id = :good_id;",param);
+            return deleteGoodResult;
+        }else{
+            //データが存在しない場合、threadGoodテーブルにインサート。
+            System.out.println("ヌルと思う");
+            var deleteGoodResult= jdbcTemplate.update("INSERT INTO thread_goods(user_id,thread_id)VALUES(:user_id,:thread_id);",param);
+            return deleteGoodResult;
+        }
+
+    }
+
+    public boolean deleteThread(Integer thread_id){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("thread_id",thread_id);
+        List<MyReview> searchReviewResult = jdbcTemplate.query("SELECT title FROM reviews WHERE thread_id =:thread_id;", param,
+                new DataClassRowMapper<>(MyReview.class));
+        //レビューがないなら消してtrueを返す。
+        if(searchReviewResult.isEmpty()){
+            var deleteThreadHashtagResult = jdbcTemplate.update("DELETE FROM thread_hashtag WHERE thread_id = :thread_id;",param);
+            var deleteThreadGoodResult = jdbcTemplate.update("DELETE FROM thread_goods WHERE thread_id = :thread_id;",param);
+            var deleteThreadResult= jdbcTemplate.update("DELETE FROM threads WHERE id = :thread_id;",param);
+            return true;
+        }
+        //レビューがあったら消さずにfalseを返す。
+        return false;
 
     }
 
