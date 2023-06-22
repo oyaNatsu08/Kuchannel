@@ -167,4 +167,12 @@ public class KuchannelService {
         return kuchannelDao.communityThreads(communityId);
     }
 
+/*-----------------------------------------------------------------------------*/
+    //レビュー削除
+    public int reviewDelete(Integer reviewId) {
+        return kuchannelDao.reviewDelete(reviewId);
+    }
+
+/*-----------------------------------------------------------------------------*/
+
 }

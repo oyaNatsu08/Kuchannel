@@ -11,7 +11,7 @@
       text-align: center;
     }
 
-    .review-all {
+    .review {
       border: 1px solid black;
       border-radius: 8px;
       padding: 10px;
@@ -25,24 +25,28 @@
       margin-top: 10px;
     }
 
-    .reply {
-      border: 1px solid orange;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 10px;
-      margin-left: 20%;
-      margin-right: 20%;
+    .popup {
+      width: 50%;
+      height: 30%;
+      text-align: center;
+      margin-top: 200px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
     }
 
-    .review {
-      border: 1px solid orangered;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 10px;
-      margin-left: 20%;
-      margin-right: 20%;
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(150, 150, 150, 0.5);
+      display: flex;
+      justify-content: center;
+      /* align-items: center; */
+      animation: fade-in 0.5s ease-in;
     }
-
   </style>
 </head>
 
@@ -50,16 +54,15 @@
 
   <div id="app0">
 
-    <th:block th:insert="common/header"></th:block>
+    <th:block th:insert="~{common/header}"></th:block>
 
   </div>
 
   <div id="app">
     <h2>登録したお店の情報</h2>
-    <button type="button">情報編集</button>
     <hr>
 
-    <div class="review-all">
+    <div class="review">
       <p>
         タイトル：
         <input type="text" v-model="reviewTitle">
@@ -76,90 +79,91 @@
       <button type="button" @click="addReview">投稿</button>
     </div>
 
-    <div class="review-all" v-for="review in reviews">
+    <div class="review" v-for="review in reviews">
+      <p>{{ review.userName }}さん</p>
+      <h3>{{ review.title }}</h3>
+      <p>レビューID: {{ review.reviewId }}</p>
 
-      <div class="review">
+      <!-- 一枚だけ表示(未) -->
+      <!-- <img :src="'/images/reviewImages/' + review.reviewImages[0].imagePath" style="width: 60px; height: auto;"> -->
 
-        <p>{{ review.userName }}さん</p>
-        <h3>{{review.title}}</h3>
-        <p>投稿日：{{ review.createDate }}</p>
-
-        <!-- 一枚だけ表示(未) -->
-        <!-- <img :src="'/images/reviewImages/' + review.reviewImages[0].imagePath" style="width: 60px; height: auto;"> -->
-
-        <!-- 複数表示 -->
-        <div class="image-review-container">
-          <p>{{review.review}}</p>
-          <div v-for="image in review.reviewImages">
-            <img :src="'/images/reviewImages/' + image.imagePath" style="width: 50px; height: auto;">
-          </div>
+      <!-- 複数表示 -->
+      <div class="image-review-container">
+        <p>{{ review.review }}</p>
+        <div v-for="image in review.reviewImages">
+          <img :src="'/images/reviewImages/' + image.imagePath" style="width: 50px; height: auto;">
         </div>
-
       </div>
-
-      <hr>
-
-      <div class="reply" v-for="reply in review.reviewReplies">
-        <p>{{ reply.userName }}さん</p>
-        <p>{{ reply.reply }}</p>
-        <p>投稿日：{{ reply.createDate }}</p>
-      </div>
-
-      <div v-if="isReplyView && reviewId == review.reviewId" style="margin-bottom: 20px;">
-        <h3>返信</h3>
-        <p>
-          本文：
-          <textarea cols="30" rows="10" v-model="replyContent"></textarea>
-        </p>
-        <button type="button" @click="closeReply">閉じる</button>
-        <button type="button" @click="addReply(review.reviewId)">送信</button>
-      </div>
-
+      {{review.reviewId}} 
       <!-- 投稿ユーザーだけ表示される(後でやる) -->
       <!-- ここを修正(富永＆宮城) -->
       <button type="button" @click="showDeleteConfirmation(review.reviewId)">削除</button>
-      <!--削除ポップアップの表示      -->
-      <div id="deletePopup" style="display: none;">
-        <p>削除しますか？</p>
-        <button type="button" @click="deleteReviewConfirmed">OK</button>
-        <button type="button" @click="cancelDeleteReview">キャンセル</button>
-      </div>
-      <button type="button">更新</button>
-
-      <button type="button" @click="openReply(review.reviewId)">返信</button>
+      <button type="button" @click="showEditPopup(review)">編集</button>
       
-      <form action="/review-detail" method="get" style="margin-top: 20px;">
-        <input type="hidden" name="reviewId" :value="review.reviewId"/>
-        <button type="submit">詳細画面へ</button>
-      </form>
+      <div v-if="showDeletePopup" class="popup-overlay">
+        <div class="popup">
+          <h2>削除しますか？</h2>
+          <button type="button" @click="deleteReview(review.reviewId)">OK</button>
+          <button type="button" @click="cancelDelete">キャンセル</button>
+        </div>
+      </div>
+
     </div>
 
     <!-- <p th:text="'クリックされたレビューは、' + ${review} + 'です。'"></p> -->
-  </div>
 
+    <!-- 編集ポップアップ -->
+    <div v-if="showPopup">
+      <h2>編集</h2>
+      <p>タイトル：<input type="text" v-model="editingReview.title"></p>
+      <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
+      <button type="button" @click="updateReview">更新</button>
+      <button type="button" @click="closePopup">キャンセル</button>
+    </div>
+  </div>
   <script src="/js/base.js"></script>
 
   <script>
-
     createApp({
       data() {
         return {
           reviewTitle: '',
           content: '',
           reviews: [],
-          isReplyView: false,
-          replies: [],
-          replyContent: '',
-          reviewId: '',
-       <!--　削除追加　-->
-          deleteReviewId: null,
-          isDeletePopupVisible: false,
+          showPopup: false,
+          showDeletePopup: false,
+          editingReview: {
+            id: '',
+            title: '',
+            content: ''
+          },
+          reviewToDelete: null
         }
       },
       methods: {
+        //レビュー削除処理
+        showDeleteConfirmation(reviewId) {
+          this.reviewToDelete = reviewId;
+          this.showDeletePopup = true;
+        },
+        deleteReview(reviewId) {
+          console.log("success", reviewId);
+          axios
+            .delete(`/api/delete/${reviewId}`)
+            .then(res => {
+              // 削除成功時の処理
+              this.getReviews();
+              this.cancelDelete();
+              console.log(res);
+            })
+            .catch(error => {
+              // エラーハンドリング処理
+              console.error(error);
+            });
+        },
+
         // レビュー投稿処理
         addReview() {
-
           console.log(this.reviewTitle, this.content);
           const formData = new FormData();
           formData.append("title", this.reviewTitle);
@@ -169,44 +173,6 @@
           for (let i = 0; i < this.$refs.fileInput.files.length; i++) {
             formData.append('images', this.$refs.fileInput.files[i]);
           }
-　　<!--レビュー削除のポップアップ表示メソッド（富永）-->
-<!--        showDeleteConfirmation(reviewId) {-->
-
-<!--          this.deleteReviewId = reviewId;-->
-<!--          if (confirm("削除しますか？")) {-->
-<!--          this.deleteReview(reviewId);-->
-<!--          }-->
-<!--        },-->
-        showDeleteConfirmation(reviewId) {
-          this.deleteReviewId = reviewId;
-          this.isDeletePopupVisible = true;
-  },
-
-
-　　<!--レビュー削除処理実装のメソッド（富永）-->
-        deleteReview(reviewId) {
-    　　　　axios.post('/delete-review', { reviewId: reviewId })
-      　　　.then(res => {
-        　　// 削除が成功した場合の処理
-        　　this.getReviews(); // レビューを再取得して表示を更新する
-            })
-          .catch(error => {
-           // エラーが発生した場合の処理
-          });
-        },
-
-
-　　　　<!--削除ポップアップで「OK」が押されたとき-->
-      deleteReviewConfirmed() {
-        this.isDeletePopupVisible = false;
-        this.deleteReview(this.deleteReviewId);
-      },
-      <!--削除ポップアップで「キャンセル」が押されたとき-->
-      cancelDeleteReview() {
-        this.isDeletePopupVisible = false;
-      },
-
-
 
           axios.post('/add-review', formData)
             .then(res => {
@@ -225,37 +191,59 @@
               this.reviews = res.data;
               console.log(this.reviews);
               console.log(this.reviews[0].reviewImages[0].imagePath);
-            });
+            }
+            );
         },
-        //返信画面表示
-        openReply(reviewId) {
-          this.isReplyView = true;
-          this.reviewId = reviewId;
+        // showDeleteConfirmation(reviewId) {
+        //   this.reviewToDelete = reviewId;
+        //   this.showDeletePopup = true;
+        // },
+        // deleteReview(reviewId) {
+        //   axios.delete('/api/delete', {
+        //     params: {
+        //       id: reviewId
+        //     }
+        //   })
+        //     .then(res => {
+        //       this.getReviews();
+        //       this.cancelDelete();
+        //       console.log(res);
+        //     });
+        // },
+        cancelDelete() {
+          this.reviewToDelete = null;
+          this.showDeletePopup = false;
         },
-        //返信画面非表示
-        closeReply() {
-          this.isReplyView = false;
+        showEditPopup(review) {
+          this.showPopup = true;
+          this.editingReview.id = review.reviewId;
+          this.editingReview.title = review.title;
+          this.editingReview.content = review.content;
         },
-        //返信送信
-        addReply(reviewId) {
-          const formData = new FormData();
-          formData.append("id", reviewId);
-          formData.append("content", this.replyContent);
-          axios.post('/add-reply', formData)
+        updateReview() {
+          const updatedReview = {
+            id: this.editingReview.id,
+            title: this.editingReview.title,
+            content: this.editingReview.content
+          };
+
+          axios.put('/api/update', updatedReview)
             .then(res => {
-              // アップロードが成功した場合の処理
-              this.isReplyView = false;
               this.getReviews();
+              this.closePopup();
               console.log(res);
-            })
-            .catch(error => {
-              // エラーが発生した場合の処理
             });
+        },
+        closePopup() {
+          this.showPopup = false;
+          this.editingReview.id = '';
+          this.editingReview.title = '';
+          this.editingReview.content = '';
         }
       },
-      created: function () {
+      created() {
         this.getReviews();
-      },
+      }
     }).mount('#app')
   </script>
 
