@@ -314,7 +314,7 @@ public class KuchannelController {
         //thread-list.htmlにthreadsの値を渡す
         model.addAttribute("threads", threads);
 
-        return "thread-list2";
+        return "thread-list";
 
     }
     //レビュー一覧へ飛ぶ
@@ -376,21 +376,7 @@ public class KuchannelController {
         return "thread-add"; //開きたいhtmlファイル名
     }
 
-    //スレッド作成処理
-    @PostMapping("/thread-add")
-    public String addThread(@ModelAttribute("threadForm")ThreadAddForm threadAddForm,
-                            Model model) {
-        //threadsテーブルにINSERT処理
-        kuchannelService.threadInsert(threadAddForm);
 
-        //コミュニティIDを元にスレッドを全件取得(現在は1固定)
-        var threads = kuchannelService.communityThreads(1);
-
-        //thread-list.htmlにthreadsの値を渡す
-        model.addAttribute("threads", threads);
-
-        return "redirect:/community/thread-list/1";
-    }
 
     //お問い合わせページ
     @GetMapping("/Information")

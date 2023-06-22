@@ -186,4 +186,14 @@ public class KuchannelService {
         return kuchannelDao.edit(loginId, name, password);
     }
 
+    public int goodDeal(Integer thread_id, Integer user_id){
+        return kuchannelDao.goodDeal(thread_id,user_id);
+    }
+
+    public boolean deleteThread(Integer thread_id){
+        return kuchannelDao.deleteThread(thread_id);
+    }
+
+    public int threadUpdate(ThreadAddForm inputData,Integer thread_id){return kuchannelDao.threadUpdate(inputData,thread_id);}
+
 }

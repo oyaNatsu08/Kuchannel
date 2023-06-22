@@ -1,10 +1,13 @@
 package com.example.Kuchannel.controller;
 
 import com.example.Kuchannel.entity.*;
+import com.example.Kuchannel.entity.*;
+import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -74,6 +77,50 @@ public class KuchannelRestController {
         List<MyReview> result = kuchannelService.getMyReviews(user.id());
         return result;
     }
+
+//    スレッド一覧ページ用。スレッドの情報を取得
+    @GetMapping("getThreads")
+    public List<CommunityThread> getThreads(){
+//        コミュニティidを渡すようにする（今は1で固定）
+        var threads = kuchannelService.communityThreads(1);
+        return threads;
+    }
+
+    @GetMapping("/goodDeal/{id}")
+    public int GoodDeal(@PathVariable("id")Integer thread_id){
+//        セッションからuser_idをもらう一旦1で固定
+//        var user = (UserRecord)session.getAttribute("user");
+        return kuchannelService.goodDeal(thread_id,1);
+    }
+
+    //スレッド削除用
+    @DeleteMapping("/deleteThread/{threadId}")
+    public boolean deleteThread(@PathVariable("threadId")Integer thread_id){
+        return kuchannelService.deleteThread(thread_id);
+    }
+
+    //セッション情報返せるつもり。
+    @GetMapping("getSessionInfo")
+    public UserRecord getSessionInfo(){
+        var user = (UserRecord)session.getAttribute("user");
+        return user;
+    }
+
+    //スレッド作成処理
+    @PostMapping("/thread-add")
+    public int addThread(@RequestBody ThreadAddForm inputData) {
+        //threadsテーブルにINSERT処理
+        var result =kuchannelService.threadInsert(inputData);
+        return result;
+    }
+
+    @PutMapping("/updateThread/{id}")
+    public int threadUpdate(@RequestBody ThreadAddForm inputData,@PathVariable("id") Integer thread_id){
+        var result =kuchannelService.threadUpdate(inputData ,thread_id);
+        return result;
+    }
+
+
 
     /*----------------------------------------*/
 
