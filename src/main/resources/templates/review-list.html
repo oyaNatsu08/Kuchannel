@@ -157,7 +157,7 @@
       <!-- 投稿ユーザーだけ表示される(後でやる) -->
       <!-- ここを修正(富永＆宮城) -->
       <button type="button" v-if="review.userId == userId">削除</button>
-      <button type="button" v-if="review.userId == userId">編集</button>
+      <button type="button" v-if="review.userId == userId" @click="showEditPopup(review)">編集</button>
       <button type="button" @click="openReply(review.reviewId)">返信</button>
 
       <form action="/review-detail" method="get" style="margin-top: 20px;">
@@ -174,12 +174,16 @@
     </div>
 
     <!-- 編集ポップアップ -->
-    <div v-if="showPopup">
-      <h2>編集</h2>
-      <p>タイトル：<input type="text" v-model="editingReview.title"></p>
-      <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
-      <button type="button" @click="updateReview">更新</button>
-      <button type="button" @click="closePopup">キャンセル</button>
+    <div v-if="showPopup" class="popup-overlay">
+      <div class="popup">
+        <h2>編集</h2>
+        <p>タイトル：<input type="text" v-model="editingReview.title"></p>
+        <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
+        <p>写真の追加：<input type="file" ref="fileInput" multiple />
+        </p>
+        <button type="button" @click="closePopup">キャンセル</button>
+        <button type="button" @click="updateReview">更新</button>
+      </div>
     </div>
 
   </div>
@@ -264,24 +268,13 @@
             }
             );
         },
-        deleteReview(reviewId) {
-          axios.delete('/api/delete', {
-            params: {
-              id: reviewId
-            }
-          })
-            .then(res => {
-              this.getReviews();
-              console.log(res);
-            });
-        },
 
         //編集・更新
         showEditPopup(review) {
           this.showPopup = true;
           this.editingReview.id = review.reviewId;
           this.editingReview.title = review.title;
-          this.editingReview.content = review.content;
+          this.editingReview.content = review.review;
         },
         updateReview() {
           const updatedReview = {
@@ -290,11 +283,13 @@
             content: this.editingReview.content
           };
 
-          axios.put('/api/update', updatedReview)
+          axios.put('/review-update', updatedReview)
             .then(res => {
-              this.getReviews();
+              this.getReviews(`[[ ${threadId} ]]`);
               this.closePopup();
+              console.log(updatedReview)
               console.log(res);
+
             });
         },
         //返信画面表示

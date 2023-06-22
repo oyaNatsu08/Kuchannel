@@ -5,6 +5,8 @@ import com.example.Kuchannel.form.ThreadAddForm;
 import jakarta.servlet.http.HttpSession;
 import com.example.Kuchannel.entity.InformatonRecord;
 //import com.example.Kuchannel.entity.ThreadRecord;
+import com.example.Kuchannel.entity.InformatonRecord;
+import com.example.Kuchannel.entity.ThreadRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -454,6 +456,7 @@ public class KuchannelDao {
     public int threadInsert(ThreadAddForm threadAddForm) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("threadName", threadAddForm.getThreadName());
+//        param.addValue("furigana", threadAddForm.getFurigana());
         param.addValue("address", threadAddForm.getAddress());
         param.addValue("salesTime", threadAddForm.getSalesTime());
         param.addValue("genre", threadAddForm.getGenre());
@@ -625,20 +628,6 @@ public class KuchannelDao {
 
     }
 
-    //お問い合わせ
-    public int information(InformatonRecord informatonRecord){
-        MapSqlParameterSource param = new MapSqlParameterSource();
-        param.addValue("userId", informatonRecord.userId());
-        param.addValue("communityId", informatonRecord.communityId());
-        param.addValue("content", informatonRecord.content());
-        param.addValue("flag", informatonRecord.flag());
-
-        var result = jdbcTemplate.update("INSERT INTO inquiries (user_id,community_id,content,flag) VALUES(:userId,:communityId,:content,:flag);",
-                param);
-
-        return result;
-    }
-
     /*------------------------------------*/
 
     //プロフィール編集（start）
@@ -664,6 +653,19 @@ public class KuchannelDao {
         }
     }
 
+    //お問い合わせ
+    public int information(InformatonRecord informatonRecord){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("userId", informatonRecord.userId());
+        param.addValue("communityId", informatonRecord.communityId());
+        param.addValue("content", informatonRecord.content());
+        param.addValue("flag", informatonRecord.flag());
+
+        var result = jdbcTemplate.update("INSERT INTO inquiries (user_id,community_id,content,flag) VALUES(:userId,:communityId,:content,:flag);",
+                param);
+
+        return result;
+    }
     //言い値ボタンが押されたとき、そのユーザーがそのスレッドへいいねを押していない場合インサート、すでに押している場合は削除。そののちにその時のいいね数をCOUNTして数字で返したい。
     public int goodDealThread(Integer thread_id,Integer user_id){
         MapSqlParameterSource param = new MapSqlParameterSource();
