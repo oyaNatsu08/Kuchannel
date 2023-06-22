@@ -176,6 +176,7 @@ public class KuchannelController {
                              @ModelAttribute("communityJoin") CommunityJoinForm communityForm,
                              @ModelAttribute("UserForm") UserForm userForm,
                              @PathVariable("randomString") String str,
+                             //コミュニティの名前
                              @PathVariable("code") String code,
                              Model model) {
 
@@ -301,18 +302,21 @@ public class KuchannelController {
     }
 
     //コミュニティのスレッド一覧へ遷移する(ボタンなどでの遷移)
-    @GetMapping("/community/thread-list")
-    public String threadListView(@RequestParam(name="id")Integer communityId,
+    @GetMapping("/community/thread-list/{communityId}")
+    public String threadListView(@PathVariable("communityId") Integer communityId,
                                  Model model) {
         //コミュニティIDを元にコミュニティを特定する
         CommunityRecord community = kuchannelService.findCommunity(communityId);
-
         model.addAttribute("name", community.name());
+        //コミュニティIDを元にスレッドを全件取得(現在は1固定)
+        var threads = kuchannelService.communityThreads(1);
 
-        return "thread-list";
+        //thread-list.htmlにthreadsの値を渡す
+        model.addAttribute("threads", threads);
+
+        return "thread-list2";
 
     }
-
     //レビュー一覧へ飛ぶ
     @GetMapping("review-list")
     public String reviewListView(@ModelAttribute("UserForm") UserForm userForm) {
@@ -357,14 +361,17 @@ public class KuchannelController {
 
     /*------------------------------------------------*/
 
-    //スレッド作成画面へ遷移
+
+
+    //スレッド作成画面
+    //RequestParamは、遷移する前のページから受け取る。今はコメントアウト
     @GetMapping("/thread-add") //urlで入力する値
     public String threadAddView(@ModelAttribute("threadForm")ThreadAddForm threadAddForm,
-                                @RequestParam(name="communityId") Integer communityId,
+//                                @RequestParam(name="communityId") Integer communityId,
                                 Model model) { //メソッド名(コントローラークラスの中で被らなければok)
 
         //コミュニティIDをthread-add.htmlに値を渡す
-        model.addAttribute("communityId", communityId);
+//        model.addAttribute("communityId", communityId);
 
         return "thread-add"; //開きたいhtmlファイル名
     }
@@ -381,13 +388,8 @@ public class KuchannelController {
 
         //thread-list.htmlにthreadsの値を渡す
         model.addAttribute("threads", threads);
-        //コミュニティIDを元にスレッドを全件取得(現在は１固定)
-        threads = kuchannelService.communityThreads(1);
 
-        //thread-list.htmlにthreadsの値を渡す
-        model.addAttribute("threads",threads);
-
-        return "thread-list";
+        return "redirect:/community/thread-list/1";
     }
 
     //お問い合わせページ

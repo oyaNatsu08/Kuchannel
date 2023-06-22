@@ -85,7 +85,7 @@
             <tbody>
               <tr v-for="thread in myThreads">
                 <td><a href="#">{{thread.threadTitle}}</a></td>
-                <td><a href="#">{{thread.communityName}}</a></td>
+                <td><a :href="getCommunityLink(thread.communityId)">{{thread.communityName}}</a></td>
               </tr>
 
             </tbody>
@@ -237,11 +237,15 @@
           this.isPopupCommunity = false;
         },
 
+        // コミュニティのリンクを動的に生成するロジックを実装
+        getCommunityLink(communityId) {
+          return `community/thread-list/${communityId}`;
+        },
+
     },
 
     created: function() {
       console.log("created");
-      console.log('isPopUo'+ this.isPopupCommunity)
 
       this.getBelongingCommunities();
       this.getMyThreads();

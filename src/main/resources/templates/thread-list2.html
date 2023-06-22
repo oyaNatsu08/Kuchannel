@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>飲食店一覧</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <link href="/css/thread-list.css" rel="stylesheet">
+</head>
+<body>
+
+  <div id="app0">
+
+    <th:block th:insert="common/header"></th:block>
+
+  </div>
+  <h1 th:text="${name} + 'へようこそ！'"></h1>
+  <form action="/thread-add" method="get">
+    <button type="submit" th:text="スレッドの新規作成"></button>
+    <input type="hidden" name="communityId" th:value="1">
+  </form>
+
+  <div class="restaurant" th:each="thread : ${threads}">
+    <img src="restaurant-a.jpg" alt="飲食店A" class="restaurant-img">
+    <div>
+      <a href="#" class="restaurant-name"><h3>[[ ${thread.title} ]]</h3></a>
+      <div class="genre">ジャンル：[[ ${thread.genre} ]]</div>
+      <div class="address">住所：[[ ${thread.address} ]]</div>
+      <div class="likes">
+        <button>いいね</button>
+        <span>[[${thread.good_count}]]</span>
+      </div>
+      <div class="opening-hours">営業時間：[[ ${thread.sales_time} ]]</div>
+      <div class="hashtags">
+        <ul th:each="hashtag : ${thread.hashTagList}">
+          <li>
+              <a href="#"> [[${hashtag.tag_name}]]</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <script src="/js/base.js"></script>
+  
+  
+</body>
+</html>

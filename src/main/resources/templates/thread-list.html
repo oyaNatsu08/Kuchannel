@@ -14,17 +14,24 @@
         <th:block th:insert="common/header"></th:block>
 
     </div>
-<!--        <h1 th:text="${name} + 'へようこそ！'"></h1>-->
+    <h1 th:text="${name} + 'へようこそ！'"></h1>
 
-        <form action="/thread-add" method="get">
-            <button type="submit" th:text="スレッドの新規作成"></button>
-            <input type="hidden" name="communityId" th:value="1">
-        </form>
+    <form action="/thread-add" method="get">
+        <button type="submit" th:text="スレッドの新規作成"></button>
+        <input type="hidden" name="communityId" th:value="1">
+    </form>
 
-        <th:block th:each="thread : ${threads}">
-            <h3><a href="#">[[ ${thread.title} ]]</a></h3>
-            <p th:text="${thread.address}"></p>
-        </th:block>
+    <th:block th:each="thread : ${threads}">
+        <h3><a href="#">[[ ${thread.title} ]]</a></h3>
+        <p th:text="${thread.address}"></p>
+        <p th:text="${thread.sales_time}"></p>
+        <p th:text="${thread.genre}"></p>
+        <ul>
+            <li th:each="hashtag : ${thread.hashTagList}">
+                <span th:text="${hashtag.tag_name}"></span>
+            </li>
+        </ul>
+    </th:block>
 
 
 
