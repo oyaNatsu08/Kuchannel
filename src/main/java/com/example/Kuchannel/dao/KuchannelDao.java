@@ -516,7 +516,6 @@ public class KuchannelDao {
 
         var updateThreadResult = jdbcTemplate.update("UPDATE threads SET title=:title,address=:address,sales_time=:sales_time,genre=:genre WHERE id = :thread_id", param);
 
-
         //ハッシュタグの処理。一度スレッドハッシュタグをリセットして、再度インサートする。
         var resetThreadHashtag = jdbcTemplate.update("DELETE FROM thread_hashtag WHERE thread_id = :thread_id", param);
 
