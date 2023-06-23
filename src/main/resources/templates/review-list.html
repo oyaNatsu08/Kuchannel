@@ -271,6 +271,7 @@
           for (let i = 0; i < this.$refs.fileInput.files.length; i++) {
             formData.append('images', this.$refs.fileInput.files[i]);
           }
+          console.log("ここまで");
 
           axios.post('/add-review', formData)
             .then(res => {

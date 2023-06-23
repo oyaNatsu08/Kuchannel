@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>飲食店一覧</title>
+  <title>口ゃんねる</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
   <link href="/css/popup.css" rel="stylesheet">
@@ -12,14 +12,20 @@
 </head>
 
 <body>
+
   <div id="app0">
     <th:block th:insert="common/header"></th:block>
   </div>
 
   <div id="app">
 
-    <h1 class="community-name" th:text="${name} + 'へようこそ！'"></h1>
 
+    <div class="pagetop">
+      <h1>{{communityName}}へようこそ！</h1>
+      <button @click.self="getCommunityMember">コミュニティメンバーの確認</button>
+    </div>
+
+    <!-- 検索バー -->
     <div>
       <div class="search-container">
         <p>
@@ -35,124 +41,215 @@
         </select>
         <button type="button" @click="changeRefineView()">簡単絞り込み</button>
       </div>
-    </div>
 
-    <div v-if="refineView" style="text-align: center;">
-      <div>
-        <h3>ジャンル</h3>
-        <div v-for="genre in genres" style="display: inline-block;">
-          <input type="checkbox" v-model="GenreChecked" :value="genre.genreName">{{ genre.genreName }}</input>
-        </div>
-      </div>
-      <hr>
-      <div>
-        <h3>人気のキーワード</h3>
-        <div v-for="hashtag in hashtags" style="display: inline-block;">
-          <p style="color: blue; margin-right: 10px;" @click="searchAdd(hashtag.tagName)">#{{ hashtag.tagName }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- <form action="/thread-add" method="get">
-      <button type="submit" th:text="スレッドの新規作成" @click="openPopup"></button>
-      <input type="hidden" name="communityId" th:value="1">
-    </form> -->
-    <button type="button" @click="openPopup('ThreadAdd')">スレッドの新規作成</button>
-
-
-    <div v-if="isThreadAddPopup" class="popup-overlay" @click.self="closePopup('ThreadAdd')">
-      <div class="popup">
-        <h1>スレッド新規作成</h1>
-        <p>スレッド名(店名)：<input type="text" v-model="addThreadTitle"> <!-- String threadName;と対応させる --></p>
-        <p>フリガナ：<input type="text" v-model="addThreadFurigana"></p>
-        <p>お店の住所：<input type="text" v-model="addThreadAddress"></p>
-        <p>営業時間：<input type="text" v-model="addThreadSalesTime"></p>
-        <p>ジャンル：
-          <select v-model="addThreadGenre">
-            <option value="和食" selected>和食</option>
-            <option value="中華">中華</option>
-            <option value="イタリアン">イタリアン</option>
-          </select>
-        </p>
-        <p>ハッシュタグ：<input type="text" v-model="addThreadHashtags"></p>
-        <button @click.self="addThread">作成</button>
-        <button @click.self="closePopup('ThreadAdd')">閉じる</button>
-      </div>
-    </div>
-
-
-    <div class="sorting">
-      <label><input type="radio" name="sortSelect" @click="sortItems('id')"></button>投稿の新しい順にする</label>
-      <label><input type="radio" name="sortSelect" @click="sortItems('good_count')"></button>いいねの多い順にする</label>
-    </div>
-
-
-
-    <div v-for="thread in threads">
-      <div class="restaurant" v-if="genreIncludeCheck(thread.genre)">
-
-        <img src="restaurant-a.jpg" alt="飲食店A" class="restaurant-img">
+      <div v-if="refineView" style="text-align: center;">
         <div>
-          <a :href="getThreadReviewLink(thread.id)" class="restaurant-name">
-            <h3>{{thread.title}}</h3>
-          </a>
-          <div class="genre">ジャンル：{{thread.genre}}</div>
-          <div class="address">住所：{{thread.address}}</div>
-          <div class="likes">
-            <button @click="goodDeal(thread.id)">いいね</button>
-            <span>{{thread.good_count}}</span>
-          </div>
-          <div class="opening-hours">営業時間：{{thread.sales_time}}</div>
-          <div class="hashtags">
-            <ul class="hashUl" v-for="hashtag in thread.hashTagList">
-              <li>
-                <a href="#"> {{hashtag.tag_name}}</a>
-              </li>
-            </ul>
+          <h3>ジャンル</h3>
+          <div v-for="genre in genres" style="display: inline-block;">
+            <input type="checkbox" v-model="GenreChecked" :value="genre.genreName">{{ genre.genreName }}</input>
           </div>
         </div>
-        <!-- セッションからuse_idをもってきて、ここで判別。 -->
-        <div class="delete-update">
-          <button type="button" v-if="thread.user_id == 1" @click="deleteThread(thread.id)">削除</button>
-          <button type="button" @click="openUpdateThread(thread.id)">情報編集</button>
+        <hr>
+        <div>
+          <h3>人気のキーワード</h3>
+          <div v-for="hashtag in hashtags" style="display: inline-block;">
+            <p style="color: blue; margin-right: 10px;" @click="searchAdd(hashtag.tagName)">#{{ hashtag.tagName }}</p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div v-if="isThreadUpdatePopup" class="popup-overlay" @click.self="closePopup('ThreadUpdate')">
-      <div class="popup">
-        <h1>スレッド情報編集</h1>
-        <p>スレッド名(店名)：<input type="text" v-model="updateThreadTitle"> <!-- String threadName;と対応させる --></p>
-        <p>フリガナ：<input type="text" v-model="updateThreadFurigana"></p>
-        <p>お店の住所：<input type="text" v-model="updateThreadAddress"></p>
-        <p>営業時間：<input type="text" v-model="updateThreadSalesTime"></p>
-        <p>ジャンル：
-          <select v-model="updateThreadGenre">
-            <option value="和食" selected>和食</option>
-            <option value="中華">中華</option>
-            <option value="イタリアン">イタリアン</option>
-          </select>
-        </p>
-        <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags"></p>
-        <button @click.self="updateThread">更新</button>
-        <button @click.self="closePopup('ThreadUpdate')">閉じる</button>
+
+      <!-- 並べ替えのところ -->
+      <div class="sorting">
+        <label><input type="radio" name="sortSelect" @click="sortItems('id')"></button>投稿の新しい順にする</label>
+        <label><input type="radio" name="sortSelect" @click="sortItems('good_count')"></button>いいねの多い順にする</label>
       </div>
+
+      <!-- メンバー確認 -->
+      <div v-if="isCommunityMemberPopup" @click.self="closePopup('CommunityMember')" class="popup-overlay"
+        type="button">
+        <div class="popup">
+          <h2>{{communityName}}のメンバー</h2>
+          <div v-if="sessionInfo.role ===2"><button @click="deleteCommunity">コミュニティを削除する</button></div>
+          <table class="member-container">
+            <thead>
+              <tr>
+                <th>メンバー名</th>
+                <th v-if="sessionInfo.role ===2">退会</th>
+                <th v-if="sessionInfo.role ===2">権限</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="member in communityMembers" V-bind:id="member.id">
+                <!-- リンクからその人のレビュー一覧に飛べるように -->
+                <td><a href="#">{{member.name}}</a></td>
+                <td v-if="sessionInfo.role ===2">
+                  <form name="form"><input type="checkbox" v-model="member.flag"
+                      v-bind:disabled="member.id == sessionInfo.id"></form>
+                </td>
+                <td v-if="sessionInfo.role ===2">
+
+                  <select name="roleSelect" v-model="member.role" v-bind:disabled="member.id == sessionInfo.id">
+                    <option value=1 :selected="member.role === 1">一般</option>
+                    <option value=2 :selected="member.role === 2">管理者</option>
+                  </select>
+
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button type="button" v-if="sessionInfo.role ===1">問い合わせ</button>
+          <button type="button" v-if="sessionInfo.role ===2" @click="applyChenge">この内容で変更する</button>
+          <button @click.self="closePopup('CommunityMember')">閉じる</button>
+
+        </div>
+      </div>
+
+
+
+      <!-- スレッドの新規作成 -->
+      <button type="button" @click="openPopup('ThreadAdd')">スレッドの新規作成</button>
+      <div v-if="isThreadAddPopup" class="popup-overlay" @click.self="closePopup('ThreadAdd')">
+        <div class="popup">
+          <h1>スレッド新規作成</h1>
+          <p>スレッド名(店名)：<input type="text" v-model="addThreadTitle"> <!-- String threadName;と対応させる --></p>
+          <p>フリガナ：<input type="text" v-model="addThreadFurigana"></p>
+          <p>お店の住所：<input type="text" v-model="addThreadAddress"></p>
+          <p>営業時間：<input type="text" v-model="addThreadSalesTime"></p>
+          <p>ジャンル：
+            <select v-model="addThreadGenre">
+              <option value="和食" selected>和食</option>
+              <option value="中華">中華</option>
+              <option value="イタリアン">イタリアン</option>
+            </select>
+          </p>
+          <p>ハッシュタグ：<input type="text" v-model="addThreadHashtags"></p>
+          <button @click.self="addThread">作成</button>
+          <button @click.self="closePopup('ThreadAdd')">閉じる</button>
+        </div>
+      </div>
+
+      <!-- スレッドの統合 -->
+      <button type="button" v-if="sessionInfo.role ===2" @click="integrateThread">スレッドの統合</button>
+      <div v-if="isIntegrateThreadsPopup" class="popup-overlay" @click.self="closePopup('IntegrateThreads')">
+        <div class="popup">
+          <h1>スレッド統合（採用するお店の情報を選択してください。）</h1>
+          <p>スレッド名(店名)：
+            <select v-model="selectedThreadName">
+              <option v-for="thread in selectedThreads" :value="thread.title" :key="thread.id" selected="selected">
+                {{thread.title}}
+              </option>
+            </select>
+          </p>
+          <p>フリガナ：
+            <select v-model="selectedThreadFurigana">
+              <option v-for="thread in selectedThreads" :value="thread.furigana" :key="thread.id">
+                {{thread.furigana}}
+              </option>
+            </select>
+          </p>
+          <p>お店の住所：
+            <select v-model="selectedThreadAddress">
+              <option v-for="thread in selectedThreads" :value="thread.address" :key="thread.id">
+                {{thread.address}}
+              </option>
+            </select>
+          </p>
+          <p>営業時間：
+            <select v-model="selectedThreadSalesTime">
+              <option v-for="thread in selectedThreads" :value="thread.sales_time" :key="thread.id">
+                {{thread.sales_time}}
+              </option>
+            </select>
+          </p>
+          <p>ジャンル：
+            <select v-model="selectedThreadGenre">
+              <option v-for="thread in selectedThreads" :value="thread.genre" :key="thread.id">
+                {{thread.genre}}
+              </option>
+            </select>
+          </p>
+
+          <p> ハッシュタグ：</p>
+          <div v-for="thread in selectedThreads" class="hashtag-list">
+            <div v-for="hashtag in thread.hashTagList">
+              <p><input type="checkbox" name="hashTag" v-bind:value="hashtag.tag_name"
+                  v-model="selectedThreadHashTag" />{{hashtag.tag_name}}</p>
+            </div>
+          </div>
+          <button @click.self="ThreadIntegrate">統合する</button>
+          <button @click.self="closePopup('IntegrateThreads')">閉じる</button>
+        </div>
+      </div>
+
+
+      <!-- スレッドの表示。 -->
+      <div v-for="thread in threads">
+        <div class="restaurant" v-if="genreIncludeCheck(thread.genre)">
+          <img src="restaurant-a.jpg" alt="飲食店A" class="restaurant-img">
+          <div>
+            <input type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2">
+            <a :href="getThreadReviewLink(thread.id)" class="restaurant-name">
+              <h3>{{thread.title}}</h3>
+            </a>
+            <div class="genre">ジャンル：{{thread.genre}}</div>
+            <div class="address">住所：{{thread.address}}</div>
+            <div class="likes">
+              <button @click="goodDeal(thread.id)">いいね</button>
+              <span>{{thread.good_count}}</span>
+            </div>
+            <div class="opening-hours">営業時間：{{thread.sales_time}}</div>
+            <div class="hashtags">
+              <ul v-for="hashtag in thread.hashTagList">
+                <li>
+                  <a href="#"> {{hashtag.tag_name}}</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="delete-update">
+            <button type="button" @click="openUpdateThread(thread.id)">情報編集</button>
+            <button type="button" v-if="thread.user_id == sessionInfo.id" @click="deleteThread(thread.id)">削除</button>
+
+          </div>
+
+        </div>
+      </div>
+
+      <div v-if="isThreadUpdatePopup" class="popup-overlay" @click.self="closePopup('ThreadUpdate')">
+        <div class="popup">
+          <h1>スレッド情報編集</h1>
+          <p>スレッド名(店名)：<input type="text" v-model="updateThreadTitle"> <!-- String threadName;と対応させる --></p>
+          <p>フリガナ：<input type="text" v-model="updateThreadFurigana"></p>
+          <p>お店の住所：<input type="text" v-model="updateThreadAddress"></p>
+          <p>営業時間：<input type="text" v-model="updateThreadSalesTime"></p>
+          <p>ジャンル：
+            <select v-model="updateThreadGenre">
+              <option value="和食" selected>和食</option>
+              <option value="中華">中華</option>
+              <option value="イタリアン">イタリアン</option>
+            </select>
+          </p>
+          <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags"></p>
+          <button @click.self="updateThread">更新</button>
+          <button @click.self="closePopup('ThreadUpdate')">閉じる</button>
+        </div>
+      </div>
+
     </div>
-
-
-
-
-
 
   </div>
+
   <script src="/js/base.js"></script>
+
   <script>
-    //const { createApp } = Vue;
+    // const { createApp } = Vue;
 
     createApp({
       data() {
         return {
           threads: [],
+          showMenu: false,
           sessionInfo: [],
           sortKey: 'id',
           sortOrder: 'asc',
@@ -176,6 +273,23 @@
           updateThreadGenre: '',
           updateThreadHashtags: '',
 
+          //コミュニティメンバー参照用
+          isCommunityMemberPopup: false,
+          communityMembers: [],
+          communityName: '',
+          communityId: '',
+
+          //コミュニティの統合用。
+          isIntegrateThreadsPopup: false,
+          selectedThreads: [],
+          selectedThreadName: '',
+          selectedThreadFurigana: '',
+          selectedThreadAddress: '',
+          selectedThreadSalesTime: '',
+          selectedThreadGenre: '',
+          selectedThreadHashTag: [],
+
+
           //検索
           refineView: false,
           genres: [],
@@ -193,7 +307,7 @@
 
       methods: {
         getSessionInfo() {
-          axios.get('/getSessionInfo')
+          axios.get(`/getSessionInfo/${this.communityId}`)
             .then(res => {
               this.sessionInfo = res.data;
               console.log(this.sessionInfo);
@@ -203,18 +317,22 @@
         },
         // スレッド情報の取得
         getThreads() {
-          axios.get('/getThreads')
+          axios.get(`/getThreads/${this.communityId}`)
             .then(res => {
               this.threads = res.data;
               console.log(this.threads);
             });
         },
 
+        //commonjsのやつ。
+        toggleMenu() {
+          this.showMenu = !this.showMenu;
+        },
         //いいねボタン押された時の挙動
-        goodDeal(threadId) {
+        goodDeal(id) {
           //言い値テーブルへの制御はjavaで行っているので、
           //その処理が終わったらgetThreadsメソッドをすればおっけー。
-          axios.get(`/goodDeal/thread/${threadId}`)
+          axios.get(`/goodDeal/${id}`)
             .then(res => {
               this.getThreads();
             });
@@ -268,7 +386,8 @@
               address: this.addThreadAddress,
               salesTime: this.addThreadSalesTime,
               genre: this.addThreadGenre,
-              hashtag: this.addThreadHashtags
+              hashtag: this.addThreadHashtags,
+              communityId: this.communityId
             }
             if (this.addThreadHashtags.trim() == '') {
               addInfo.hashtag = null
@@ -319,6 +438,89 @@
           };
 
         },
+        getCommunityMember() {
+          this.openPopup('CommunityMember');
+          axios.get(`/getCommunityMember/${this.communityId}`)
+            .then(res => {
+              this.communityMembers = res.data;
+            });
+
+        },
+
+        // 管理者の、変更適用ボタンのメソッド。メンバーの退会と権限の編集
+        applyChenge() {
+          axios.put(`/memberSetting/${this.communityId}`, this.communityMembers)
+            .then(res => {
+              this.getCommunityMember();
+            });
+
+        },
+        //コミュニティ削除
+        deleteCommunity() {
+          if (window.confirm(`${this.communityName}を本当に削除してもよいですか？`)) {
+            if (window.confirm('後悔しませんか?')) {
+              axios.delete(`/deleteCommunity/${this.communityId}`)
+                .then(res => {
+                  window.location.href = "http://localhost:8080/mypage";
+                });
+            }
+          }
+        },
+        //スレッド統合のページ開く
+        integrateThread() {
+          this.selectedThreads = this.threads.filter(thread => thread.isSelected === true);
+          if (this.selectedThreads.length < 2) {
+            alert('統合したいスレッドを少なくとも2つ以上選んでください')
+          } else {
+            const target = this.selectedThreads[0];
+            this.selectedThreadName = target.title;
+            this.selectedThreadFurigana = target.furigana;
+            this.selectedThreadAddress = target.address;
+            this.selectedThreadSalesTime = target.sales_time;
+            this.selectedThreadGenre = target.genre;
+            this.openPopup('IntegrateThreads');
+
+          }
+        },
+        //スレッド統合の処理
+        ThreadIntegrate() {
+
+          //ハッシュタグを、java側で追加しやすいように成形
+          const hashtagForPost = Object.values(this.selectedThreadHashTag).join(',').replace(/#/g, "");
+          console.log(hashtagForPost);
+
+          //統合するスレッドのidをjavaに送る準備
+          let integrateThreadId = []
+          for (let i = 0; i < this.selectedThreads.length; i++) {
+            integrateThreadId.push(this.selectedThreads[i].id)
+          };
+          const integrateThreadIdForPost = Object.values(integrateThreadId).join(',');
+
+          //受け取った統合情報をセットする。
+          const integrateInfo = {
+            threadName: this.selectedThreadName,
+            furigana: this.selectedThreadFurigana,
+            address: this.selectedThreadAddress,
+            salesTime: this.selectedThreadSalesTime,
+            genre: this.selectedThreadGenre,
+            hashtag: hashtagForPost,
+            integrateThreadId: integrateThreadIdForPost,
+            communityId: this.communityId
+          };
+          if (hashtagForPost.trim() == '') {
+            integrateInfo.hashtag = null;
+          };
+
+
+
+
+          //axiosにput。
+          axios.put('/IntegrateThreads', integrateInfo)
+            .then(res => {
+              this.getThreads();
+            });
+
+        },
 
         //スレッドのレビュー一覧に遷移
         getThreadReviewLink(threadId) {
@@ -363,7 +565,7 @@
 
         //検索バーにハッシュタグを追加
         searchAdd(hashtag) {
-          this.searchText += '#' + hashtag + ' ';
+          this.searchText += ' #' + hashtag + ' ';
         },
 
         //検索処理
@@ -389,10 +591,14 @@
 
       created: function () {
         console.log("created");
+        this.communityName = `[[${communityName}]]`;
+        this.communityId = `[[${communityId}]]`;
+        console.log(this.communityId, this.communityName);
         this.getThreads();
         this.getSessionInfo();
         this.getGenres();
         this.getHashtags();
+
       }
 
     }).mount('#app')

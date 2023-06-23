@@ -194,7 +194,11 @@ public class KuchannelController {
                 //参加確認画面へ
                 return "community-join";
             } else {
-                model.addAttribute("name", code);
+
+                var community = kuchannelService.getCommunity("http://localhost:8080/community/" + str + "/" + code);
+
+                model.addAttribute("communityId", community.id());
+                model.addAttribute("communityName", code);
                 return "thread-list";
             }
         }
@@ -301,23 +305,18 @@ public class KuchannelController {
         }
     }
 
+
+
     //コミュニティのスレッド一覧へ遷移する(ボタンなどでの遷移)
     @GetMapping("/community/thread-list/{communityId}")
     public String threadListView(@PathVariable("communityId") Integer communityId,
                                  Model model) {
         //コミュニティIDを元にコミュニティを特定する
         CommunityRecord community = kuchannelService.findCommunity(communityId);
+        model.addAttribute("communityId",communityId );
+        model.addAttribute("communityName", community.name());
+        System.out.println(community.name());
         model.addAttribute("name", community.name());
-        //コミュニティIDを元にスレッドを全件取得(現在は1固定)
-        var threads = kuchannelService.communityThreads(communityId);
-
-        //thread-list.htmlにthreadsの値を渡す
-        model.addAttribute("threads", threads);
-        //コミュニティIDを元にスレッドを全件取得(現在は１固定)
-        threads = kuchannelService.communityThreads(1);
-
-        //thread-list.htmlにthreadsの値を渡す
-        model.addAttribute("threads",threads);
 
         return "thread-list";
     }
@@ -429,18 +428,6 @@ public class KuchannelController {
 
     /*------------------------------------------------*/
 
-    //スレッド作成画面
-    //RequestParamは、遷移する前のページから受け取る。今はコメントアウト
-    @GetMapping("/thread-add") //urlで入力する値
-    public String threadAddView(@ModelAttribute("threadForm")ThreadAddForm threadAddForm,
-//                                @RequestParam(name="communityId") Integer communityId,
-                                Model model) { //メソッド名(コントローラークラスの中で被らなければok)
-
-        //コミュニティIDをthread-add.htmlに値を渡す
-//        model.addAttribute("communityId", communityId);
-
-        return "thread-add"; //開きたいhtmlファイル名
-    }
 
     //    /*-------------------------Update(プロフィール編集)--------------------------*/
     @GetMapping("/profile-edit")
@@ -469,7 +456,6 @@ public class KuchannelController {
         String loginId = editForm.getLoginId();
         String name = editForm.getName();
         String password = editForm.getPassword();
-
         kuchannelService.edit(loginId, name, password);
         UserRecord userData = (UserRecord) session.getAttribute("user");
         var user_id = userData.loginId();
@@ -479,5 +465,4 @@ public class KuchannelController {
         return "/profile-details";
     }
 //    /*------------------------------------------------------------------------*/
-
 }
