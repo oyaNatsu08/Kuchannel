@@ -156,7 +156,8 @@ public class KuchannelController {
                 kuchannelService.communityUserInsert(user.id(), communityId, communityAddForm.getNickName(), 2);
             }
 
-            model.addAttribute("name", inviteCode);
+            model.addAttribute("communityId", communityId);
+            model.addAttribute("communityName", inviteCode);
 
             return "thread-list";
         }
@@ -276,7 +277,8 @@ public class KuchannelController {
 
             }
 
-            model.addAttribute("name", community.name());
+            model.addAttribute("communityId", community.id());
+            model.addAttribute("communityName", community.name());
 
             return "thread-list";
 
@@ -391,8 +393,14 @@ public class KuchannelController {
                                @RequestParam("threadId") Integer threadId,
                                Model model) {
 
+        //スレッドIDをもとにコミュニティIDを入手
+        var thread = kuchannelService.getThread(threadId);
+
         //レビューIDを元にreviewsテーブルから情報を取得する
         var review = kuchannelService.findReview(reviewId);
+
+        //ユーザーIDとコミュニティIDをもとにニックネームを入手
+        var reviewAccount = kuchannelService.getAccountInfoNick(review.userId(), thread.getCommunity_id());
 
         //データベースからレビューの画像情報を取得する
         var reviewImages = kuchannelService.getReviewImages(reviewId);
@@ -400,10 +408,18 @@ public class KuchannelController {
         //データベースからレビューの返信情報を取得する
         var reviewReplies = kuchannelService.getReviewReply(reviewId);
 
+        for (ReviewReply reviewReply : reviewReplies) {
+            //ユーザーIDとコミュニティIDをもとにニックネームを入手
+            var replyAccount = kuchannelService.getAccountInfoNick(reviewReply.getUserId(), thread.getCommunity_id());
+
+            reviewReply.setUserName(replyAccount.getName());
+
+        }
+
         //データベースからレビューのいいね件数を取得する
         var goodCount = kuchannelService.getGoodReview(reviewId);
 
-        model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
+        model.addAttribute("review", new ReviewElementAll(review.userId(), reviewAccount.getName(), review.reviewId(), review.title(),
                 review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
         model.addAttribute("reviewId", reviewId);
         model.addAttribute("threadId", threadId);

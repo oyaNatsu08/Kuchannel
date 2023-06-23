@@ -331,13 +331,13 @@ public class KuchannelDao {
     }
 
     //データベースからレビューの返信情報を取得する
-    public List<ReviewReplyRecord> getReviewReply(Integer reviewId) {
+    public List<ReviewReply> getReviewReply(Integer reviewId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("reviewId", reviewId);
 
         var list = jdbcTemplate.query("SELECT rep.id AS replyId, rep.user_id, u.name AS userName, rep.review_id, " +
                 "rep.reply, to_char(rep.create_date, 'YYYY-MM-DD HH24:MI') AS createDate FROM replies rep JOIN users u ON rep.user_id = u.id " +
-                "WHERE rep.review_id = :reviewId ORDER BY rep.id", param, new DataClassRowMapper<>(ReviewReplyRecord.class));
+                "WHERE rep.review_id = :reviewId ORDER BY rep.id", param, new DataClassRowMapper<>(ReviewReply.class));
 
         return list;
 
@@ -384,7 +384,7 @@ public class KuchannelDao {
     }
 
     //repliesテーブルにインサート処理
-    public ReviewReplyRecord replyInsert(int userId, int reviewId, String content) {
+    public ReviewReply replyInsert(int userId, int reviewId, String content) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
         param.addValue("reviewId", reviewId);
@@ -403,7 +403,7 @@ public class KuchannelDao {
 
         var user = (UserRecord)session.getAttribute("user");
 
-        var reply = new ReviewReplyRecord(
+        var reply = new ReviewReply(
                         Integer.parseInt(keyHolder.getKeys().get("id").toString()),
                         Integer.parseInt(keyHolder.getKeys().get("user_id").toString()),
                         user.name(),
@@ -873,7 +873,23 @@ public class KuchannelDao {
                         "On u.id = cu.user_id\n" +
                         "WHERE cu.community_id = :community_id AND user_id = :user_id;", param,
                 new DataClassRowMapper<>(AccountInformation.class));
-        System.out.println(list.get(0));
+        //System.out.println(list.get(0));
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    //getAccountInfoのニックネームがある場合は、ニックネームで取得するバージョン
+    public AccountInformation getAccountInfoNick(Integer userId, Integer communityId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("community_id", communityId);
+        param.addValue("user_id", userId);
+        List<AccountInformation> list = jdbcTemplate.query("SELECT u.id, " +
+                        "CASE WHEN cu.nick_name IS NULL THEN u.name " +
+                        "ELSE cu.nick_name END AS name, " +
+                        "cu.role FROM users u JOIN community_user cu " +
+                        "On u.id = cu.user_id\n" +
+                        "WHERE cu.community_id = :community_id AND user_id = :user_id;", param,
+                new DataClassRowMapper<>(AccountInformation.class));
+        //System.out.println(list.get(0));
         return list.isEmpty() ? null : list.get(0);
     }
 

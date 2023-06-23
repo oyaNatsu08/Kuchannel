@@ -160,6 +160,9 @@ public class KuchannelRestController {
     @GetMapping("/getReviews")
     public List<ReviewElementAll> getReviews(@RequestParam("threadId") Integer threadId) {
 
+        //スレッドIDをもとにコミュニティIDを入手
+        var thread = kuchannelService.getThread(threadId);
+
         //データベースからレビュー一覧に表示する情報を全件取得
         var revs = kuchannelService.findReviewAll(threadId);
 
@@ -167,6 +170,9 @@ public class KuchannelRestController {
         List<ReviewElementAll> reviews = new ArrayList<>();
 
         for (var rev : revs) {
+            //ユーザーIDとコミュニティIDをもとにニックネームを入手
+            var reviewAccount = kuchannelService.getAccountInfoNick(rev.userId(), thread.getCommunity_id());
+
             //データベースからレビューの画像情報を取得する
             var reviewImages = kuchannelService.getReviewImages(rev.reviewId());
 
@@ -175,10 +181,20 @@ public class KuchannelRestController {
             //データベースからレビューの返信情報を取得する
             var reviewReplies = kuchannelService.getReviewReply(rev.reviewId());
 
+            for (ReviewReply reviewReply : reviewReplies) {
+                //ユーザーIDとコミュニティIDをもとにニックネームを入手
+                var replyAccount = kuchannelService.getAccountInfoNick(reviewReply.getUserId(), thread.getCommunity_id());
+
+                reviewReply.setUserName(replyAccount.getName());
+
+            }
+
             //データベースからレビューのいいね件数を取得する
             var goodCount = kuchannelService.getGoodReview(rev.reviewId());
 
-            reviews.add(new ReviewElementAll(rev.userId(), rev.userName(), rev.reviewId(), rev.title(),
+            System.out.println("ニックネーム" + reviewAccount.getName());
+
+            reviews.add(new ReviewElementAll(rev.userId(), reviewAccount.getName(), rev.reviewId(), rev.title(),
                     rev.review(), rev.createDate(), reviewImages, reviewReplies, goodCount));
 
         }
@@ -288,7 +304,7 @@ public class KuchannelRestController {
 
     //レビュー返信登録処理
     @PostMapping("add-reply")
-    public ReviewReplyRecord addReply(@RequestParam("id") Integer reviewId,
+    public ReviewReply addReply(@RequestParam("id") Integer reviewId,
                                            @RequestParam("content") String content) {
         //repliesテーブルにインサート処理
         var user = (UserRecord)session.getAttribute("user");

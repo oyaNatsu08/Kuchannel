@@ -200,7 +200,7 @@
             </div>
             <div class="opening-hours">営業時間：{{thread.sales_time}}</div>
             <div class="hashtags">
-              <ul v-for="hashtag in thread.hashTagList">
+              <ul class="hashtag" v-for="hashtag in thread.hashTagList">
                 <li>
                   <a href="#"> {{hashtag.tag_name}}</a>
                 </li>

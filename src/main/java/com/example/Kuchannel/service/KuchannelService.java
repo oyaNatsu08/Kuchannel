@@ -133,7 +133,7 @@ public class KuchannelService {
     }
 
     //データベースからレビューの返信情報を取得する
-    public List<ReviewReplyRecord> getReviewReply(Integer reviewId) {
+    public List<ReviewReply> getReviewReply(Integer reviewId) {
         return kuchannelDao.getReviewReply(reviewId);
     }
 
@@ -153,7 +153,7 @@ public class KuchannelService {
     }
 
     //repliesテーブルにインサート処理
-    public ReviewReplyRecord replyInsert(int userId, int reviewId, String content) {
+    public ReviewReply replyInsert(int userId, int reviewId, String content) {
         return kuchannelDao.replyInsert(userId, reviewId, content);
     }
 
@@ -246,6 +246,11 @@ public class KuchannelService {
     public List<AccountInformation> getCommunityMember(Integer communityId){return kuchannelDao.getCommunityMember(communityId);}
 
     public AccountInformation getAccountInfo(Integer user_id, Integer community_id){return kuchannelDao.getAccountInfo(user_id,community_id);}
+
+    //getAccountInfoのニックネームがある場合は、ニックネームで取得するバージョン
+    public AccountInformation getAccountInfoNick(Integer userId, Integer communityId) {
+        return kuchannelDao.getAccountInfoNick(userId, communityId);
+    }
 
     public int memberSetting(List<AccountInformation> updateInfo, Integer communityId){return kuchannelDao.memberSetting(updateInfo,communityId);}
 

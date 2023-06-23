@@ -209,7 +209,7 @@ h3 {
     text-decoration: none;
   }
 
-  ul{
+  .hashtag{
     list-style-type: none;
     display: flex;
     padding:0px 5px

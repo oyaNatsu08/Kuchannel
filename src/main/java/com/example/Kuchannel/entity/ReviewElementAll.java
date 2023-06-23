@@ -6,5 +6,5 @@ import java.util.List;
 //ReviewRecordとReviewImageRecordとReviewReplyRecordの情報を持っているレコードクラス
 public record ReviewElementAll(Integer userId, String userName, Integer reviewId, String title, String review,
                                String createDate, List<ReviewImageRecord> reviewImages,
-                               List<ReviewReplyRecord> reviewReplies, Integer goodCount) {
+                               List<ReviewReply> reviewReplies, Integer goodCount) {
 }
