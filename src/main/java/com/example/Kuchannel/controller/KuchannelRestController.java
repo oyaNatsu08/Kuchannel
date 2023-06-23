@@ -5,12 +5,15 @@ import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.form.ReviewUpdateForm;
+import com.example.Kuchannel.entity.*;
+import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +23,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,26 +87,18 @@ public class KuchannelRestController {
     }
 
 //    スレッド一覧ページ用。スレッドの情報を取得
-    @GetMapping("getThreads")
-    public List<CommunityThread> getThreads(){
-//        コミュニティidを渡すようにする（今は1で固定）
-        var threads = kuchannelService.communityThreads(1);
+    @GetMapping("getThreads/{communityId}")
+    public List<CommunityThread> getThreads(@PathVariable("communityId")Integer communityId){
+//        コミュニティidを渡すようにする（今は1で固定）->修正
+        var threads = kuchannelService.communityThreads(communityId);
         return threads;
     }
 
-    //スレッドのグッド
-    @GetMapping("/goodDeal/thread/{threadId}")
-    public int goodDealThread(@PathVariable("threadId")Integer thread_id){
+    @GetMapping("/goodDeal/{id}")
+    public int GoodDeal(@PathVariable("id")Integer thread_id){
 //        セッションからuser_idをもらう一旦1で固定
-        var user = (UserRecord)session.getAttribute("user");
-        return kuchannelService.goodDealThread(thread_id, user.id());
-    }
-
-    //レビューのグッド
-    @GetMapping("/goodDeal/review/{reviewId}")
-    public int goodDealReview(@PathVariable("reviewId")Integer reviewId){
-        var user = (UserRecord)session.getAttribute("user");
-        return kuchannelService.goodDealReview(reviewId, user.id());
+//        var user = (UserRecord)session.getAttribute("user");
+        return kuchannelService.goodDeal(thread_id,1);
     }
 
     //スレッド削除用
@@ -111,27 +107,42 @@ public class KuchannelRestController {
         return kuchannelService.deleteThread(thread_id);
     }
 
-    //セッション情報返せるつもり。
-    @GetMapping("getSessionInfo")
-    public UserRecord getSessionInfo(){
+    //セッション情報から、ユーザーidとroleを持った情報を返す。
+    //getThreadと同じで、コミュニティidを渡すようにする。今は１で固定。
+    @GetMapping("/getSessionInfo/{communityId}")
+    public AccountInformation getSessionInfo(@PathVariable("communityId")Integer communityId){
+        System.out.println("success");
         var user = (UserRecord)session.getAttribute("user");
-        return user;
+        var accountInfo = kuchannelService.getAccountInfo(user.id(),communityId);
+
+        return accountInfo;
     }
 
     //スレッド作成処理
     @PostMapping("/thread-add")
     public int addThread(@RequestBody ThreadAddForm inputData) {
+        var user = (UserRecord)session.getAttribute("user");
         //threadsテーブルにINSERT処理
-        var result =kuchannelService.threadInsert(inputData);
+        var result =kuchannelService.threadInsert(inputData,user.id());
         return result;
     }
 
     @PutMapping("/updateThread/{id}")
     public int threadUpdate(@RequestBody ThreadAddForm inputData,@PathVariable("id") Integer thread_id){
-        var result = kuchannelService.threadUpdate(inputData ,thread_id);
+        var result =kuchannelService.threadUpdate(inputData ,thread_id);
+        return result;
+    }
 
-        var thread = kuchannelService.getThread(result);
+    @PutMapping("/memberSetting/{communityId}")
+    public int memberSetting(@PathVariable("communityId") Integer communityId,@RequestBody List<AccountInformation> updateInfo){
+        System.out.println(updateInfo);
+        var result =kuchannelService.memberSetting(updateInfo, communityId);
+        return result;
+    }
 
+    @DeleteMapping("/deleteCommunity/{communityId}")
+    public int deleteCommunity(@PathVariable("communityId")Integer communityId){
+        var result =kuchannelService.deleteCommunity(communityId);
         return result;
     }
 
@@ -207,7 +218,7 @@ public class KuchannelRestController {
     @PostMapping("/add-review")
     public ResponseEntity<String> addReview(@RequestParam("title") String title,
                                             @RequestParam("content") String content,
-                                            @RequestParam("images") List<MultipartFile> images) {
+                                            @RequestParam(value = "images", required = false) List<MultipartFile> images) {
 
         //入力値チェック(本文)
         if ("".equals(content)) {
@@ -223,13 +234,16 @@ public class KuchannelRestController {
         var user = (UserRecord)session.getAttribute("user");
         int reviewId = kuchannelService.reviewInsert(user.id(), 1, title, content);
 
-        for (MultipartFile image : images) {
-            // 画像を1枚ずつ保存処理
-            var num = uploadImage(image);
 
-            //review_Imagesテーブルにインサート処理
-            kuchannelService.reviewImagesInsert(reviewId, num + image.getOriginalFilename());
+        if (images != null) {
+            for (MultipartFile image : images) {
+                // 画像を1枚ずつ保存処理
+                var num = uploadImage(image);
 
+                //review_Imagesテーブルにインサート処理
+                kuchannelService.reviewImagesInsert(reviewId, num + image.getOriginalFilename());
+
+            }
         }
 
         return ResponseEntity.ok("登録処理に成功しました。");
@@ -292,6 +306,39 @@ public class KuchannelRestController {
         return thread;
     }
 
+    //ジャンルを取得する
+    @GetMapping("/getGenres")
+    public List<GenreRecord> getGenre() {
+        var genre = kuchannelService.getGenres();
+
+        System.out.println("ジャンル：" + genre);
+
+        return genre;
+    }
+
+    //人気のハッシュタグを取得
+    @GetMapping("/getHashtags")
+    public List<HashTagRecord> getHashtags() {
+        var hashtags = kuchannelService.getHashtags();
+
+        System.out.println("ハッシュタグ上位5件：" + hashtags);
+
+        return hashtags;
+    }
+
+    //キーワードでスレッドを絞り込む
+    @GetMapping("/keywordThreads")
+    public List<CommunityThread> keyThreads(@RequestParam("keyword") String keyword) {
+        //keywordを空白(半角または全角)ごとに分けて格納
+        String[] keywords = keyword.split("[\\s\\p{Z}]");
+
+        //キーワードとスレッドタイトルであいまい検索
+        var threads = kuchannelService.findKeyThread(keywords);
+
+        return threads;
+
+    }
+
     /*-------------------------------------*/
     @DeleteMapping("/api/delete/{reviewId}")
     public int deleteReview(@PathVariable("reviewId") Integer reviewId) {
@@ -299,5 +346,32 @@ public class KuchannelRestController {
         return success;
     }
     /*-------------------------------------*/
+
+    //スレッド一覧でコミュニティ名を出す用。すでにあったfindCommunityを利用。
+    @GetMapping("/getCommunityName/{communityId}")
+    public CommunityRecord getCommunityName(@PathVariable Integer communityId) {
+        return kuchannelService.findCommunity(communityId);
+    }
+
+    //スレッド一覧でコミュニティ名を出す用。すでにあったfindCommunityを利用。
+    @GetMapping("/getCommunityMember/{communityId}")
+    public List<AccountInformation> getCommunityMember(@PathVariable Integer communityId) {
+        return kuchannelService.getCommunityMember(communityId);
+    }
+
+
+    //統合処理。スレッド情報をもとに新しいスレッドを作成&スレッドいいねとスレッドハッシュタグを編集。
+    @PutMapping("/IntegrateThreads")
+    public int IntegrateThreads(@RequestBody ThreadAddForm threadInfo){
+        var user = (UserRecord)session.getAttribute("user");
+        kuchannelService.IntegrateThreads(threadInfo, user.id());
+        System.out.println(threadInfo);
+        return 1;
+    }
+
+
+
+
+
 
 }

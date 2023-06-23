@@ -25,4 +25,8 @@ public class ThreadAddForm {
     //ハッシュタグ
     String hashtag;
 
+    Integer communityId;
+    String integrateThreadId;
+
+
 }

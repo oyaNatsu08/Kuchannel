@@ -4,9 +4,6 @@ import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
 import jakarta.servlet.http.HttpSession;
 import com.example.Kuchannel.entity.InformatonRecord;
-//import com.example.Kuchannel.entity.ThreadRecord;
-import com.example.Kuchannel.entity.InformatonRecord;
-import com.example.Kuchannel.entity.ThreadRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -15,8 +12,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public class KuchannelDao {
@@ -458,7 +459,7 @@ public class KuchannelDao {
     /*---------------------------------------------*/
 
     //threadsテーブルにINSERTする処理
-    public int threadInsert(ThreadAddForm threadAddForm) {
+    public int threadInsert(ThreadAddForm threadAddForm,Integer userId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("threadName", threadAddForm.getThreadName());
 //        param.addValue("furigana", threadAddForm.getFurigana());
@@ -466,12 +467,14 @@ public class KuchannelDao {
         param.addValue("salesTime", threadAddForm.getSalesTime());
         param.addValue("genre", threadAddForm.getGenre());
         param.addValue("hashTag",threadAddForm.getHashtag());
+        param.addValue("community_id",threadAddForm.getCommunityId());
+        param.addValue("user_id",userId);
 
         KeyHolder keyHolder1 = new GeneratedKeyHolder();
 
-        //user_idとコミュニティid今は1で固定。後で修正。
+        //user_idとコミュニティid今は1で固定。後で修正。06/23スレッドidはThreadAddFormから取得に変更。
         var threadAddResult= jdbcTemplate.update("INSERT INTO threads(user_id, community_id, image_path, " +
-                "title, address, sales_time, genre, create_date) VALUES(1, 1, null, :threadName, " +
+                "title, address, sales_time, genre, create_date) VALUES(:user_id, :community_id, null, :threadName, " +
                 ":address, :salesTime, :genre, now())", param,keyHolder1);
 
         //インサートしたIDを受け取る
@@ -518,10 +521,10 @@ public class KuchannelDao {
             }
         }
 
-        return threadAddResult;
+        return addThreadId;
     }
 
-
+    //スレッド情報の更新
     public int threadUpdate(ThreadAddForm inputData,Integer thread_id) {
         //ハッシュタグ以外のアップデート処理
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -534,6 +537,7 @@ public class KuchannelDao {
         param.addValue("hashtags", inputData.getHashtag());
 
         var updateThreadResult = jdbcTemplate.update("UPDATE threads SET title=:title,address=:address,sales_time=:sales_time,genre=:genre WHERE id = :thread_id", param);
+
 
         //ハッシュタグの処理。一度スレッドハッシュタグをリセットして、再度インサートする。
         var resetThreadHashtag = jdbcTemplate.update("DELETE FROM thread_hashtag WHERE thread_id = :thread_id", param);
@@ -572,6 +576,7 @@ public class KuchannelDao {
         }
         return resetThreadHashtag;
     }
+
 
 
 
@@ -630,6 +635,66 @@ public class KuchannelDao {
                 new DataClassRowMapper<>(CommunityThread.class));
 
         return list.isEmpty() ? null : list.get(0);
+
+    }
+
+    //ジャンルを取得する
+    public List<GenreRecord> getGenres() {
+
+        var list = jdbcTemplate.query("SELECT DISTINCT(genre) AS genreName FROM threads",
+                new DataClassRowMapper<>(GenreRecord.class));
+
+        return list;
+
+    }
+
+    //人気のハッシュタグを取得する
+    public List<HashTagRecord> getHashtags() {
+
+        var list = jdbcTemplate.query("SELECT h.id, h.tag_name, COUNT(*) AS count FROM hashtags h " +
+                "JOIN thread_hashtag th ON h.id = th.hashtag_id GROUP BY h.id " +
+                "ORDER BY COUNT(*) DESC LIMIT 5", new DataClassRowMapper<>(HashTagRecord.class));
+
+        return list;
+
+    }
+
+    //キーワードとスレッドタイトルであいまい検索
+    public List<CommunityThread> findKeyThread(String[] keywords) {
+        List<CommunityThread> lists = new ArrayList<>();
+        Set<CommunityThread> threadSet = new HashSet<>();
+
+        for (String key : keywords) {
+            MapSqlParameterSource param = new MapSqlParameterSource();
+            param.addValue("key", "%" + key + "%");
+
+            var list = jdbcTemplate.query("select *\n" +
+                            "from threads t\n" +
+                            "left join (\n" +
+                            "  select thread_id, count(*) good_count\n" +
+                            "  from thread_goods\n" +
+                            "  group by thread_id) g\n" +
+                            "  on t.id = g.thread_id\n" +
+                            "\n" +
+                            "left join \n" +
+                            "(\n" +
+                            "  select thread_id, string_agg(tag_name, ',') AS hashtags\n" +
+                            "  from hashtags h\n" +
+                            "  join thread_hashtag th\n" +
+                            "  on h.id = th.hashtag_id\n" +
+                            "  group by thread_id\n" +
+                            ") h\n" +
+                            "on h.thread_id = t.id\n" +
+                            "where t.title LIKE :key ORDER BY t.id", param,
+                    new DataClassRowMapper<>(CommunityThread.class));
+
+            //listをlistsに詰めなおす
+            threadSet.addAll(list);
+
+        }
+
+        lists.addAll(threadSet);
+        return lists;
 
     }
 
@@ -753,5 +818,132 @@ public class KuchannelDao {
     }
 
 /*----------------------------------------------------------*/
+
+    //いいねボタンが押されたとき、そのユーザーがそのスレッドへいいねを押していない場合インサート、すでに押している場合は削除。そののちにその時のいいね数をCOUNTして数字で返したい。
+    public int goodDeal(Integer thread_id,Integer user_id){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("thread_id",thread_id);
+        param.addValue("user_id",user_id);
+        //すでにいいねされているかを検索。
+        List<Good> searchGoodResult = jdbcTemplate.query("SELECT *FROM thread_goods WHERE user_id=:user_id AND thread_id =:thread_id;", param,
+                new DataClassRowMapper<>(Good.class));
+        //そのデータがが存在する場合
+        if(!searchGoodResult.isEmpty()){
+            //データが存在する場合、searchGoodResultからidを取得し、それを消す。
+            System.out.println("ヌルじゃない"+searchGoodResult.get(0));
+            var existingGoodId =searchGoodResult.get(0).getId();
+            param.addValue("good_id",existingGoodId);
+            var deleteGoodResult= jdbcTemplate.update("DELETE FROM thread_goods WHERE id = :good_id;",param);
+            return deleteGoodResult;
+        }else{
+            //データが存在しない場合、threadGoodテーブルにインサート。
+            System.out.println("ヌルと思う");
+            var deleteGoodResult= jdbcTemplate.update("INSERT INTO thread_goods(user_id,thread_id)VALUES(:user_id,:thread_id);",param);
+            return deleteGoodResult;
+        }
+
+    }
+
+    //スレッド一覧の、コミュニティ詳細用。コミュニティIDからメンバー一覧取得
+    public List<AccountInformation> getCommunityMember(Integer communityId){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("community_id",communityId);
+        List<AccountInformation> members = jdbcTemplate.query("SELECT u.id,\n" +
+                        "CASE\n" +
+                        "  WHEN cu.nick_name IS NULL THEN u.name\n" +
+                        "        ELSE cu.nick_name\n" +
+                        "    END AS name,\n" +
+                        "cu.role\n" +
+                        "FROM users u\n" +
+                        "JOIN community_user cu\n" +
+                        "ON u.id = cu.user_id\n" +
+                        "WHERE cu.community_id=:community_id AND flag=true;", param,
+                new DataClassRowMapper<>(AccountInformation.class));
+        return members;
+    }
+
+    //セッションと権限確認する用＆管理社機能の際に必要な情報（権限、退会フラッグ）渡せる用。
+    public AccountInformation getAccountInfo(Integer user_id,Integer community_id){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("community_id",community_id);
+        param.addValue("user_id",user_id);
+        List<AccountInformation> list = jdbcTemplate.query("SELECT u.id,u.name,cu.role\n" +
+                        "FROM users u\n" +
+                        "JOIN community_user cu\n" +
+                        "On u.id = cu.user_id\n" +
+                        "WHERE cu.community_id = :community_id AND user_id = :user_id;", param,
+                new DataClassRowMapper<>(AccountInformation.class));
+        System.out.println(list.get(0));
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    //管理者が退会させられる用の奴。アカウント情報のListが渡されるので、ここでflagがtrueのやつは退会させる（逆なことに注意）
+    public int memberSetting(List<AccountInformation> updateInfo, Integer communityId){
+
+        for(var i =0;i<updateInfo.size();i++){
+            var target = updateInfo.get(i);
+            if(target.getRole() ==1){
+                MapSqlParameterSource param =new MapSqlParameterSource();
+                param.addValue("community_id",communityId);
+                param.addValue("user_id",target.getId());
+                int result = jdbcTemplate.update("UPDATE community_user SET role = 1 WHERE user_id =:user_id AND community_id = :community_id;",param);
+
+            }else{
+                MapSqlParameterSource param =new MapSqlParameterSource();
+                param.addValue("community_id",communityId);
+                param.addValue("user_id",target.getId());
+                int result = jdbcTemplate.update("UPDATE community_user SET role = 2 WHERE user_id =:user_id AND community_id = :community_id;",param);
+            }
+            if(target.isFlag()){
+                MapSqlParameterSource param =new MapSqlParameterSource();
+                param.addValue("community_id",communityId);
+                param.addValue("user_id",target.getId());
+                int result = jdbcTemplate.update("UPDATE community_user SET flag = false WHERE user_id =:user_id AND community_id = :community_id;",param);
+            }
+
+        }
+        return 1;
+    }
+
+    public int deleteCommunity(Integer communityId){
+        MapSqlParameterSource param =new MapSqlParameterSource();
+        param.addValue("community_id",communityId);
+        int result = jdbcTemplate.update("UPDATE community_user SET flag = false WHERE community_id = :community_id;",param);
+        int result2 = jdbcTemplate.update("UPDATE communities SET delete_date = now() WHERE id = :community_id;",param);
+        return result2;
+    }
+
+    public int IntegrateThreads(ThreadAddForm threadInfo,Integer userId){
+        int addedThreadId = threadInsert(threadInfo,userId);
+        System.out.println("threadInfo:"+threadInfo);
+        System.out.println("userId:"+userId);
+        System.out.println("addedThreadId:"+addedThreadId);
+
+        //レビューのいいねを重複させ内容にインサート
+        MapSqlParameterSource param =new MapSqlParameterSource();
+        param.addValue("integrate_thread_id",threadInfo.getIntegrateThreadId());
+        param.addValue("added_thread_id",addedThreadId);
+        int result2 = jdbcTemplate.update("INSERT INTO thread_goods (thread_id,user_id)\n" +
+                "SELECT :added_thread_id, user_id\n" +
+                "FROM (\n" +
+                "  SELECT DISTINCT user_id\n" +
+                "  FROM thread_goods\n" +
+                "  WHERE thread_id IN (SELECT unnest(string_to_array(:integrate_thread_id, ','))::integer)\n" +
+                ") distinct_user;", param);
+
+
+//        ここから元のデータの更新削除
+//        レビューを新しくできたスレッドへ移動。
+        int result3 = jdbcTemplate.update("UPDATE reviews SET thread_id = :added_thread_id WHERE thread_id IN (SELECT unnested_id FROM (SELECT unnest(string_to_array(:integrate_thread_id, ','))::integer AS unnested_id) AS subquery);", param);
+//        元のスレッドgoodを削除。
+        int result4 = jdbcTemplate.update("DELETE FROM thread_goods WHERE thread_id IN (SELECT unnested_id FROM (SELECT unnest(string_to_array(:integrate_thread_id, ','))::integer AS unnested_id) AS subquery);", param);
+//        元のスレッドのスレッドハッシュタグを消す
+        int result5 = jdbcTemplate.update("DELETE FROM thread_hashtag WHERE thread_id IN (SELECT unnested_id FROM (SELECT unnest(string_to_array(:integrate_thread_id, ','))::integer AS unnested_id) AS subquery);", param);
+//        元のスレッドを消す
+        int result6 = jdbcTemplate.update("DELETE FROM threads WHERE id IN (SELECT unnested_id FROM (SELECT unnest(string_to_array(:integrate_thread_id, ','))::integer AS unnested_id) AS subquery);", param);
+
+
+        return 1;
+    }
 
 }
