@@ -4,11 +4,9 @@ import com.example.Kuchannel.dao.KuchannelDao;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.entity.InformatonRecord;
-//import com.example.Kuchannel.entity.ThreadRecord;
-import com.example.Kuchannel.entity.InformatonRecord;
-import com.example.Kuchannel.entity.ThreadRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -197,8 +195,8 @@ public class KuchannelService {
     /*---------------------------------------------*/
 
     //threadテーブルにINSERTする処理
-    public int threadInsert(ThreadAddForm threadAddForm) {
-        return kuchannelDao.threadInsert(threadAddForm);
+    public int threadInsert(ThreadAddForm threadAddForm,Integer userId) {
+        return kuchannelDao.threadInsert(threadAddForm,userId);
     }
 
     //コミュニティIDを元にスレッドを全件取得
@@ -239,5 +237,20 @@ public class KuchannelService {
     }
 
 /*-----------------------------------------------------------------------------*/
+
+    public int goodDeal(Integer thread_id, Integer user_id){
+        return kuchannelDao.goodDeal(thread_id,user_id);
+    }
+
+    //コミュニティメンバー表示用。所属コミュニティメンバーを返す
+    public List<AccountInformation> getCommunityMember(Integer communityId){return kuchannelDao.getCommunityMember(communityId);}
+
+    public AccountInformation getAccountInfo(Integer user_id, Integer community_id){return kuchannelDao.getAccountInfo(user_id,community_id);}
+
+    public int memberSetting(List<AccountInformation> updateInfo, Integer communityId){return kuchannelDao.memberSetting(updateInfo,communityId);}
+
+    public int deleteCommunity(Integer communityId){return kuchannelDao.deleteCommunity(communityId);}
+
+    public int IntegrateThreads(ThreadAddForm threadInfo,Integer userId){return kuchannelDao.IntegrateThreads(threadInfo,userId);}
 
 }
