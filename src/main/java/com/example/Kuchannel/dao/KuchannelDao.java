@@ -323,19 +323,21 @@ public class KuchannelDao {
     /*---------------------------------------------*/
 
     //threadsテーブルにINSERTする処理
-    public int threadInsert(ThreadAddForm threadAddForm) {
+    public int threadInsert(ThreadAddForm threadAddForm,Integer userId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("threadName", threadAddForm.getThreadName());
         param.addValue("address", threadAddForm.getAddress());
         param.addValue("salesTime", threadAddForm.getSalesTime());
         param.addValue("genre", threadAddForm.getGenre());
         param.addValue("hashTag",threadAddForm.getHashtag());
+        param.addValue("community_id",threadAddForm.getCommunityId());
+        param.addValue("user_id",userId);
 
         KeyHolder keyHolder1 = new GeneratedKeyHolder();
 
-        //user_idとコミュニティid今は1で固定。後で修正。
+        //user_idとコミュニティid今は1で固定。後で修正。06/23スレッドidはThreadAddFormから取得に変更。
         var threadAddResult= jdbcTemplate.update("INSERT INTO threads(user_id, community_id, image_path, " +
-                "title, address, sales_time, genre, create_date) VALUES(1, 1, null, :threadName, " +
+                "title, address, sales_time, genre, create_date) VALUES(:user_id, :community_id, null, :threadName, " +
                 ":address, :salesTime, :genre, now())", param,keyHolder1);
 
         //インサートしたIDを受け取る
@@ -382,9 +384,10 @@ public class KuchannelDao {
             }
         }
 
-        return threadAddResult;
+        return addThreadId;
     }
 
+    //スレッド情報の更新
     public int threadUpdate(ThreadAddForm inputData,Integer thread_id) {
         //ハッシュタグ以外のアップデート処理
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -436,6 +439,7 @@ public class KuchannelDao {
         }
         return resetThreadHashtag;
     }
+
 
 
 
@@ -579,5 +583,39 @@ public class KuchannelDao {
         int result = jdbcTemplate.update("UPDATE community_user SET flag = false WHERE community_id = :community_id;",param);
         int result2 = jdbcTemplate.update("UPDATE communities SET delete_date = now() WHERE id = :community_id;",param);
         return result2;
-    };
+    }
+
+    public int IntegrateThreads(ThreadAddForm threadInfo,Integer userId){
+        int addedThreadId = threadInsert(threadInfo,userId);
+        System.out.println("threadInfo:"+threadInfo);
+        System.out.println("userId:"+userId);
+        System.out.println("addedThreadId:"+addedThreadId);
+
+        //レビューのいいねを重複させ内容にインサート
+        MapSqlParameterSource param =new MapSqlParameterSource();
+        param.addValue("integrate_thread_id",threadInfo.getIntegrateThreadId());
+        param.addValue("added_thread_id",addedThreadId);
+        int result2 = jdbcTemplate.update("INSERT INTO thread_goods (thread_id,user_id)\n" +
+                "SELECT :added_thread_id, user_id\n" +
+                "FROM (\n" +
+                "  SELECT DISTINCT user_id\n" +
+                "  FROM thread_goods\n" +
+                "  WHERE thread_id IN (SELECT unnest(string_to_array(:integrate_thread_id, ','))::integer)\n" +
+                ") distinct_user;", param);
+
+
+//        ここから元のデータの更新削除
+//        レビューを新しくできたスレッドへ移動。
+        int result3 = jdbcTemplate.update("UPDATE reviews SET thread_id = :added_thread_id WHERE thread_id IN (SELECT unnested_id FROM (SELECT unnest(string_to_array(:integrate_thread_id, ','))::integer AS unnested_id) AS subquery);", param);
+//        元のスレッドgoodを削除。
+        int result4 = jdbcTemplate.update("DELETE FROM thread_goods WHERE thread_id IN (SELECT unnested_id FROM (SELECT unnest(string_to_array(:integrate_thread_id, ','))::integer AS unnested_id) AS subquery);", param);
+//        元のスレッドのスレッドハッシュタグを消す
+        int result5 = jdbcTemplate.update("DELETE FROM thread_hashtag WHERE thread_id IN (SELECT unnested_id FROM (SELECT unnest(string_to_array(:integrate_thread_id, ','))::integer AS unnested_id) AS subquery);", param);
+//        元のスレッドを消す
+        int result6 = jdbcTemplate.update("DELETE FROM threads WHERE id IN (SELECT unnested_id FROM (SELECT unnest(string_to_array(:integrate_thread_id, ','))::integer AS unnested_id) AS subquery);", param);
+
+
+        return 1;
+    }
+
 }

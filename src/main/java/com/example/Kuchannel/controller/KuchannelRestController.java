@@ -104,8 +104,9 @@ public class KuchannelRestController {
     //スレッド作成処理
     @PostMapping("/thread-add")
     public int addThread(@RequestBody ThreadAddForm inputData) {
+        var user = (UserRecord)session.getAttribute("user");
         //threadsテーブルにINSERT処理
-        var result =kuchannelService.threadInsert(inputData);
+        var result =kuchannelService.threadInsert(inputData,user.id());
         return result;
     }
 
@@ -149,6 +150,18 @@ public class KuchannelRestController {
     public List<AccountInformation> getCommunityMember(@PathVariable Integer communityId) {
         return kuchannelService.getCommunityMember(communityId);
     }
+
+
+    //統合処理。スレッド情報をもとに新しいスレッドを作成&スレッドいいねとスレッドハッシュタグを編集。
+    @PutMapping("/IntegrateThreads")
+    public int IntegrateThreads(@RequestBody ThreadAddForm threadInfo){
+        var user = (UserRecord)session.getAttribute("user");
+        kuchannelService.IntegrateThreads(threadInfo, user.id());
+        System.out.println(threadInfo);
+        return 1;
+    }
+
+
 
 
 

@@ -107,3 +107,10 @@ body {
   height: 30px;
   width: 200px;
 }
+
+.hashtag-list{
+  display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+}

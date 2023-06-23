@@ -129,8 +129,8 @@ public class KuchannelService {
     /*---------------------------------------------*/
 
     //threadテーブルにINSERTする処理
-    public int threadInsert(ThreadAddForm threadAddForm) {
-        return kuchannelDao.threadInsert(threadAddForm);
+    public int threadInsert(ThreadAddForm threadAddForm,Integer userId) {
+        return kuchannelDao.threadInsert(threadAddForm,userId);
     }
 
     //コミュニティIDを元にスレッドを全件取得
@@ -156,5 +156,7 @@ public class KuchannelService {
     public int memberSetting(List<AccountInformation> updateInfo, Integer communityId){return kuchannelDao.memberSetting(updateInfo,communityId);}
 
     public int deleteCommunity(Integer communityId){return kuchannelDao.deleteCommunity(communityId);}
+
+    public int IntegrateThreads(ThreadAddForm threadInfo,Integer userId){return kuchannelDao.IntegrateThreads(threadInfo,userId);}
 
 }

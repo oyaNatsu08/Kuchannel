@@ -93,30 +93,53 @@
 
     <!-- スレッドの統合 -->
     <button type="button" v-if="sessionInfo.role ===2" @click="integrateThread" >スレッドの統合</button>
-    <div v-if="isIntegrateThreadsPopup" class="popup-overlay" @click.self="closePopup('integrateThread')">
+    <div v-if="isIntegrateThreadsPopup" class="popup-overlay" @click.self="closePopup('IntegrateThreads')">
       <div class="popup">
         <h1>スレッド統合（採用するお店の情報を選択してください。）</h1>
         <p>スレッド名(店名)：
           <select v-model="selectedThreadName">
-            <option v-for="thread in selectedThreads" :value="thread.id" :key="thread.id" selected>
+            <option v-for="thread in selectedThreads" :value="thread.title" :key="thread.id" selected="selected">
               {{thread.title}}
             </option>
           </select>
         </p>
-        <p><input type="text" v-model="addThreadTitle"> <!-- String threadName;と対応させる --></p>
-        <!-- <p>フリガナ：<input type="text"v-model="addThreadFurigana"></p>
-        <p>お店の住所：<input type="text"v-model="addThreadAddress"></p>
-        <p>営業時間：<input type="text"v-model="addThreadSalesTime"></p>
-        <p>ジャンル：
-          <select v-model="addThreadGenre">
-            <option value="和食" selected>和食</option>
-            <option value="中華">中華</option>
-            <option value="イタリアン">イタリアン</option>
+        <p>フリガナ：
+          <select v-model="selectedThreadFurigana">
+            <option v-for="thread in selectedThreads" :value="thread.furigana" :key="thread.id" >
+              {{thread.furigana}}
+            </option>
           </select>
         </p>
-        <p>ハッシュタグ：<input type="text" v-model="addThreadHashtags"></p>
-        <button @click.self="addThread">作成</button> -->
-        <button @click.self="closePopup('integrateThread')">閉じる</button>
+        <p>お店の住所：
+          <select v-model="selectedThreadAddress">
+            <option v-for="thread in selectedThreads" :value="thread.address" :key="thread.id" >
+              {{thread.address}}
+            </option>
+          </select>
+        </p>
+        <p>営業時間：
+          <select v-model="selectedThreadSalesTime">
+            <option v-for="thread in selectedThreads" :value="thread.sales_time" :key="thread.id" >
+              {{thread.sales_time}}
+            </option>
+          </select>
+        </p>
+        <p>ジャンル：
+          <select v-model="selectedThreadGenre">
+            <option v-for="thread in selectedThreads" :value="thread.genre" :key="thread.id" >
+              {{thread.genre}}
+            </option>
+          </select>
+        </p>
+
+          <p> ハッシュタグ：</p>
+        <div v-for="thread in selectedThreads" class="hashtag-list">
+          <div v-for="hashtag in thread.hashTagList">
+            <p><input type="checkbox" name="hashTag" v-bind:value="hashtag.tag_name" v-model="selectedThreadHashTag"/>{{hashtag.tag_name}}</p>
+          </div>
+        </div>
+        <button @click.self="ThreadIntegrate">統合する</button>
+        <button @click.self="closePopup('IntegrateThreads')">閉じる</button>
       </div>
     </div>
 
@@ -217,7 +240,13 @@
           //コミュニティの統合用。
           isIntegrateThreadsPopup:false,
           selectedThreads:[],
-          selectedThreadName:'',
+          selectedThreadName:'10',
+          selectedThreadFurigana:'',
+          selectedThreadAddress:'',
+          selectedThreadSalesTime:'',
+          selectedThreadGenre:'',
+          selectedThreadHashTag:[],
+
 
 
         }
@@ -307,7 +336,8 @@
                 address:this.addThreadAddress,
                 salesTime:this.addThreadSalesTime,
                 genre:this.addThreadGenre,
-                hashtag:this.addThreadHashtags
+                hashtag:this.addThreadHashtags,
+                communityId :this.communityId
             }
             if(this.addThreadHashtags.trim()==''){
               addInfo.hashtag=null
@@ -378,7 +408,7 @@
         //コミュニティ削除
         deleteCommunity(){
           if(window.confirm(`${this.communityName}を本当に削除してもよいですか？`)){
-            if(window.confirm('公開しませんか?')){
+            if(window.confirm('後悔しませんか?')){
               axios.delete(`/deleteCommunity/${this.communityId}`)
               .then(res=>{
                 window.location.href = "http://localhost:8080/mypage";
@@ -386,12 +416,61 @@
             }
           }
         },
+        //スレッド統合のページ開く
         integrateThread(){
-          console.log(this.threads);
-          this.openPopup('IntegrateThreads');
           this.selectedThreads = this.threads.filter(thread =>thread.isSelected === true);
-          console.log(this.selectedThreads);
-        }
+          if(this.selectedThreads.length<2){
+            alert('統合したいスレッドを少なくとも2つ以上選んでください')
+          }else{
+            const target =this.selectedThreads[0];
+            this.selectedThreadName =target.title;
+            this.selectedThreadFurigana =target.furigana;
+            this.selectedThreadAddress =target.address;
+            this.selectedThreadSalesTime =target.sales_time;
+            this.selectedThreadGenre =target.genre;
+            this.openPopup('IntegrateThreads');          
+
+          }
+        },
+        //スレッド統合の処理
+        ThreadIntegrate(){
+          
+          //ハッシュタグを、java側で追加しやすいように成形
+          const hashtagForPost = Object.values(this.selectedThreadHashTag).join(',').replace(/#/g,"");
+          console.log(hashtagForPost);
+
+          //統合するスレッドのidをjavaに送る準備
+          let integrateThreadId =[]
+          for(let i=0; i<this.selectedThreads.length; i++){
+            integrateThreadId.push(this.selectedThreads[i].id)
+          };
+          const integrateThreadIdForPost = Object.values(integrateThreadId).join(',');
+
+          //受け取った統合情報をセットする。
+          const integrateInfo ={
+                threadName:this.selectedThreadName,
+                furigana:this.selectedThreadFurigana,
+                address:this.selectedThreadAddress,
+                salesTime:this.selectedThreadSalesTime,
+                genre:this.selectedThreadGenre,
+                hashtag:hashtagForPost,
+                integrateThreadId:integrateThreadIdForPost,
+                communityId :this.communityId
+          };
+          if(hashtagForPost.trim()==''){
+            integrateInfo.hashtag=null;
+          };
+
+          
+          
+
+          //axiosにput。
+          axios.put('/IntegrateThreads',integrateInfo)
+          .then(res=>{
+            this.getThreads();
+          });
+
+        },
 
       },
 
