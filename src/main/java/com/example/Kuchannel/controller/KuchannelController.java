@@ -309,87 +309,18 @@ public class KuchannelController {
         CommunityRecord community = kuchannelService.findCommunity(communityId);
         model.addAttribute("name", community.name());
         //コミュニティIDを元にスレッドを全件取得(現在は1固定)
-        var threads = kuchannelService.communityThreads(1);
+        var threads = kuchannelService.communityThreads(communityId);
 
         //thread-list.htmlにthreadsの値を渡す
         model.addAttribute("threads", threads);
+        //コミュニティIDを元にスレッドを全件取得(現在は１固定)
+        threads = kuchannelService.communityThreads(1);
+
+        //thread-list.htmlにthreadsの値を渡す
+        model.addAttribute("threads",threads);
 
         return "thread-list";
-
     }
-    //レビュー一覧へ飛ぶ
-    @GetMapping("review-list")
-    public String reviewListView(@ModelAttribute("UserForm") UserForm userForm) {
-
-        //ログインしているか確認
-        if (session.getAttribute("user") == null) {
-            return "login";
-        } else {
-            return "review-list";
-        }
-    }
-
-    //レビュー作成処理
-    @PostMapping("/review-add")
-    public String reviewAdd(Model model) {
-
-        return "review-list";
-    }
-
-    //レビュー詳細画面へ
-    @GetMapping("/review-detail")
-    public String reviewDetail(@RequestParam("reviewId") Integer reviewId,
-                               Model model) {
-
-        //レビューIDを元にreviewsテーブルから情報を取得する
-        var review = kuchannelService.findReview(reviewId);
-
-        //データベースからレビューの画像情報を取得する
-        var reviewImages = kuchannelService.getReviewImages(reviewId);
-
-        //データベースからレビューの返信情報を取得する
-        var reviewReplies = kuchannelService.getReviewReply(reviewId);
-
-        model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
-                review.review(), review.createDate(), reviewImages, reviewReplies));
-        model.addAttribute("reviewId", reviewId);
-
-        return "review-detail";
-
-    }
-
-    //ユーザーのレビュー一覧画面に遷移
-    @GetMapping("/user-review/{userId}")
-    public String userReviewView(@PathVariable("userId") Integer userId,
-                                 Model model) {
-
-        //ユーザーのレビュー一覧に必要な情報を取得する
-        var reviews = kuchannelService.getUserReview(userId);
-
-        model.addAttribute("reviews", reviews);
-
-        return "user-review-list";
-    }
-
-
-    /*------------------------------------------------*/
-
-
-
-    //スレッド作成画面
-    //RequestParamは、遷移する前のページから受け取る。今はコメントアウト
-    @GetMapping("/thread-add") //urlで入力する値
-    public String threadAddView(@ModelAttribute("threadForm")ThreadAddForm threadAddForm,
-//                                @RequestParam(name="communityId") Integer communityId,
-                                Model model) { //メソッド名(コントローラークラスの中で被らなければok)
-
-        //コミュニティIDをthread-add.htmlに値を渡す
-//        model.addAttribute("communityId", communityId);
-
-        return "thread-add"; //開きたいhtmlファイル名
-    }
-
-
 
     //お問い合わせページ
     @GetMapping("/Information")
@@ -422,6 +353,89 @@ public class KuchannelController {
         var informationDetails = kuchannelService.information(informatonRecord);
 
         return "thread-list";
+
+    }
+    //スレッドのレビュー一覧へ飛ぶ
+    @GetMapping("/thread-review/{threadId}")
+    public String reviewListView(@PathVariable("threadId") Integer threadId,
+                                 @ModelAttribute("UserForm") UserForm userForm,
+                                 Model model) {
+
+        //ログインしているか確認
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
+
+            //スレッドIDをもとに、スレッド情報を取得する
+            var thread = kuchannelService.getThread(threadId);
+
+            model.addAttribute("thread", thread);
+
+            return "review-list";
+        }
+    }
+
+    //レビュー作成処理
+    @PostMapping("/review-add")
+    public String reviewAdd(Model model) {
+
+        return "review-list";
+    }
+
+    //レビュー詳細画面へ
+    @GetMapping("/review-detail")
+    public String reviewDetail(@RequestParam("reviewId") Integer reviewId,
+                               @RequestParam("threadId") Integer threadId,
+                               Model model) {
+
+        //レビューIDを元にreviewsテーブルから情報を取得する
+        var review = kuchannelService.findReview(reviewId);
+
+        //データベースからレビューの画像情報を取得する
+        var reviewImages = kuchannelService.getReviewImages(reviewId);
+
+        //データベースからレビューの返信情報を取得する
+        var reviewReplies = kuchannelService.getReviewReply(reviewId);
+
+        //データベースからレビューのいいね件数を取得する
+        var goodCount = kuchannelService.getGoodReview(reviewId);
+
+        model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
+                review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
+        model.addAttribute("reviewId", reviewId);
+        model.addAttribute("threadId", threadId);
+
+        return "review-detail";
+
+    }
+
+    //ユーザーのレビュー一覧画面に遷移
+    @GetMapping("/user-review/{userId}")
+    public String userReviewView(@PathVariable("userId") Integer userId,
+                                 Model model) {
+
+        //ユーザーのレビュー一覧に必要な情報を取得する
+        var reviews = kuchannelService.getUserReview(userId);
+
+        model.addAttribute("reviews", reviews);
+
+        return "user-review-list";
+    }
+
+
+    /*------------------------------------------------*/
+
+    //スレッド作成画面
+    //RequestParamは、遷移する前のページから受け取る。今はコメントアウト
+    @GetMapping("/thread-add") //urlで入力する値
+    public String threadAddView(@ModelAttribute("threadForm")ThreadAddForm threadAddForm,
+//                                @RequestParam(name="communityId") Integer communityId,
+                                Model model) { //メソッド名(コントローラークラスの中で被らなければok)
+
+        //コミュニティIDをthread-add.htmlに値を渡す
+//        model.addAttribute("communityId", communityId);
+
+        return "thread-add"; //開きたいhtmlファイル名
     }
 
     //    /*-------------------------Update(プロフィール編集)--------------------------*/

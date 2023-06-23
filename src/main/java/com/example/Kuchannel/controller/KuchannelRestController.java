@@ -1,11 +1,15 @@
 package com.example.Kuchannel.controller;
 
+import com.example.Kuchannel.KuchannelApplication;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
+import com.example.Kuchannel.form.ReviewUpdateForm;
 import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -86,11 +90,19 @@ public class KuchannelRestController {
         return threads;
     }
 
-    @GetMapping("/goodDeal/{id}")
-    public int GoodDeal(@PathVariable("id")Integer thread_id){
+    //スレッドのグッド
+    @GetMapping("/goodDeal/thread/{threadId}")
+    public int goodDealThread(@PathVariable("threadId")Integer thread_id){
 //        セッションからuser_idをもらう一旦1で固定
-//        var user = (UserRecord)session.getAttribute("user");
-        return kuchannelService.goodDeal(thread_id,1);
+        var user = (UserRecord)session.getAttribute("user");
+        return kuchannelService.goodDealThread(thread_id, user.id());
+    }
+
+    //レビューのグッド
+    @GetMapping("/goodDeal/review/{reviewId}")
+    public int goodDealReview(@PathVariable("reviewId")Integer reviewId){
+        var user = (UserRecord)session.getAttribute("user");
+        return kuchannelService.goodDealReview(reviewId, user.id());
     }
 
     //スレッド削除用
@@ -116,7 +128,10 @@ public class KuchannelRestController {
 
     @PutMapping("/updateThread/{id}")
     public int threadUpdate(@RequestBody ThreadAddForm inputData,@PathVariable("id") Integer thread_id){
-        var result =kuchannelService.threadUpdate(inputData ,thread_id);
+        var result = kuchannelService.threadUpdate(inputData ,thread_id);
+
+        var thread = kuchannelService.getThread(result);
+
         return result;
     }
 
@@ -132,10 +147,10 @@ public class KuchannelRestController {
 
     //レビュー一覧取得
     @GetMapping("/getReviews")
-    public List<ReviewElementAll> getReviews() {
+    public List<ReviewElementAll> getReviews(@RequestParam("threadId") Integer threadId) {
 
-        //データベースからレビュー一覧に表示する情報を全件取得(スレッドID 1 固定)
-        var revs = kuchannelService.findReviewAll(1);
+        //データベースからレビュー一覧に表示する情報を全件取得
+        var revs = kuchannelService.findReviewAll(threadId);
 
         //画像込みのレビュー情報を受け取るリスト
         List<ReviewElementAll> reviews = new ArrayList<>();
@@ -149,8 +164,11 @@ public class KuchannelRestController {
             //データベースからレビューの返信情報を取得する
             var reviewReplies = kuchannelService.getReviewReply(rev.reviewId());
 
+            //データベースからレビューのいいね件数を取得する
+            var goodCount = kuchannelService.getGoodReview(rev.reviewId());
+
             reviews.add(new ReviewElementAll(rev.userId(), rev.userName(), rev.reviewId(), rev.title(),
-                    rev.review(), rev.createDate(), reviewImages, reviewReplies));
+                    rev.review(), rev.createDate(), reviewImages, reviewReplies, goodCount));
 
         }
 
@@ -173,11 +191,33 @@ public class KuchannelRestController {
 //    }
 
 
+    //レビューの編集・更新機能処理
+    @PutMapping("/review-update")
+    public int update(@RequestBody ReviewUpdateForm reviewUpdateForm){
+
+        //reviewsテーブルのレコードの更新処理
+        var reviewUpdate = kuchannelService.reviewUpdate(reviewUpdateForm.getId(),reviewUpdateForm.getTitle(),reviewUpdateForm.getContent());
+
+        return reviewUpdate;
+
+    }
+
+
     //レビュー投稿処理
     @PostMapping("/add-review")
     public ResponseEntity<String> addReview(@RequestParam("title") String title,
-                            @RequestParam("content") String content,
-                            @RequestParam("images") List<MultipartFile> images) {
+                                            @RequestParam("content") String content,
+                                            @RequestParam("images") List<MultipartFile> images) {
+
+        //入力値チェック(本文)
+        if ("".equals(content)) {
+            return ResponseEntity.badRequest().body("");
+        }
+
+//        //入力値チェック(タイトル)
+//        if (title.length() > 50) {
+//            return ResponseEntity.badRequest().body("タイトルが長すぎます。50文字以内で入力してください。");
+//        }
 
         //reviewsテーブルにインサート処理かつインサートしたIDを取得(thread_id 固定)
         var user = (UserRecord)session.getAttribute("user");
@@ -243,5 +283,21 @@ public class KuchannelRestController {
         return reply;
 
     }
+
+    //スレッド情報を取得する
+    @GetMapping("/getThread")
+    public CommunityThread getThread(@RequestParam("threadId") Integer threadId) {
+        var thread = kuchannelService.getThread(threadId);
+
+        return thread;
+    }
+
+    /*-------------------------------------*/
+    @DeleteMapping("/api/delete/{reviewId}")
+    public int deleteReview(@PathVariable("reviewId") Integer reviewId) {
+        int success = kuchannelService.reviewDelete(reviewId);
+        return success;
+    }
+    /*-------------------------------------*/
 
 }
