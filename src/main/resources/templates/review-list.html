@@ -154,7 +154,7 @@
       </div>
 
       <!-- 投稿ユーザーだけ表示される(後でやる) -->
-      <button type="button">削除</button>
+      <button type="button" @click="showDeleteConfirmation(review.reviewId)">削除</button>
       <button type="button" @click="showEditPopup(review)">編集</button>
       <button type="button" @click="openReply(review.reviewId)">返信</button>
 
@@ -167,6 +167,14 @@
       <div>
         <button @click="goodDeal(review.reviewId)">いいね</button>
         <span>{{ review.goodCount }}</span>
+      </div>
+
+      <div v-if="showDeletePopup" class="popup-overlay">
+        <div class="popup">
+          <h2>削除しますか？</h2>
+          <button type="button" @click="deleteReview(reviewToDelete)">OK</button>
+          <button type="button" @click="cancelDelete">キャンセル</button>
+        </div>
       </div>
 
     </div>
@@ -222,11 +230,36 @@
           updateThreadHashtags: '',
           thread: [],
 
+          reviewToDelete: '',
+          showDeletePopup: false,
+
         }
       },
       methods: {
+        //レビュー削除処理
+        showDeleteConfirmation(reviewId) {
+          this.reviewToDelete = reviewId;
+          this.showDeletePopup = true;
+        },
+        deleteReview(reviewId) {
+          console.log("success", reviewId);
+          axios
+            .delete(`/api/delete/${reviewId}`)
+            .then(res => {
+              // 削除成功時の処理
+              this.getReviews(`[[ ${threadId} ]]`);
+              this.cancelDelete();
+              console.log(res);
+            })
+            .catch(error => {
+              // エラーハンドリング処理
+              console.error(error);
+            });
+        },
+
         // レビュー投稿処理
         addReview() {
+
           console.log(this.reviewTitle, this.content);
           const formData = new FormData();
           formData.append("title", this.reviewTitle);
@@ -316,6 +349,10 @@
           this.editingReview.id = '';
           this.editingReview.title = '';
           this.editingReview.content = '';
+        },
+        cancelDelete() {
+          this.reviewToDelete = null;
+          this.showDeletePopup = false;
         },
         //ユーザーのレビュー一覧に遷移
         getUserReviewLink(userId) {

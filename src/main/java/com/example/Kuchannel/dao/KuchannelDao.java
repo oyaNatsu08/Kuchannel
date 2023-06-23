@@ -17,7 +17,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class KuchannelDao {
@@ -392,8 +391,14 @@ public class KuchannelDao {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
+        //repliesテーブルにインサート処理
         jdbcTemplate.update("INSERT INTO replies(user_id, review_id, reply, create_date) " +
                 "VALUES(:userId, :reviewId, :content, now())", param, keyHolder);
+
+        param.addValue("replyId", Integer.parseInt(keyHolder.getKeys().get("id").toString()));
+
+        //noticesテーブルにインサート処理
+        jdbcTemplate.update("INSERT INTO notices(reply_id, read_flag) VALUES (:replyId, 't')", param);
 
         var user = (UserRecord)session.getAttribute("user");
 
@@ -732,5 +737,21 @@ public class KuchannelDao {
         return false;
 
     }
+
+/*--------------------レビュー削除------------------------------*/
+
+
+
+    public int reviewDelete(Integer reviewId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("id", reviewId);
+        jdbcTemplate.update("DELETE FROM notices WHERE reply_id IN (SELECT id FROM replies WHERE review_id = :id)",param);
+        jdbcTemplate.update("DELETE FROM replies WHERE review_id = :id ",param);
+        jdbcTemplate.update("DELETE FROM review_images WHERE review_id = :id ",param);
+        jdbcTemplate.update("DELETE FROM review_goods WHERE review_id = :id ",param);
+        return jdbcTemplate.update("DELETE FROM reviews WHERE id = :id", param);
+    }
+
+/*----------------------------------------------------------*/
 
 }
