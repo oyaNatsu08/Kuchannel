@@ -179,6 +179,21 @@ public class KuchannelService {
         return kuchannelDao.getThread(threadId);
     }
 
+    //ジャンルを取得する
+    public List<GenreRecord> getGenres() {
+        return kuchannelDao.getGenres();
+    }
+
+    //人気のハッシュタグを取得する
+    public List<HashTagRecord> getHashtags() {
+        return kuchannelDao.getHashtags();
+    }
+
+    //キーワードとスレッドタイトルであいまい検索
+    public List<CommunityThread> findKeyThread(String[] keywords) {
+        return kuchannelDao.findKeyThread(keywords);
+    }
+
     /*---------------------------------------------*/
 
     //threadテーブルにINSERTする処理

@@ -292,6 +292,39 @@ public class KuchannelRestController {
         return thread;
     }
 
+    //ジャンルを取得する
+    @GetMapping("/getGenres")
+    public List<GenreRecord> getGenre() {
+        var genre = kuchannelService.getGenres();
+
+        System.out.println("ジャンル：" + genre);
+
+        return genre;
+    }
+
+    //人気のハッシュタグを取得
+    @GetMapping("/getHashtags")
+    public List<HashTagRecord> getHashtags() {
+        var hashtags = kuchannelService.getHashtags();
+
+        System.out.println("ハッシュタグ上位5件：" + hashtags);
+
+        return hashtags;
+    }
+
+    //キーワードでスレッドを絞り込む
+    @GetMapping("/keywordThreads")
+    public List<CommunityThread> keyThreads(@RequestParam("keyword") String keyword) {
+        //keywordを空白(半角または全角)ごとに分けて格納
+        String[] keywords = keyword.split("[\\s\\p{Z}]");
+
+        //キーワードとスレッドタイトルであいまい検索
+        var threads = kuchannelService.findKeyThread(keywords);
+
+        return threads;
+
+    }
+
     /*-------------------------------------*/
     @DeleteMapping("/api/delete/{reviewId}")
     public int deleteReview(@PathVariable("reviewId") Integer reviewId) {

@@ -16,7 +16,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public class KuchannelDao {
@@ -630,6 +633,66 @@ public class KuchannelDao {
                 new DataClassRowMapper<>(CommunityThread.class));
 
         return list.isEmpty() ? null : list.get(0);
+
+    }
+
+    //ジャンルを取得する
+    public List<GenreRecord> getGenres() {
+
+        var list = jdbcTemplate.query("SELECT DISTINCT(genre) AS genreName FROM threads",
+                new DataClassRowMapper<>(GenreRecord.class));
+
+        return list;
+
+    }
+
+    //人気のハッシュタグを取得する
+    public List<HashTagRecord> getHashtags() {
+
+        var list = jdbcTemplate.query("SELECT h.id, h.tag_name, COUNT(*) AS count FROM hashtags h " +
+                "JOIN thread_hashtag th ON h.id = th.hashtag_id GROUP BY h.id " +
+                "ORDER BY COUNT(*) DESC LIMIT 5", new DataClassRowMapper<>(HashTagRecord.class));
+
+        return list;
+
+    }
+
+    //キーワードとスレッドタイトルであいまい検索
+    public List<CommunityThread> findKeyThread(String[] keywords) {
+        List<CommunityThread> lists = new ArrayList<>();
+        Set<CommunityThread> threadSet = new HashSet<>();
+
+        for (String key : keywords) {
+            MapSqlParameterSource param = new MapSqlParameterSource();
+            param.addValue("key", "%" + key + "%");
+
+            var list = jdbcTemplate.query("select *\n" +
+                            "from threads t\n" +
+                            "left join (\n" +
+                            "  select thread_id, count(*) good_count\n" +
+                            "  from thread_goods\n" +
+                            "  group by thread_id) g\n" +
+                            "  on t.id = g.thread_id\n" +
+                            "\n" +
+                            "left join \n" +
+                            "(\n" +
+                            "  select thread_id, string_agg(tag_name, ',') AS hashtags\n" +
+                            "  from hashtags h\n" +
+                            "  join thread_hashtag th\n" +
+                            "  on h.id = th.hashtag_id\n" +
+                            "  group by thread_id\n" +
+                            ") h\n" +
+                            "on h.thread_id = t.id\n" +
+                            "where t.title LIKE :key ORDER BY t.id", param,
+                    new DataClassRowMapper<>(CommunityThread.class));
+
+            //listをlistsに詰めなおす
+            threadSet.addAll(list);
+
+        }
+
+        lists.addAll(threadSet);
+        return lists;
 
     }
 

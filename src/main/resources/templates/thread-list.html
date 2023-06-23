@@ -20,11 +20,37 @@
 
     <h1 class="community-name" th:text="${name} + 'へようこそ！'"></h1>
 
-    <div class="search-container">
-      <p>
-        <input type="text" v-model="search">
-        <input type="submit" value="&#xf002">
-      </p>
+    <div>
+      <div class="search-container">
+        <p>
+          <input type="text" v-model="searchText">
+          <input type="submit" value="&#xf002" @click="find(searchText)">
+        </p>
+      </div>
+
+      <div>
+        <select name="refine" v-model="selectedOption">
+          <option value="thrad">スレッド</option>
+          <option value="review">全レビュー</option>
+        </select>
+        <button type="button" @click="changeRefineView()">簡単絞り込み</button>
+      </div>
+    </div>
+
+    <div v-if="refineView" style="text-align: center;">
+      <div>
+        <h3>ジャンル</h3>
+        <div v-for="genre in genres" style="display: inline-block;">
+          <input type="checkbox" v-model="GenreChecked" :value="genre.genreName">{{ genre.genreName }}</input>
+        </div>
+      </div>
+      <hr>
+      <div>
+        <h3>人気のキーワード</h3>
+        <div v-for="hashtag in hashtags" style="display: inline-block;">
+          <p style="color: blue; margin-right: 10px;" @click="searchAdd(hashtag.tagName)">#{{ hashtag.tagName }}</p>
+        </div>
+      </div>
     </div>
 
     <!-- <form action="/thread-add" method="get">
@@ -62,31 +88,34 @@
 
 
 
-    <div class="restaurant" v-for="thread in threads">
-      <img src="restaurant-a.jpg" alt="飲食店A" class="restaurant-img">
-      <div>
-        <a :href="getThreadReviewLink(thread.id)" class="restaurant-name">
-          <h3>{{thread.title}}</h3>
-        </a>
-        <div class="genre">ジャンル：{{thread.genre}}</div>
-        <div class="address">住所：{{thread.address}}</div>
-        <div class="likes">
-          <button @click="goodDeal(thread.id)">いいね</button>
-          <span>{{thread.good_count}}</span>
+    <div v-for="thread in threads">
+      <div class="restaurant" v-if="genreIncludeCheck(thread.genre)">
+
+        <img src="restaurant-a.jpg" alt="飲食店A" class="restaurant-img">
+        <div>
+          <a :href="getThreadReviewLink(thread.id)" class="restaurant-name">
+            <h3>{{thread.title}}</h3>
+          </a>
+          <div class="genre">ジャンル：{{thread.genre}}</div>
+          <div class="address">住所：{{thread.address}}</div>
+          <div class="likes">
+            <button @click="goodDeal(thread.id)">いいね</button>
+            <span>{{thread.good_count}}</span>
+          </div>
+          <div class="opening-hours">営業時間：{{thread.sales_time}}</div>
+          <div class="hashtags">
+            <ul class="hashUl" v-for="hashtag in thread.hashTagList">
+              <li>
+                <a href="#"> {{hashtag.tag_name}}</a>
+              </li>
+            </ul>
+          </div>
         </div>
-        <div class="opening-hours">営業時間：{{thread.sales_time}}</div>
-        <div class="hashtags">
-          <ul class="hashUl" v-for="hashtag in thread.hashTagList">
-            <li>
-              <a href="#"> {{hashtag.tag_name}}</a>
-            </li>
-          </ul>
+        <!-- セッションからuse_idをもってきて、ここで判別。 -->
+        <div class="delete-update">
+          <button type="button" v-if="thread.user_id == 1" @click="deleteThread(thread.id)">削除</button>
+          <button type="button" @click="openUpdateThread(thread.id)">情報編集</button>
         </div>
-      </div>
-      <!-- セッションからuse_idをもってきて、ここで判別。 -->
-      <div class="delete-update">
-        <button type="button" v-if="thread.user_id == 1" @click="deleteThread(thread.id)">削除</button>
-        <button type="button" @click="openUpdateThread(thread.id)">情報編集</button>
       </div>
     </div>
 
@@ -148,7 +177,13 @@
           updateThreadHashtags: '',
 
           //検索
-          search: '',
+          refineView: false,
+          genres: [],
+          hashtags: [],
+          isGenreCheck: false,
+          GenreChecked: [],
+          searchText: '',
+          selectedOption: 'thrad',
 
         }
 
@@ -290,12 +325,74 @@
           return `/thread-review/${threadId}`;
         },
 
+        //絞り込みリストを表示
+        changeRefineView() {
+          this.refineView = !this.refineView;
+        },
+
+        //スレッドのジャンル一覧を取得
+        getGenres() {
+          axios.get('/getGenres')
+            .then(res => {
+              this.genres = res.data;
+            });
+        },
+
+        //スレッドの人気のハッシュタグを取得
+        getHashtags() {
+          axios.get('/getHashtags')
+            .then(res => {
+              this.hashtags = res.data;
+            });
+        },
+
+        //ジャンルの絞り込みチェック
+        genreIncludeCheck(genreName) {
+          if (this.GenreChecked.length === 0) {
+            return true;
+          }
+
+          for (var genre of this.GenreChecked) {
+            if (genreName == genre) {
+              return true;
+            }
+          }
+          return false;
+
+        },
+
+        //検索バーにハッシュタグを追加
+        searchAdd(hashtag) {
+          this.searchText += '#' + hashtag + ' ';
+        },
+
+        //検索処理
+        find(searchText) {
+          if (this.selectedOption === 'thrad') {
+            // スレッドを検索する処理
+            axios.get('/keywordThreads', {
+              params: {
+                keyword: searchText
+              }
+            })
+              .then(res => {
+                this.threads = res.data;
+              });
+
+          } else if (this.selectedOption === 'review') {
+            // 全レビューを検索する処理
+            // 例: this.searchText を使用して全レビューを検索する
+          }
+        },
+
       },
 
       created: function () {
         console.log("created");
         this.getThreads();
         this.getSessionInfo();
+        this.getGenres();
+        this.getHashtags();
       }
 
     }).mount('#app')

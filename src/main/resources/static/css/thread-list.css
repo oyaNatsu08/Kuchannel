@@ -99,17 +99,17 @@ h3 {
   /* box-sizing: border-box; */
   position: relative;
   border: 1px solid #999;
-  /* padding: 3px 10px; */
+  /* padding-bottom: 20px; */
   border-radius: 20px;
   height: 2.5em;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  margin-left: 35%;
-  margin-right: 35%;
+  /* overflow: hidden; */
+  /* display: flex;
+  justify-content: center; */
 }
 
 .search-container input[type="text"] {
+  margin-left: 5%;
+  width: 90%;
   border: none;
 }
 

@@ -154,8 +154,8 @@
       </div>
 
       <!-- 投稿ユーザーだけ表示される(後でやる) -->
-      <button type="button" @click="showDeleteConfirmation(review.reviewId)">削除</button>
-      <button type="button" @click="showEditPopup(review)">編集</button>
+      <button type="button" v-if="review.userId == userId" @click="showDeleteConfirmation(review.reviewId)">削除</button>
+      <button type="button" v-if="review.userId == userId" @click="showEditPopup(review)">編集</button>
       <button type="button" @click="openReply(review.reviewId)">返信</button>
 
       <form action="/review-detail" method="get" style="margin-top: 20px;">
@@ -232,6 +232,8 @@
 
           reviewToDelete: '',
           showDeletePopup: false,
+
+          userId: '',
 
         }
       },
@@ -447,6 +449,8 @@
         this.updateThreadSalesTime = `[[ ${thread.sales_time} ]]`;
         this.updateThreadGenre = `[[ ${thread.genre} ]]`;
         this.updateThreadHashtags = `[[ ${thread.hashtags} ]]`;
+
+        this.userId = `[[ ${userId} ]]`;
 
       },
     }).mount('#app')
