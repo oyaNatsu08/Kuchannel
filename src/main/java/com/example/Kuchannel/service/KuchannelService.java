@@ -217,4 +217,12 @@ public class KuchannelService {
 
     public int threadUpdate(ThreadAddForm inputData,Integer thread_id){return kuchannelDao.threadUpdate(inputData,thread_id);}
 
+/*-----------------------------------------------------------------------------*/
+    //レビュー削除
+    public int reviewDelete(Integer reviewId) {
+        return kuchannelDao.reviewDelete(reviewId);
+    }
+
+/*-----------------------------------------------------------------------------*/
+
 }

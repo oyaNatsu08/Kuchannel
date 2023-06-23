@@ -8,6 +8,8 @@ import com.example.Kuchannel.form.ReviewUpdateForm;
 import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -289,5 +291,13 @@ public class KuchannelRestController {
 
         return thread;
     }
+
+    /*-------------------------------------*/
+    @DeleteMapping("/api/delete/{reviewId}")
+    public int deleteReview(@PathVariable("reviewId") Integer reviewId) {
+        int success = kuchannelService.reviewDelete(reviewId);
+        return success;
+    }
+    /*-------------------------------------*/
 
 }

@@ -51,7 +51,6 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-
   </style>
 </head>
 
@@ -155,9 +154,8 @@
       </div>
 
       <!-- 投稿ユーザーだけ表示される(後でやる) -->
-      <!-- ここを修正(富永＆宮城) -->
-      <button type="button" v-if="review.userId == userId">削除</button>
-      <button type="button" v-if="review.userId == userId" @click="showEditPopup(review)">編集</button>
+      <button type="button" @click="showDeleteConfirmation(review.reviewId)">削除</button>
+      <button type="button" @click="showEditPopup(review)">編集</button>
       <button type="button" @click="openReply(review.reviewId)">返信</button>
 
       <form action="/review-detail" method="get" style="margin-top: 20px;">
@@ -169,6 +167,14 @@
       <div>
         <button @click="goodDeal(review.reviewId)">いいね</button>
         <span>{{ review.goodCount }}</span>
+      </div>
+
+      <div v-if="showDeletePopup" class="popup-overlay">
+        <div class="popup">
+          <h2>削除しますか？</h2>
+          <button type="button" @click="deleteReview(reviewToDelete)">OK</button>
+          <button type="button" @click="cancelDelete">キャンセル</button>
+        </div>
       </div>
 
     </div>
@@ -224,12 +230,33 @@
           updateThreadHashtags: '',
           thread: [],
 
-          //ログインしているユーザーID
-          userId: '',
+          reviewToDelete: '',
+          showDeletePopup: false,
 
         }
       },
       methods: {
+        //レビュー削除処理
+        showDeleteConfirmation(reviewId) {
+          this.reviewToDelete = reviewId;
+          this.showDeletePopup = true;
+        },
+        deleteReview(reviewId) {
+          console.log("success", reviewId);
+          axios
+            .delete(`/api/delete/${reviewId}`)
+            .then(res => {
+              // 削除成功時の処理
+              this.getReviews(`[[ ${threadId} ]]`);
+              this.cancelDelete();
+              console.log(res);
+            })
+            .catch(error => {
+              // エラーハンドリング処理
+              console.error(error);
+            });
+        },
+
         // レビュー投稿処理
         addReview() {
 
@@ -322,6 +349,10 @@
           this.editingReview.id = '';
           this.editingReview.title = '';
           this.editingReview.content = '';
+        },
+        cancelDelete() {
+          this.reviewToDelete = null;
+          this.showDeletePopup = false;
         },
         //ユーザーのレビュー一覧に遷移
         getUserReviewLink(userId) {
@@ -417,10 +448,9 @@
         this.updateThreadGenre = `[[ ${thread.genre} ]]`;
         this.updateThreadHashtags = `[[ ${thread.hashtags} ]]`;
 
-        this.userId = `[[ ${userId} ]]`;
-
       },
     }).mount('#app')
+
   </script>
 
 </body>
