@@ -83,7 +83,7 @@ public class KuchannelDao {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
         var result = jdbcTemplate.query("SELECT c.id AS communityId ,c_u.user_id,c.name AS community_name,c_u.nick_name ,c_u.flag FROM community_user c_u JOIN communities c ON c_u.community_id = c.id WHERE c_u.user_id = :userId",param,new DataClassRowMapper<>(BelongingCommunities.class));
-        System.out.println(result);
+        //System.out.println(result);
         return result;
     }
 
@@ -114,7 +114,7 @@ public class KuchannelDao {
                         "FROM threads th JOIN communities co ON th.community_id = co.id JOIN community_user cu ON co.id = cu.community_id " +
                         "WHERE th.user_id = :userId AND cu.user_id = :userId AND cu.flag = true;", param,
                 new DataClassRowMapper<>(MyThread.class));
-        System.out.println(result);
+        //System.out.println(result);
         return result;
     }
 
@@ -128,7 +128,7 @@ public class KuchannelDao {
                 "JOIN communities co ON th.community_id = co.id JOIN community_user cu on co.id = cu.community_id " +
                 "WHERE th.user_id = :userId AND cu.user_id = :userId AND cu.flag = true;", param,
                 new DataClassRowMapper<>(MyReview.class));
-        System.out.println(result);
+        //System.out.println(result);
         return result;
     }
 
@@ -603,7 +603,7 @@ public class KuchannelDao {
                         "on h.thread_id = t.id\n" +
                         "where t.community_id = :id ORDER BY t.id", param,
                 new DataClassRowMapper<>(CommunityThread.class));
-        System.out.println(list);
+        //System.out.println(list);
 
         return list;
     }
@@ -659,12 +659,14 @@ public class KuchannelDao {
     }
 
     //キーワードとスレッドタイトルであいまい検索
-    public List<CommunityThread> findKeyThread(String[] keywords) {
+    public List<CommunityThread> findKeyThread(Integer communityId, String[] keywords) {
         List<CommunityThread> lists = new ArrayList<>();
         Set<CommunityThread> threadSet = new HashSet<>();
+        MapSqlParameterSource param = new MapSqlParameterSource();
+
+        param.addValue("communityId", communityId);
 
         for (String key : keywords) {
-            MapSqlParameterSource param = new MapSqlParameterSource();
             param.addValue("key", "%" + key + "%");
 
             var list = jdbcTemplate.query("select *\n" +
@@ -684,8 +686,9 @@ public class KuchannelDao {
                             "  group by thread_id\n" +
                             ") h\n" +
                             "on h.thread_id = t.id\n" +
-                            "where t.title LIKE :key ORDER BY t.id", param,
-                    new DataClassRowMapper<>(CommunityThread.class));
+                            "where t.community_id = :communityId AND t.title LIKE :key " +
+                            "ORDER BY t.id", param,
+                            new DataClassRowMapper<>(CommunityThread.class));
 
             //listをlistsに詰めなおす
             threadSet.addAll(list);
@@ -695,6 +698,51 @@ public class KuchannelDao {
         lists.addAll(threadSet);
         return lists;
 
+    }
+
+    //キーワードとレビューの本文、タイトルであいまい検索
+    public List<CommunityThread> findKeyReview(Integer communityId, String[] keywords) {
+
+        List<CommunityThread> lists = new ArrayList<>();
+        Set<CommunityThread> threadSet = new HashSet<>();
+        MapSqlParameterSource param = new MapSqlParameterSource();
+
+        param.addValue("communityId", communityId);
+
+        for (String key : keywords) {
+            param.addValue("key", "%" + key + "%");
+
+            var list = jdbcTemplate.query("select * " +
+                            "from threads t\n" +
+                            "left join (\n" +
+                            "  select thread_id, count(*) good_count\n" +
+                            "  from thread_goods\n" +
+                            "  group by thread_id) g\n" +
+                            "  on t.id = g.thread_id\n" +
+                            "\n" +
+                            "left join \n" +
+                            "(\n" +
+                            "  select thread_id, string_agg(tag_name, ',') AS hashtags\n" +
+                            "  from hashtags h\n" +
+                            "  join thread_hashtag th\n" +
+                            "  on h.id = th.hashtag_id\n" +
+                            "  group by thread_id\n" +
+                            ") h\n" +
+                            "on h.thread_id = t.id\n " +
+                            "join reviews r on t.id = r.thread_id " +
+                            "where (r.title like :key or r.review like :key) " +
+                            "and t.community_id = :communityId ORDER BY t.id", param,
+                            new DataClassRowMapper<>(CommunityThread.class));
+
+            //listをlistsに詰めなおす
+            threadSet.addAll(list);
+
+            //System.out.println("review検索" + list);
+
+        }
+
+        lists.addAll(threadSet);
+        return lists;
     }
 
     //お知らせテーブルの未読フラッグをアップデート

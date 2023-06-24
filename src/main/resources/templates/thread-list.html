@@ -574,7 +574,8 @@
             // スレッドを検索する処理
             axios.get('/keywordThreads', {
               params: {
-                keyword: searchText
+                keyword: searchText,
+                communityId: this.communityId
               }
             })
               .then(res => {
@@ -583,7 +584,15 @@
 
           } else if (this.selectedOption === 'review') {
             // 全レビューを検索する処理
-            // 例: this.searchText を使用して全レビューを検索する
+            axios.get('/keywordReviews', {
+              params: {
+                keyword: searchText,
+                communityId: this.communityId
+              }
+            })
+            .then(res => {
+              this.threads = res.data;
+            })
           }
         },
 

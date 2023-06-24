@@ -144,7 +144,7 @@ public class KuchannelRestController {
 
     @PutMapping("/memberSetting/{communityId}")
     public int memberSetting(@PathVariable("communityId") Integer communityId,@RequestBody List<AccountInformation> updateInfo){
-        System.out.println(updateInfo);
+        //System.out.println(updateInfo);
         var result =kuchannelService.memberSetting(updateInfo, communityId);
         return result;
     }
@@ -286,7 +286,7 @@ public class KuchannelRestController {
     public List<GenreRecord> getGenre() {
         var genre = kuchannelService.getGenres();
 
-        System.out.println("ジャンル：" + genre);
+        //System.out.println("ジャンル：" + genre);
 
         return genre;
     }
@@ -296,22 +296,36 @@ public class KuchannelRestController {
     public List<HashTagRecord> getHashtags() {
         var hashtags = kuchannelService.getHashtags();
 
-        System.out.println("ハッシュタグ上位5件：" + hashtags);
+        //System.out.println("ハッシュタグ上位5件：" + hashtags);
 
         return hashtags;
     }
 
     //キーワードでスレッドを絞り込む
     @GetMapping("/keywordThreads")
-    public List<CommunityThread> keyThreads(@RequestParam("keyword") String keyword) {
+    public List<CommunityThread> keyThreads(@RequestParam("communityId") Integer communityId,
+                                            @RequestParam("keyword") String keyword) {
         //keywordを空白(半角または全角)ごとに分けて格納
         String[] keywords = keyword.split("[\\s\\p{Z}]");
 
         //キーワードとスレッドタイトルであいまい検索
-        var threads = kuchannelService.findKeyThread(keywords);
+        var threads = kuchannelService.findKeyThread(communityId, keywords);
 
         return threads;
 
+    }
+
+    //キーワードでレビューからスレッドを絞り込む
+    @GetMapping("/keywordReviews")
+    public List<CommunityThread> keyReviews(@RequestParam("communityId") Integer communityId,
+                                            @RequestParam("keyword") String keyword) {
+        //keywordを空白(半角または全角)ごとに分けて格納
+        String[] keywords = keyword.split("[\\s\\p{Z}]");
+
+        //キーワードとスレッドタイトルであいまい検索
+        var threads = kuchannelService.findKeyReview(communityId, keywords);
+
+        return threads;
     }
 
     /*-------------------------------------*/
@@ -340,7 +354,7 @@ public class KuchannelRestController {
     public int IntegrateThreads(@RequestBody ThreadAddForm threadInfo){
         var user = (UserRecord)session.getAttribute("user");
         kuchannelService.IntegrateThreads(threadInfo, user.id());
-        System.out.println(threadInfo);
+        //System.out.println(threadInfo);
         return 1;
     }
 

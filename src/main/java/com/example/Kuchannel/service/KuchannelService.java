@@ -187,8 +187,13 @@ public class KuchannelService {
     }
 
     //キーワードとスレッドタイトルであいまい検索
-    public List<CommunityThread> findKeyThread(String[] keywords) {
-        return kuchannelDao.findKeyThread(keywords);
+    public List<CommunityThread> findKeyThread(Integer communityId, String[] keywords) {
+        return kuchannelDao.findKeyThread(communityId, keywords);
+    }
+
+    //キーワードとレビューの本文、タイトルであいまい検索
+    public List<CommunityThread> findKeyReview(Integer communityId, String[] keywords) {
+        return kuchannelDao.findKeyReview(communityId, keywords);
     }
 
     //お知らせテーブルの未読フラッグをアップデート
