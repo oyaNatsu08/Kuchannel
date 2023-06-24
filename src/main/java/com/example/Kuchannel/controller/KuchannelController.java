@@ -223,7 +223,7 @@ public class KuchannelController {
             List<NoticeReplyRecord2> notices2 = new ArrayList<>();
             for (NoticeReplyRecord notice : notices) {
                 UserRecord replyUser = kuchannelService.findUser(notice.replyUserId());
-                notices2.add(new NoticeReplyRecord2(replyUser.name(), notice.threadTitle(), notice.flag(), notice.reviewId()));
+                notices2.add(new NoticeReplyRecord2(replyUser.name(), notice.threadId(), notice.threadTitle(), notice.noticeId(), notice.flag(), notice.reviewId()));
             }
 
             //お問い合わせ情報を表示する
@@ -342,8 +342,8 @@ public class KuchannelController {
 
         var userData = (UserRecord)session.getAttribute("user");
         //セッションのユーザーID
-//        var userId = userData.id();
-        var userId = 1;
+        var userId = userData.id();
+        //var userId = 1;
         var communityId = 1;
         String content = informationForm.getInformation();
         boolean flag = false;
@@ -391,6 +391,8 @@ public class KuchannelController {
     @GetMapping("/review-detail")
     public String reviewDetail(@RequestParam("reviewId") Integer reviewId,
                                @RequestParam("threadId") Integer threadId,
+                               @RequestParam(value = "noticeId", required = false) Integer noticeId,
+                               @RequestParam(value = "flag", required = false) Boolean readFlag,
                                Model model) {
 
         //スレッドIDをもとにコミュニティIDを入手
@@ -423,6 +425,12 @@ public class KuchannelController {
                 review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
         model.addAttribute("reviewId", reviewId);
         model.addAttribute("threadId", threadId);
+
+        //お知らせ画面からの遷移か判断する, 未読フラッグがtrueならfalseに変える
+        if ((noticeId != null) && (readFlag)) {
+            //お知らせテーブルの未読フラッグをアップデート
+            kuchannelService.readNotice(noticeId);
+        }
 
         return "review-detail";
 

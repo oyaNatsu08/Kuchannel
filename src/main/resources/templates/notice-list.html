@@ -38,14 +38,14 @@
                 <div v-if="replyView">
                     <th:block th:each="notice : ${notices}">
                         <div th:if="${notice.flag}">
-                            <a th:href="@{/review(id=${notice.reviewId})}">
+                            <a th:href="@{/review-detail(reviewId=${notice.reviewId}, threadId=${notice.threadId}, noticeId=${notice.noticeId}, flag=${notice.flag})}">
                                 <p class="notice-list" style="background-color: sandybrown;"
                                     th:text="${notice.replyUserName} + 'さんが' + ${notice.threadTitle} + 'へのレビューに返信しました'">
                                 </p>
                             </a>
                         </div>
                         <div th:unless="${notice.flag}">
-                            <a th:href="@{/review(id=${notice.reviewId})}">
+                            <a th:href="@{/review-detail(reviewId=${notice.reviewId}, threadId=${notice.threadId}, noticeId=${notice.noticeId}, flag=${notice.flag})}">
                                 <p class="notice-list" style="background-color: gray;"
                                     th:text="${notice.replyUserName} + 'さんが' + ${notice.threadTitle} + 'へのレビューに返信しました'">
                                 </p>

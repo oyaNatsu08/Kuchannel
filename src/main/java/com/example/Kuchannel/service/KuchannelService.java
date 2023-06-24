@@ -192,6 +192,11 @@ public class KuchannelService {
         return kuchannelDao.findKeyThread(keywords);
     }
 
+    //お知らせテーブルの未読フラッグをアップデート
+    public int readNotice(Integer noticeId) {
+        return kuchannelDao.readNotice(noticeId);
+    }
+
     /*---------------------------------------------*/
 
     //threadテーブルにINSERTする処理

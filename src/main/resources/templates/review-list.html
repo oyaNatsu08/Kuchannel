@@ -58,7 +58,7 @@
 
   <div id="app0">
 
-    <th:block th:insert="common/header"></th:block>
+    <th:block th:insert="~{common/header}"></th:block>
 
   </div>
 
@@ -264,6 +264,7 @@
 
           console.log(this.reviewTitle, this.content);
           const formData = new FormData();
+          formData.append("threadId", `[[ ${threadId} ]]`);
           formData.append("title", this.reviewTitle);
           formData.append("content", this.content);
 

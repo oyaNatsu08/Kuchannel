@@ -241,8 +241,8 @@ public class KuchannelDao {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
 
-        var list = jdbcTemplate.query("SELECT rep.user_id AS replyUserId, th.title AS threadTitle, " +
-                        "no.read_flag AS flag, rev.id AS reviewId " +
+        var list = jdbcTemplate.query("SELECT rep.user_id AS replyUserId, th.id AS threadId, th.title AS threadTitle, " +
+                        "no.id AS noticeId, no.read_flag AS flag, rev.id AS reviewId " +
                         "FROM threads th JOIN reviews rev ON th.id = rev.thread_id " +
                         "JOIN replies rep ON rev.id = rep.review_id " +
                         "JOIN notices no ON rep.id = no.reply_id " +
@@ -698,6 +698,15 @@ public class KuchannelDao {
 
     }
 
+    //お知らせテーブルの未読フラッグをアップデート
+    public int readNotice(Integer noticeId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("noticeId", noticeId);
+
+        return jdbcTemplate.update("UPDATE notices SET read_flag = 'f' WHERE id = :noticeId", param);
+    }
+
+
     /*------------------------------------*/
 
     //プロフィール編集（start）
@@ -707,11 +716,11 @@ public class KuchannelDao {
 
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("name", name);
-        System.out.println(name);
+        //System.out.println(name);
         param.addValue("password", password);
-        System.out.println(password);
+        //System.out.println(password);
         param.addValue("loginId",loginId);
-        System.out.println(loginId);
+        //System.out.println(loginId);
         try {
             jdbcTemplate.update(sql, param);
 

@@ -192,7 +192,7 @@ public class KuchannelRestController {
             //データベースからレビューのいいね件数を取得する
             var goodCount = kuchannelService.getGoodReview(rev.reviewId());
 
-            System.out.println("ニックネーム" + reviewAccount.getName());
+            //System.out.println("ニックネーム" + reviewAccount.getName());
 
             reviews.add(new ReviewElementAll(rev.userId(), reviewAccount.getName(), rev.reviewId(), rev.title(),
                     rev.review(), rev.createDate(), reviewImages, reviewReplies, goodCount));
@@ -234,6 +234,7 @@ public class KuchannelRestController {
     @PostMapping("/add-review")
     public ResponseEntity<String> addReview(@RequestParam("title") String title,
                                             @RequestParam("content") String content,
+                                            @RequestParam("threadId") Integer threadId,
                                             @RequestParam(value = "images", required = false) List<MultipartFile> images) {
 
         //入力値チェック(本文)
@@ -248,7 +249,7 @@ public class KuchannelRestController {
 
         //reviewsテーブルにインサート処理かつインサートしたIDを取得(thread_id 固定)
         var user = (UserRecord)session.getAttribute("user");
-        int reviewId = kuchannelService.reviewInsert(user.id(), 1, title, content);
+        int reviewId = kuchannelService.reviewInsert(user.id(), threadId, title, content);
 
 
         if (images != null) {
