@@ -1,0 +1,327 @@
+[33mcommit 4f8a909254f7d200a74b76c90abe1411d279ba0b[m[33m ([m[1;36mHEAD -> [m[1;32muchima[m[33m, [m[1;31morigin/uchima[m[33m)[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Fri Jun 23 15:20:22 2023 +0900
+
+    管理者機能一区切り
+
+[33mcommit 4076f45783d568e4bce952557f90f16533d1b875[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Fri Jun 23 08:27:32 2023 +0900
+
+    管理者統合以外
+
+[33mcommit 0c9c6e57b2a423ff4714aa52cf5d2150a6c14fbf[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Thu Jun 22 17:15:52 2023 +0900
+
+    0602定時プッシュ
+
+[33mcommit 558f89feb3825fbe13e7d3691888da0e95b2fc8a[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Thu Jun 22 10:15:14 2023 +0900
+
+    プルするためにコミット
+
+[33mcommit 8acf3b4d42fe4e95b232ad1a2bcd7afca052303a[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Thu Jun 22 09:28:15 2023 +0900
+
+    06/22結合用
+
+[33mcommit c88478ec85e8a00a34f9b89667a6a8e953da471a[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Wed Jun 21 16:45:32 2023 +0900
+
+    スレッドの機能、管理者とコミュニティメンバー以外一通り
+
+[33mcommit 24392adf688c62d667aabdea45a9fbb6aba46baa[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Tue Jun 20 17:42:50 2023 +0900
+
+    スレッドの追加と一覧表示（画像以外）
+
+[33mcommit 26f829c8fc1783cd52255283b5803c79b1668afd[m[33m ([m[1;31morigin/oyafuso2[m[33m)[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Mon Jun 19 16:44:51 2023 +0900
+
+    6/19(月)
+    ・スレッド一覧、作成
+
+[33mcommit 0b98b98ae8178237d7f38ab6839c5c2e04eb321a[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Mon Jun 19 16:41:28 2023 +0900
+
+    6/19(月)
+    ・スレッド一覧、作成
+
+[33mcommit 2c52b98f641e142ad3645ad6e570e7a2196e3c30[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Mon Jun 19 09:07:30 2023 +0900
+
+    6/19(月)
+    ・内間の情報統合
+
+[33mcommit 2a7a2d44e0cd4871ba4fa5c9227357b832518598[m
+Merge: 4f1c09d b18c298
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Mon Jun 19 09:02:00 2023 +0900
+
+    6/19(月)
+    ・内間の情報統合(未)
+
+[33mcommit 4f1c09d596a6efb5f9c91a617738b87dd47e530c[m[33m ([m[1;32moyafuso2[m[33m)[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Sun Jun 18 20:49:08 2023 +0900
+
+    6/16(金)
+    ・宮城の情報統合
+    ・富永の情報統合
+    6/17(土)
+    ・内間の情報統合
+    ・親富祖の情報統合
+    6/18(日)
+    ・コミュニティに再参加する場合は、community_userテーブルをINSERTではなく、UPDATEする。
+    ・ニックネームを付けない場合は、ユーザー名で参加する
+    ・お知らせ一覧のタブ作成
+    ・不要なファイルの削除
+    ・プロフィール閲覧機能統合
+    ・ファイル統合
+
+[33mcommit ba0bf60ccd6d0566beec3ef05467489e37a4da7f[m
+Merge: 45b33c5 c493794
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Sun Jun 18 19:22:03 2023 +0900
+
+    6/16(金)
+    ・宮城の情報統合
+    ・富永の情報統合
+    6/17(土)
+    ・内間の情報統合
+    ・親富祖の情報統合
+    6/18(日)
+    ・コミュニティに再参加する場合は、community_userテーブルをINSERTではなく、UPDATEする。
+    ・ニックネームを付けない場合は、ユーザー名で参加する
+    ・お知らせ一覧のタブ作成
+    ・不要なファイルの削除
+    ・プロフィール閲覧機能統合
+    ・ファイル統合(未)
+
+[33mcommit 45b33c5537b668dd10b9ea1fb9ddd0b8e1fd3ff5[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Sun Jun 18 19:06:35 2023 +0900
+
+    6/16(金)
+    ・宮城の情報統合
+    ・富永の情報統合
+    6/17(土)
+    ・内間の情報統合
+    ・親富祖の情報統合
+    6/18(日)
+    ・コミュニティに再参加する場合は、community_userテーブルをINSERTではなく、UPDATEする。
+    ・ニックネームを付けない場合は、ユーザー名で参加する
+    ・お知らせ一覧のタブ作成
+    ・不要なファイルの削除
+    ・ファイル統合(未)
+
+[33mcommit 4bf50587ef2671be23dce6860c55effdef3d17e2[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Sun Jun 18 19:01:16 2023 +0900
+
+    6/16(金)
+    ・宮城の情報統合
+    ・富永の情報統合
+    6/17(土)
+    ・内間の情報統合
+    ・親富祖の情報統合
+    6/18(日)
+    ・コミュニティに再参加する場合は、community_userテーブルをINSERTではなく、UPDATEする。
+    ・ニックネームを付けない場合は、ユーザー名で参加する
+    ・お知らせ一覧のタブ作成
+    ・不要なファイルの削除
+
+[33mcommit 19b31aa22adba5412ea49c0badf6999e5e160fb5[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Sun Jun 18 13:30:32 2023 +0900
+
+    6/16(金)
+    ・宮城の情報統合
+    ・富永の情報統合
+    6/17(土)
+    ・内間の情報統合
+    ・親富祖の情報統合
+    6/18(日)
+    ・コミュニティに再参加する場合は、community_userテーブルをINSERTではなく、UPDATEする。
+
+[33mcommit b18c298a3997d5de18eba568edc22d7902ffd18a[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Sat Jun 17 23:29:08 2023 +0900
+
+    mypageのレイアウト少しだけ変更
+
+[33mcommit 31b9605c56e8230c5eecb214c39d79199af30cae[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Sat Jun 17 23:11:26 2023 +0900
+
+    6/16(金)
+    ・宮城の情報統合
+    ・富永の情報統合
+    6/17(土)
+    ・内間の情報統合
+    ・親富祖の情報統合
+    ・コミュニティに再参加する場合は、community_userテーブルをINSERTではなく、UPDATEする。(未)
+
+[33mcommit 2607db39b4ac370393e8ffb5d829f738dabc8775[m
+Merge: 7c6f4a9 1632eae
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Sat Jun 17 22:12:11 2023 +0900
+
+    Merge branch 'oyafuso2' of https://github.com/oyaNatsu08/Kuchannel into uchima
+
+[33mcommit 7c6f4a984e1ade7b5a3ebf9aaa049aed1c366934[m[33m ([m[1;32moyahuso2[m[33m)[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Sat Jun 17 22:10:09 2023 +0900
+
+    マイページの情報取得若干修正
+
+[33mcommit 1632eaec29c9fa720cfa233524158f693dae308c[m
+Merge: b9ad19f 04bb094
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Sat Jun 17 22:04:43 2023 +0900
+
+    6/16(金)
+    ・宮城の情報統合
+    ・富永の情報統合
+    6/17(土)
+    ・内間の情報統合(未)
+    ・親富祖の情報統合(未)
+
+[33mcommit c4937941438eba065d3b130f2af0704cc86c6d66[m
+Author: konan <miyagikonan.2023.kensyu@gmail.com>
+Date:   Fri Jun 16 17:58:36 2023 +0900
+
+    プロフィールの閲覧機能完了
+
+[33mcommit b9ad19febdc0c2fc6e83de7e60d1ae1577b38462[m
+Merge: 1cc345e c4cd01e
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Fri Jun 16 16:57:45 2023 +0900
+
+    6/16(金)
+    ・宮城の情報統合
+    ・富永の情報統合
+
+[33mcommit 1cc345e17f2d12bfecc97c38332adfa43c33b114[m
+Merge: 72eeb11 3df9a47
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Fri Jun 16 16:30:34 2023 +0900
+
+    6/16(金)
+    ・宮城の情報統合
+
+[33mcommit c4cd01ec591c34f848f8489e85a9802e5bfa3ee2[m
+Author: 富永 <tominaga.ryu.2023.kensyu@gmail.com>
+Date:   Fri Jun 16 16:16:48 2023 +0900
+
+    account
+
+[33mcommit 72eeb1175a8f8ebb4fcea573046f49410ea86d01[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Fri Jun 16 16:09:58 2023 +0900
+
+    6/16(金)
+    ・コミュニティ参加機能
+    ・お知らせ一覧(返信、問い合わせ)
+
+[33mcommit 04bb094a5a3c769524e2b58a0bf19009f561ee2a[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Fri Jun 16 15:39:31 2023 +0900
+
+    マイページ一区切り
+
+[33mcommit 3df9a477481844c8b301f2b22ef93e50f895624e[m
+Author: konan <miyagikonan.2023.kensyu@gmail.com>
+Date:   Fri Jun 16 14:55:02 2023 +0900
+
+    ログイン・ログアウト機能・デザイン完了
+
+[33mcommit 551490b34f9662c9b8fe63dbb93118b44f205ec8[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Fri Jun 16 14:16:14 2023 +0900
+
+    マイページ、所属コミュニティと、建てたスレッドを確認できる
+
+[33mcommit 25067e27369ddc9948942c3b9c3c83c2bd797ba9[m
+Author: konan <miyagikonan.2023.kensyu@gmail.com>
+Date:   Fri Jun 16 11:36:45 2023 +0900
+
+    ログイン・ログアウト機能完了
+
+[33mcommit 7400c0710047e79d5964a9486fb60b728aa94047[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Thu Jun 15 18:32:54 2023 +0900
+
+    0615退会まで
+
+[33mcommit 13865ea035c7145e3e07efde93820691bb013ba4[m
+Merge: 0845502 bdb2ac1
+Author: 富永 <tominaga.ryu.2023.kensyu@gmail.com>
+Date:   Thu Jun 15 18:05:40 2023 +0900
+
+    Merge branch 'miyagi' of https://github.com/oyaNatsu08/Kuchannel into tominaga
+
+[33mcommit bdb2ac1c19005f42ada71fac9bc2caf9e43e8ea9[m
+Author: konan <miyagikonan.2023.kensyu@gmail.com>
+Date:   Thu Jun 15 17:53:54 2023 +0900
+
+    ログイン・ログアウト・新規作成機能
+
+[33mcommit f83fd7ece4758130c12bdc4486f7ff4624261b67[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Thu Jun 15 17:47:45 2023 +0900
+
+    6/15(木)
+    ・コミュニティ作成機能(済)
+    ・ヘッダー仮(済)
+    ・お知らせ画面(未)
+
+[33mcommit dd989fc787f52a70ca860084e4719d16620333cf[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Thu Jun 15 17:34:41 2023 +0900
+
+    マイページ表示（コミュニティ一覧）作業中
+
+[33mcommit b51c3ba7774cd6806a5cdf3ffdc00aa56b068325[m
+Author: konan <miyagikonan.2023.kensyu@gmail.com>
+Date:   Thu Jun 15 11:03:04 2023 +0900
+
+    テスト
+
+[33mcommit 4e511c89d8d58716ffa978a74393ee094d837d80[m
+Author: uchimaazu <uchimaazu.kensyu@gmail.com>
+Date:   Thu Jun 15 10:57:05 2023 +0900
+
+    安寿テスト
+
+[33mcommit 7233d60dcae1be2e795b224397654b5b525d45e8[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Thu Jun 15 10:56:51 2023 +0900
+
+    コミットテスト
+
+[33mcommit 3b9edf1694ba691f05cf940bd600e159c1f9ac18[m[33m ([m[1;31morigin/miyagi[m[33m)[m
+Author: konan <miyagikonan.2023.kensyu@gmail.com>
+Date:   Thu Jun 15 10:40:00 2023 +0900
+
+    test
+
+[33mcommit 08455021995d75fdb9304b375741174d6eec5623[m
+Author: 富永 <tominaga.ryu.2023.kensyu@gmail.com>
+Date:   Thu Jun 15 10:39:13 2023 +0900
+
+    testDemo
+
+[33mcommit 403dff5abb4631284b95afb70f3fb634af0232cf[m
+Author: OyafusoNatsuki <oyafuso.natsuki.2023.kensyu@gmail.com>
+Date:   Thu Jun 15 10:30:12 2023 +0900
+
+    開発前準備です

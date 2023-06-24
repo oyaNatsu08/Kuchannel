@@ -7,6 +7,6 @@ import lombok.Data;
 public class Good {
     Integer id;
     Integer user_id;
-    Integer thread_id;
+    Integer thread_review_id;
 
 }

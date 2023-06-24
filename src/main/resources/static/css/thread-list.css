@@ -1,15 +1,146 @@
 body {
+  font-family: Arial, sans-serif;
+  line-height: 1.5;
+  margin: 0;
+  padding: 20px;
+}
+
+h3 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.restaurant {
+  margin-bottom: 20px;
+  background-color: #FFECD7;
+  /* 薄いオレンジ色の背景 */
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  width: 80%;
+  margin: 0 auto;
+  margin-top: 4%;
+  padding: 4%;
+}
+
+.restaurant-img {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  margin-right: 10px;
+}
+
+.restaurant-name {
+  font-size: 20px;
+}
+
+.genre {
+  font-size: 10px;
+}
+
+.address {
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.likes {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.likes button {
+  margin-right: 5px;
+  padding: 5px 10px;
+  border: none;
+  background-color: #eaeaea;
+  cursor: pointer;
+}
+
+.likes span {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.opening-hours {
+  font-size: 10px;
+  margin-top: 5px;
+}
+
+.hashtags {
+  font-size: 10px;
+  margin-top: 5px;
+  display: flex;
+}
+
+.hashtags a {
+  margin-right: 5px;
+  color: #1e66b8;
+  text-decoration: none;
+}
+
+.hashUl {
+  list-style-type: none;
+  display: flex;
+  padding: 0px 5px
+}
+
+.delete-update {
+  margin-left: auto;
+  margin-bottom: auto;
+}
+
+.community-name {
+  text-align: center;
+}
+
+/* 検索ボックスcss */
+.search-container {
+  /* box-sizing: border-box; */
+  position: relative;
+  border: 1px solid #999;
+  /* padding-bottom: 20px; */
+  border-radius: 20px;
+  height: 2.5em;
+  /* overflow: hidden; */
+  /* display: flex;
+  justify-content: center; */
+}
+
+.search-container input[type="text"] {
+  margin-left: 5%;
+  width: 90%;
+  border: none;
+}
+
+.search-container input[type="text"]:focus {
+  outline: 0;
+}
+
+.search-container input[type="submit"] {
+  cursor: pointer;
+  font-family: FontAwesome;
+  font-size: 1.3em;
+  border: none;
+  background: none;
+  color: #3879D9;
+  position: absolute;
+  width: 2.5em;
+  height: 2.8em;
+  right: 0;
+  top: -10px;
+  outline: none;
     font-family: Arial, sans-serif;
     line-height: 1.5;
     margin: 0;
     padding: 20px;
   }
-  
+
   h3 {
     margin: 0;
     font-size: 24px;
   }
-  
+
   .restaurant {
     margin-bottom: 20px;
     background-color: #FFECD7; /* 薄いオレンジ色の背景 */
@@ -21,33 +152,33 @@ body {
     margin-top: 4%;
     padding: 4%;
   }
-  
+
   .restaurant-img {
     flex-shrink: 0;
     width: 80px;
     height: 80px;
     margin-right: 10px;
   }
-  
+
   .restaurant-name {
     font-size: 20px;
   }
-  
+
   .genre {
     font-size: 10px;
   }
-  
+
   .address {
     font-size: 12px;
     margin-top: 5px;
   }
-  
+
   .likes {
     display: flex;
     align-items: center;
     margin-top: 5px;
   }
-  
+
   .likes button {
     margin-right: 5px;
     padding: 5px 10px;
@@ -55,23 +186,23 @@ body {
     background-color: #eaeaea;
     cursor: pointer;
   }
-  
+
   .likes span {
     font-size: 12px;
     font-weight: bold;
   }
-  
+
   .opening-hours {
     font-size: 10px;
     margin-top: 5px;
   }
-  
+
   .hashtags {
     font-size: 10px;
     margin-top: 5px;
     display:flex;
   }
-  
+
   .hashtags a {
     margin-right: 5px;
     color: #1e66b8;

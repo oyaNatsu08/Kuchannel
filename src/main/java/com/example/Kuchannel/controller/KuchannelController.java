@@ -2,6 +2,7 @@ package com.example.Kuchannel.controller;
 
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.*;
+import com.example.Kuchannel.entity.InformatonRecord;
 import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +11,15 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SimpleTimeZone;
 import java.util.UUID;
 
 @Controller
@@ -187,7 +194,11 @@ public class KuchannelController {
                 //参加確認画面へ
                 return "community-join";
             } else {
-                model.addAttribute("name", code);
+
+                var community = kuchannelService.getCommunity("http://localhost:8080/community/" + str + "/" + code);
+
+                model.addAttribute("communityId", community.id());
+                model.addAttribute("communityName", code);
                 return "thread-list";
             }
         }
@@ -222,24 +233,6 @@ public class KuchannelController {
 
             return "notice-list";
 
-        }
-    }
-
-    //レビュー一覧へ(仮)
-    @GetMapping("/review")
-    public String reviewView(@RequestParam("id") Integer reviewId,
-                             @ModelAttribute("UserForm") UserForm userForm,
-                             Model model) {
-        //ログインしているか確認
-        if (session.getAttribute("user") == null) {
-            return "login";
-        } else {
-
-            ReviewRecord review = kuchannelService.findReviews(reviewId);
-
-            model.addAttribute("review", review);
-
-            return "review";
         }
     }
 
@@ -323,27 +316,153 @@ public class KuchannelController {
         model.addAttribute("communityId",communityId );
         model.addAttribute("communityName", community.name());
         System.out.println(community.name());
+        model.addAttribute("name", community.name());
+
+        return "thread-list";
+    }
+
+    //お問い合わせページ
+    @GetMapping("/Information")
+    public String info(@ModelAttribute("informationForm") InformationForm informationForm) {
+        return "Information";
+    }
+
+    @PostMapping("/Information")
+    public String information(@Validated @ModelAttribute("informationForm") InformationForm informationForm,
+                              BindingResult bindingResult,
+//                              @RequestParam(name="communityId") Integer communityId,
+                              Model model){
+
+        //バリデーション
+        if (bindingResult.hasErrors()){
+            return "Information";
+        }
+
+        var userData = (UserRecord)session.getAttribute("user");
+        //セッションのユーザーID
+//        var userId = userData.id();
+        var userId = 1;
+        var communityId = 1;
+        String content = informationForm.getInformation();
+        boolean flag = false;
+
+        //お問い合わせ情報の処理を行う
+        InformatonRecord informatonRecord = new  InformatonRecord(userId,communityId,content,flag);
+
+        var informationDetails = kuchannelService.information(informatonRecord);
 
         return "thread-list";
 
     }
-    /*------------------------------------------------*/
+    //スレッドのレビュー一覧へ飛ぶ
+    @GetMapping("/thread-review/{threadId}")
+    public String reviewListView(@PathVariable("threadId") Integer threadId,
+                                 @ModelAttribute("UserForm") UserForm userForm,
+                                 Model model) {
 
+        //ログインしているか確認
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
 
+            //スレッドIDをもとに、スレッド情報を取得する
+            var thread = kuchannelService.getThread(threadId);
 
-    //スレッド作成画面
-    //RequestParamは、遷移する前のページから受け取る。今はコメントアウト
-    @GetMapping("/thread-add") //urlで入力する値
-    public String threadAddView(@ModelAttribute("threadForm")ThreadAddForm threadAddForm,
-//                                @RequestParam(name="communityId") Integer communityId,
-                                Model model) { //メソッド名(コントローラークラスの中で被らなければok)
+            //ユーザー情報を取得
+            var user = (UserRecord)session.getAttribute("user");
 
-        //コミュニティIDをthread-add.htmlに値を渡す
-//        model.addAttribute("communityId", communityId);
+            model.addAttribute("thread", thread);
+            model.addAttribute("userId", user.id());
 
-        return "thread-add"; //開きたいhtmlファイル名
+            return "review-list";
+        }
+    }
+
+    //レビュー作成処理
+    @PostMapping("/review-add")
+    public String reviewAdd(Model model) {
+
+        return "review-list";
+    }
+
+    //レビュー詳細画面へ
+    @GetMapping("/review-detail")
+    public String reviewDetail(@RequestParam("reviewId") Integer reviewId,
+                               @RequestParam("threadId") Integer threadId,
+                               Model model) {
+
+        //レビューIDを元にreviewsテーブルから情報を取得する
+        var review = kuchannelService.findReview(reviewId);
+
+        //データベースからレビューの画像情報を取得する
+        var reviewImages = kuchannelService.getReviewImages(reviewId);
+
+        //データベースからレビューの返信情報を取得する
+        var reviewReplies = kuchannelService.getReviewReply(reviewId);
+
+        //データベースからレビューのいいね件数を取得する
+        var goodCount = kuchannelService.getGoodReview(reviewId);
+
+        model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
+                review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
+        model.addAttribute("reviewId", reviewId);
+        model.addAttribute("threadId", threadId);
+
+        return "review-detail";
+
+    }
+
+    //ユーザーのレビュー一覧画面に遷移
+    @GetMapping("/user-review/{userId}")
+    public String userReviewView(@PathVariable("userId") Integer userId,
+                                 Model model) {
+
+        //ユーザーのレビュー一覧に必要な情報を取得する
+        var reviews = kuchannelService.getUserReview(userId);
+
+        model.addAttribute("reviews", reviews);
+
+        return "user-review-list";
     }
 
 
+    /*------------------------------------------------*/
 
+
+    //    /*-------------------------Update(プロフィール編集)--------------------------*/
+    @GetMapping("/profile-edit")
+    public String profileUpdate(@RequestParam("name") String name,
+                                @RequestParam("loginId") String loginId,
+                                @RequestParam("password") String password,
+                                @RequestParam("imagePath") String imagePath,
+                                @ModelAttribute("EditForm")EditForm editForm,
+                                Model model){
+
+        UserRecord user = new UserRecord(null, loginId, name, password, imagePath);
+
+        model.addAttribute("user", user);
+
+        return "profile-edit";
+    }
+
+    @PostMapping("profile-edit")
+    public String profileUpdate(@Validated @ModelAttribute("EditForm") EditForm editForm,
+                                BindingResult bindingResult,
+                                Model model){
+        //バリデーション
+        if(bindingResult.hasErrors()){
+            return "profile-edit";
+        }
+        String loginId = editForm.getLoginId();
+        String name = editForm.getName();
+        String password = editForm.getPassword();
+        kuchannelService.edit(loginId, name, password);
+        UserRecord userData = (UserRecord) session.getAttribute("user");
+        var user_id = userData.loginId();
+
+        model.addAttribute("profile", kuchannelService.detail(user_id));
+
+        return "/profile-details";
+    }
+//    /*------------------------------------------------------------------------*/
 }
