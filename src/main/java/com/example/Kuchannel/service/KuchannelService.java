@@ -6,7 +6,6 @@ import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.entity.InformatonRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -128,7 +127,7 @@ public class KuchannelService {
     }
 
     //データベースからレビューの画像情報を取得する
-    public List<ReviewImageRecord> getReviewImages(Integer reviewId) {
+    public List<ReviewImage> getReviewImages(Integer reviewId) {
         return kuchannelDao.getReviewImages(reviewId);
     }
 

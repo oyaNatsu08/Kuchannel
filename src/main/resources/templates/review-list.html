@@ -126,7 +126,7 @@
           <p class="review-cell" style="width: 300px; margin-right: 20px;">{{review.review}}</p>
           <div v-for="(image, index) in review.reviewImages">
             <div v-if="index === 0">
-              <img :src="'/images/reviewImages/' + image.imagePath" style="width: 50px; height: auto;">
+              <img :src="'data:image/png;base64,' + image.imagePath" style="width: 50px; height: auto;">
             </div>
           </div>
         </div>

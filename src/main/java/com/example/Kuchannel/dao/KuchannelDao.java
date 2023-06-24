@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -319,12 +318,12 @@ public class KuchannelDao {
     }
 
     //データベースからレビューの画像情報を取得する
-    public List<ReviewImageRecord> getReviewImages(Integer reviewId) {
+    public List<ReviewImage> getReviewImages(Integer reviewId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("reviewId", reviewId);
 
         var list = jdbcTemplate.query("SELECT review_id, image_path FROM review_images WHERE review_id = :reviewId",
-                param, new DataClassRowMapper<>(ReviewImageRecord.class));
+                param, new DataClassRowMapper<>(ReviewImage.class));
 
         return list;
 
@@ -380,7 +379,7 @@ public class KuchannelDao {
         param.addValue("imagePath", imagePath);
 
         return jdbcTemplate.update("INSERT INTO review_images(review_id, image_path) " +
-                "VALUES(:reviewId, :imagePath)", param);
+                "VALUES(:reviewId, :Path)", param);
     }
 
     //repliesテーブルにインサート処理

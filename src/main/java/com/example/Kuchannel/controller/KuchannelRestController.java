@@ -8,6 +8,7 @@ import com.example.Kuchannel.form.ReviewUpdateForm;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.service.KuchannelService;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -101,6 +103,13 @@ public class KuchannelRestController {
         return kuchannelService.goodDeal(thread_id,1);
     }
 
+    @GetMapping("/goodDeal/review/{reviewId}")
+    public int GoodReviewDeal(@PathVariable("reviewId") Integer reviewId) {
+        var user = (UserRecord)session.getAttribute("user");
+
+        return kuchannelService.goodDealReview(reviewId, user.id());
+    }
+
     //スレッド削除用
     @DeleteMapping("/deleteThread/{threadId}")
     public boolean deleteThread(@PathVariable("threadId")Integer thread_id){
@@ -111,7 +120,7 @@ public class KuchannelRestController {
     //getThreadと同じで、コミュニティidを渡すようにする。今は１で固定。
     @GetMapping("/getSessionInfo/{communityId}")
     public AccountInformation getSessionInfo(@PathVariable("communityId")Integer communityId){
-        System.out.println("success");
+
         var user = (UserRecord)session.getAttribute("user");
         var accountInfo = kuchannelService.getAccountInfo(user.id(),communityId);
 
@@ -176,8 +185,6 @@ public class KuchannelRestController {
             //データベースからレビューの画像情報を取得する
             var reviewImages = kuchannelService.getReviewImages(rev.reviewId());
 
-            //画像をbase64にエンコードする
-
             //データベースからレビューの返信情報を取得する
             var reviewReplies = kuchannelService.getReviewReply(rev.reviewId());
 
@@ -202,22 +209,6 @@ public class KuchannelRestController {
         return reviews;
     }
 
-    //画像をbase64にエンコードする処理
-//    public List<ReviewImageRecord> changeBase64(List<ReviewImageRecord> reviewImages) {
-//        for (var image : reviewImages) {
-//
-//        }
-//    }
-
-    //レビューの編集・更新機能処理
-//    @PostMapping("/api/update")
-//    public ResponseEntity<String> update(@RequestParam("title") String title,
-//                                         @RequestParam("content") String content,
-//                                         @RequestParam("images") List<MultipartFile> images){
-//
-//    }
-
-
     //レビューの編集・更新機能処理
     @PutMapping("/review-update")
     public int update(@RequestBody ReviewUpdateForm reviewUpdateForm){
@@ -235,7 +226,7 @@ public class KuchannelRestController {
     public ResponseEntity<String> addReview(@RequestParam("title") String title,
                                             @RequestParam("content") String content,
                                             @RequestParam("threadId") Integer threadId,
-                                            @RequestParam(value = "images", required = false) List<MultipartFile> images) {
+                                            @RequestParam(value = "images", required = false) List<MultipartFile> images) throws IOException {
 
         //入力値チェック(本文)
         if ("".equals(content)) {
@@ -254,52 +245,19 @@ public class KuchannelRestController {
 
         if (images != null) {
             for (MultipartFile image : images) {
-                // 画像を1枚ずつ保存処理
-                var num = uploadImage(image);
+                //アップロード画像をバイト値に変換
+                byte[] bytes = image.getBytes();
+
+                //画像をエンコード
+                String encode = Base64.getEncoder().encodeToString(bytes);
 
                 //review_Imagesテーブルにインサート処理
-                kuchannelService.reviewImagesInsert(reviewId, num + image.getOriginalFilename());
+                kuchannelService.reviewImagesInsert(reviewId, encode);
 
             }
         }
 
         return ResponseEntity.ok("登録処理に成功しました。");
-
-    }
-
-    //画像アップロード処理 戻り値に画像の名前が被らないように現在時刻を返す
-    private long uploadImage(MultipartFile image) {
-        //ファイル名を取得
-        String fileName = image.getOriginalFilename();
-
-        //現在時刻を取得(画像の名前が被らないようにするため)
-        long currentTimeMillis = System.currentTimeMillis();
-
-        //格納先パスを指定(ひとまず絶対パス)
-        Path filePath = Paths.get("src/main/resources/static/images/reviewImages/" + currentTimeMillis + fileName);
-
-        try {
-            //アップロード画像をバイト値に変換
-            byte[] bytes = image.getBytes();
-
-            //String encode = Base64.getEncoder().encodeToString(bytes);
-
-            //System.out.println(encode);
-
-            // Base64デコード
-            //byte[] decodedBytes = Base64.getDecoder().decode(encode);
-
-
-
-            //バイト値を書き込むファイルを作成し、指定したパスに格納
-            OutputStream stream = Files.newOutputStream(filePath);
-            stream.write(bytes);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return currentTimeMillis;
 
     }
 
