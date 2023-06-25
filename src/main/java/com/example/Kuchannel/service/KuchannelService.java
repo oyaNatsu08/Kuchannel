@@ -6,6 +6,7 @@ import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.entity.InformatonRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -183,8 +184,13 @@ public class KuchannelService {
     }
 
     //人気のハッシュタグを取得する
-    public List<HashTagRecord> getHashtags() {
-        return kuchannelDao.getHashtags();
+    public List<HashTagRecord> getPopularHashtags(Integer communityId) {
+        return kuchannelDao.getPopularHashtags(communityId);
+    }
+
+    //ハッシュタグ全件取得
+    public List<HashTag> getAllHashtags(Integer communityId){
+        return kuchannelDao.getAllHashtags(communityId);
     }
 
     //キーワードとスレッドタイトルであいまい検索
@@ -248,6 +254,8 @@ public class KuchannelService {
     public AccountInformation getAccountInfo(Integer user_id, Integer community_id){return kuchannelDao.getAccountInfo(user_id,community_id);}
 
     public int memberSetting(List<AccountInformation> updateInfo, Integer communityId){return kuchannelDao.memberSetting(updateInfo,communityId);}
+
+    public int updateCommunityName(Integer communityId, String newCommunityName){return kuchannelDao.updateCommunityName(communityId,newCommunityName);}
 
     public int deleteCommunity(Integer communityId){return kuchannelDao.deleteCommunity(communityId);}
 

@@ -479,12 +479,8 @@ public class KuchannelDao {
 
         //インサートしたIDを受け取る
         var addThreadId = Integer.parseInt(keyHolder1.getKeys().get("id").toString());
-        System.out.println(addThreadId);
-
 
         //以下ハッシュタグ追加処理
-
-
         if(threadAddForm.getHashtag() != null){
             //ハッシュタグの内容を取得し、「,」でsplitして分ける。
             String[] inputHashTags = threadAddForm.getHashtag().trim().split(",");
@@ -649,11 +645,23 @@ public class KuchannelDao {
     }
 
     //人気のハッシュタグを取得する
-    public List<HashTagRecord> getHashtags() {
+    public List<HashTagRecord> getPopularHashtags(Integer communityId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("communityId", communityId);
+        var list = jdbcTemplate.query("SELECT h.id, h.tag_name, COUNT(*) AS count FROM hashtags h \n" +
+                "JOIN thread_hashtag th ON h.id = th.hashtag_id \n" +
+                "JOIN threads t ON t.id = th.thread_id\n" +
+                "WHERE t.community_id = :communityId GROUP BY h.id  ORDER BY COUNT(*) DESC LIMIT 5;",param, new DataClassRowMapper<>(HashTagRecord.class));
 
-        var list = jdbcTemplate.query("SELECT h.id, h.tag_name, COUNT(*) AS count FROM hashtags h " +
-                "JOIN thread_hashtag th ON h.id = th.hashtag_id GROUP BY h.id " +
-                "ORDER BY COUNT(*) DESC LIMIT 5", new DataClassRowMapper<>(HashTagRecord.class));
+        return list;
+
+    }
+
+    //ハッシュタグを全件取得
+    public List<HashTag> getAllHashtags(Integer communityId){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("communityId", communityId);
+        var list = jdbcTemplate.query("SELECT h.id, h.tag_name FROM hashtags h JOIN thread_hashtag th ON h.id = th.hashtag_id JOIN threads t ON t.id = th.thread_id WHERE t.community_id = :communityId ;",param, new DataClassRowMapper<>(HashTag.class));
 
         return list;
 
@@ -904,6 +912,16 @@ public class KuchannelDao {
 
         }
         return 1;
+    }
+
+    public int updateCommunityName(Integer communityId,String newCommunityName){
+        MapSqlParameterSource param =new MapSqlParameterSource();
+        param.addValue("community_id",communityId);
+        param.addValue("newName",newCommunityName);
+
+        return jdbcTemplate.update("UPDATE communities SET name = :newName WHERE id = :community_id;",param);
+
+
     }
 
     public int deleteCommunity(Integer communityId){

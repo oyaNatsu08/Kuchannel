@@ -245,3 +245,13 @@ h3 {
     justify-content: center;
     align-items: flex-start;
 }
+.suggest-area{
+  background-color: #98e5eb;
+  opacity: 0.8;
+}
+.suggest-content{
+  opacity: 1;
+}
+.refine-view{
+  background-color: rgba(240, 171, 24, 0.945);
+}

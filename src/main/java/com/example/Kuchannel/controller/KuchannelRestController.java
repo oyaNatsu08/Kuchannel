@@ -137,8 +137,14 @@ public class KuchannelRestController {
     //管理者用。メンバー編集用
     @PutMapping("/memberSetting/{communityId}")
     public int memberSetting(@PathVariable("communityId") Integer communityId,@RequestBody List<AccountInformation> updateInfo){
-        System.out.println(updateInfo);
         var result =kuchannelService.memberSetting(updateInfo, communityId);
+        return result;
+    }
+
+    @PutMapping("updateCommunityName/{communityId}/{newCommunityName}")
+    public int updateCommunityName(@PathVariable("communityId") Integer communityId,@PathVariable("newCommunityName") String newCommunityName){
+        System.out.println(newCommunityName);
+        var result =kuchannelService.updateCommunityName(communityId,newCommunityName);
         return result;
     }
 
@@ -320,12 +326,18 @@ public class KuchannelRestController {
     }
 
     //人気のハッシュタグを取得
-    @GetMapping("/getHashtags")
-    public List<HashTagRecord> getHashtags() {
-        var hashtags = kuchannelService.getHashtags();
-
+    @GetMapping("/getPopularHashtags/{communityId}")
+    public List<HashTagRecord> getPopularHashtags(@PathVariable("communityId")Integer communityId) {
+        var hashtags = kuchannelService.getPopularHashtags(communityId);
         System.out.println("ハッシュタグ上位5件：" + hashtags);
+        return hashtags;
+    }
 
+    //ハッシュタグ全件を取得
+    @GetMapping("/getAllHashtags/{communityId}")
+    public List<HashTag> getAllHashtags(@PathVariable("communityId")Integer communityId) {
+        var hashtags = kuchannelService.getAllHashtags(communityId);
+        System.out.println("ハッシュタグ全件：" + hashtags);
         return hashtags;
     }
 
