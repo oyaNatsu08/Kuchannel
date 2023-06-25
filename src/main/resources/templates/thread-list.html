@@ -124,6 +124,7 @@
             </select>
           </p>
           <p>ハッシュタグ：<input type="text" v-model="addThreadHashtags"></p>
+          <p>写真の追加：<input type="file" ref="fileInput" /></p>
           <button @click.self="addThread">作成</button>
           <button @click.self="closePopup('ThreadAdd')">閉じる</button>
         </div>
@@ -186,7 +187,7 @@
       <!-- スレッドの表示。 -->
       <div v-for="thread in threads">
         <div class="restaurant" v-if="genreIncludeCheck(thread.genre)">
-          <img src="restaurant-a.jpg" alt="飲食店A" class="restaurant-img">
+          <img :src="'data:image/png;base64,' + thread.image_path" class="restaurant-img">
           <div>
             <input type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2">
             <a :href="getThreadReviewLink(thread.id)" class="restaurant-name">
@@ -231,6 +232,13 @@
             </select>
           </p>
           <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags"></p>
+          <p>写真の追加：<input type="file" ref="fileInput" /></p>
+          <p>更新前の画像</p>
+          <div style="display: flex; justify-content: center;">
+            <img :src="'data:image/png;base64,' + imageThread"
+              style="width: 50px; height: auto;">
+          </div>
+
           <button @click.self="updateThread">更新</button>
           <button @click.self="closePopup('ThreadUpdate')">閉じる</button>
         </div>
@@ -272,6 +280,7 @@
           updateThreadSalesTime: '',
           updateThreadGenre: '',
           updateThreadHashtags: '',
+          imageThreads: '',
 
           //コミュニティメンバー参照用
           isCommunityMemberPopup: false,
@@ -380,20 +389,36 @@
           if (this.addThreadTitle == '') {
             alert('お店の名前は必須入力です')
           } else {
-            const addInfo = {
-              threadName: this.addThreadTitle,
-              furigana: this.addThreadFurigana,
-              address: this.addThreadAddress,
-              salesTime: this.addThreadSalesTime,
-              genre: this.addThreadGenre,
-              hashtag: this.addThreadHashtags,
-              communityId: this.communityId
-            }
-            if (this.addThreadHashtags.trim() == '') {
-              addInfo.hashtag = null
+            // const addInfo = {
+            //   threadName: this.addThreadTitle,
+            //   furigana: this.addThreadFurigana,
+            //   address: this.addThreadAddress,
+            //   salesTime: this.addThreadSalesTime,
+            //   genre: this.addThreadGenre,
+            //   hashtag: this.addThreadHashtags,
+            //   communityId: this.communityId,
+            // }
+            // if (this.addThreadHashtags.trim() == '') {
+            //   addInfo.hashtag = null
+            // }
+
+            const formData = new FormData();
+            formData.append("threadName", this.addThreadTitle);
+            formData.append("furigana", this.addThreadFurigana);
+            formData.append("address", this.addThreadAddress);
+            formData.append("salesTime", this.addThreadSalesTime);
+            formData.append("genre", this.addThreadGenre);
+
+            if (this.addThreadHashtags == '') {
+              formData.append("hashtag", null);
+            } else {
+              formData.append("hashtag", this.addThreadHashtags);
             }
 
-            axios.post('/thread-add', addInfo)
+            formData.append("communityId", this.communityId);
+            formData.append('image', this.$refs.fileInput.files[0]);
+
+            axios.post('/thread-add', formData)
               .then(res => {
                 this.getThreads();
                 this.closePopup('ThreadAdd');
@@ -414,6 +439,7 @@
           this.updateThreadSalesTime = targetThread.sales_time;
           this.updateThreadGenre = targetThread.genre;
           this.updateThreadHashtags = targetThread.hashtags;
+          this.imageThread = targetThread.image_path;
 
 
         },
@@ -421,16 +447,33 @@
           if (this.updateThreadTitle == '') {
             alert('お店の名前は必須入力です')
           } else {
-            const updataInfo = {
-              threadName: this.updateThreadTitle,
-              furigana: this.updateThreadFurigana,
-              address: this.updateThreadAddress,
-              salesTime: this.updateThreadSalesTime,
-              genre: this.updateThreadGenre,
-              hashtag: this.updateThreadHashtags
+            // const updataInfo = {
+            //   threadName: this.updateThreadTitle,
+            //   furigana: this.updateThreadFurigana,
+            //   address: this.updateThreadAddress,
+            //   salesTime: this.updateThreadSalesTime,
+            //   genre: this.updateThreadGenre,
+            //   hashtag: this.updateThreadHashtags
+            // }
+
+            const formData = new FormData();
+            formData.append("threadName", this.updateThreadTitle);
+            formData.append("furigana", this.updateThreadFurigana);
+            formData.append("address", this.updateThreadAddress);
+            formData.append("salesTime", this.updateThreadSalesTime);
+            formData.append("genre", this.updateThreadGenre);
+
+            if (this.updateThreadHashtags == '') {
+              formData.append("hashtag", null);
+            } else {
+              formData.append("hashtag", this.updateThreadHashtags);
             }
 
-            axios.put(`/updateThread/${this.updateThreadId}`, updataInfo)
+            formData.append("communityId", this.communityId);
+            formData.append('image', this.$refs.fileInput.files[0]);
+
+
+            axios.put(`/updateThread/${this.updateThreadId}`, formData)
               .then(res => {
                 this.getThreads();
                 this.closePopup('ThreadUpdate')
@@ -590,9 +633,9 @@
                 communityId: this.communityId
               }
             })
-            .then(res => {
-              this.threads = res.data;
-            })
+              .then(res => {
+                this.threads = res.data;
+              })
           }
         },
 

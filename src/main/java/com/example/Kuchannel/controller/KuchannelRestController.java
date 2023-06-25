@@ -129,16 +129,49 @@ public class KuchannelRestController {
 
     //スレッド作成処理
     @PostMapping("/thread-add")
-    public int addThread(@RequestBody ThreadAddForm inputData) {
+    public int addThread(@RequestParam("threadName") String threadName,
+                         @RequestParam("furigana") String furigana,
+                         @RequestParam("address") String address,
+                         @RequestParam("salesTime") String salesTime,
+                         @RequestParam("genre") String genre,
+                         @RequestParam("hashtag") String hashtag,
+                         @RequestParam("communityId") Integer communityId,
+                         @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {    //@RequestBody ThreadAddForm inputData
         var user = (UserRecord)session.getAttribute("user");
+
+        byte[] bytes = image.getBytes();
+
+        if ("".equals(hashtag)) {
+            hashtag = null;
+        }
+
+        String encode = Base64.getEncoder().encodeToString(bytes);
+
         //threadsテーブルにINSERT処理
-        var result =kuchannelService.threadInsert(inputData,user.id());
+        var result = kuchannelService.threadInsert(new ThreadAddForm(threadName, furigana, address, salesTime, genre, hashtag, communityId, encode),user.id());
         return result;
     }
 
     @PutMapping("/updateThread/{id}")
-    public int threadUpdate(@RequestBody ThreadAddForm inputData,@PathVariable("id") Integer thread_id){
-        var result =kuchannelService.threadUpdate(inputData ,thread_id);
+    public int threadUpdate(@RequestParam("threadName") String threadName,
+                            @RequestParam("furigana") String furigana,
+                            @RequestParam("address") String address,
+                            @RequestParam("salesTime") String salesTime,
+                            @RequestParam("genre") String genre,
+                            @RequestParam("hashtag") String hashtag,
+                            @RequestParam("communityId") Integer communityId,
+                            @RequestParam(value = "image", required = false) MultipartFile image,
+                            @PathVariable("id") Integer thread_id) throws IOException {
+        byte[] bytes = image.getBytes();
+
+        if ("".equals(hashtag)) {
+            hashtag = null;
+        }
+
+        String encode = Base64.getEncoder().encodeToString(bytes);
+
+        var result =kuchannelService.threadUpdate(new ThreadAddForm(threadName, furigana, address, salesTime, genre, hashtag, communityId, encode) ,thread_id);
+
         return result;
     }
 
@@ -211,10 +244,32 @@ public class KuchannelRestController {
 
     //レビューの編集・更新機能処理
     @PutMapping("/review-update")
-    public int update(@RequestBody ReviewUpdateForm reviewUpdateForm){
-
+    public int update(@RequestParam("id") Integer id,
+                      @RequestParam("title") String title,
+                      @RequestParam("content") String content,
+                      @RequestParam(value = "images", required = false) List<MultipartFile> images) throws IOException {
         //reviewsテーブルのレコードの更新処理
-        var reviewUpdate = kuchannelService.reviewUpdate(reviewUpdateForm.getId(),reviewUpdateForm.getTitle(),reviewUpdateForm.getContent());
+        //var reviewUpdate = kuchannelService.reviewUpdate(reviewUpdateForm.getId(),reviewUpdateForm.getTitle(),reviewUpdateForm.getContent());
+        var reviewUpdate = kuchannelService.reviewUpdate(id, title, content);
+
+        //review_imagesテーブルに入ってたデータを削除
+        kuchannelService.deleteImages(id);
+
+        //System.out.println("images:" + images);
+
+        if (images != null) {
+            for (MultipartFile image : images) {
+                //アップロード画像をバイト値に変換
+                byte[] bytes = image.getBytes();
+
+                //画像をエンコード
+                String encode = Base64.getEncoder().encodeToString(bytes);
+
+                //review_Imagesテーブルにインサート処理
+                kuchannelService.reviewImagesInsert(id, encode);
+
+            }
+        }
 
         return reviewUpdate;
 
@@ -326,6 +381,14 @@ public class KuchannelRestController {
         var threads = kuchannelService.findKeyReview(communityId, keywords);
 
         return threads;
+    }
+
+    //スレッドIDをもとにコミュニティIDを取得する
+    @GetMapping("/getCommunityId")
+    public CommunityThread getCommunityId(@RequestParam("threadId") Integer threadId) {
+        var community = kuchannelService.getThread(threadId);
+
+        return community;
     }
 
     /*-------------------------------------*/

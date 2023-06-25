@@ -201,6 +201,11 @@ public class KuchannelService {
         return kuchannelDao.readNotice(noticeId);
     }
 
+    //review_imagesテーブルをレビューIDをもとに削除
+    public int deleteImages(Integer reviewId) {
+        return kuchannelDao.deleteImages(reviewId);
+    }
+
     /*---------------------------------------------*/
 
     //threadテーブルにINSERTする処理

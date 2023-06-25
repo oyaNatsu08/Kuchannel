@@ -1,6 +1,7 @@
 package com.example.Kuchannel.form;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data //自動的にgetterとsetterを生成してくれるなど
 public class ThreadAddForm {
@@ -28,5 +29,16 @@ public class ThreadAddForm {
     Integer communityId;
     String integrateThreadId;
 
+    String base64Image;
 
+    public ThreadAddForm(String threadName, String furigana, String address, String salesTime, String genre, String hashtag, Integer communityId, String base64Image) {
+        this.threadName = threadName;
+        this.furigana = furigana;
+        this.address = address;
+        this.salesTime = salesTime;
+        this.genre = genre;
+        this.hashtag = hashtag;
+        this.communityId = communityId;
+        this.base64Image = base64Image;
+    }
 }

@@ -379,7 +379,7 @@ public class KuchannelDao {
         param.addValue("imagePath", imagePath);
 
         return jdbcTemplate.update("INSERT INTO review_images(review_id, image_path) " +
-                "VALUES(:reviewId, :Path)", param);
+                "VALUES(:reviewId, :imagePath)", param);
     }
 
     //repliesテーブルにインサート処理
@@ -469,16 +469,18 @@ public class KuchannelDao {
         param.addValue("community_id",threadAddForm.getCommunityId());
         param.addValue("user_id",userId);
 
+        param.addValue("image", threadAddForm.getBase64Image());
+
         KeyHolder keyHolder1 = new GeneratedKeyHolder();
 
         //user_idとコミュニティid今は1で固定。後で修正。06/23スレッドidはThreadAddFormから取得に変更。
         var threadAddResult= jdbcTemplate.update("INSERT INTO threads(user_id, community_id, image_path, " +
-                "title, address, sales_time, genre, create_date) VALUES(:user_id, :community_id, null, :threadName, " +
+                "title, address, sales_time, genre, create_date) VALUES(:user_id, :community_id, :image, :threadName, " +
                 ":address, :salesTime, :genre, now())", param,keyHolder1);
 
         //インサートしたIDを受け取る
         var addThreadId = Integer.parseInt(keyHolder1.getKeys().get("id").toString());
-        System.out.println(addThreadId);
+        //System.out.println(addThreadId);
 
 
         //以下ハッシュタグ追加処理
@@ -535,7 +537,9 @@ public class KuchannelDao {
         param.addValue("genre", inputData.getGenre());
         param.addValue("hashtags", inputData.getHashtag());
 
-        var updateThreadResult = jdbcTemplate.update("UPDATE threads SET title=:title,address=:address,sales_time=:sales_time,genre=:genre WHERE id = :thread_id", param);
+        param.addValue("image", inputData.getBase64Image());
+
+        var updateThreadResult = jdbcTemplate.update("UPDATE threads SET title=:title,address=:address,sales_time=:sales_time,genre=:genre,image_path=:image WHERE id = :thread_id", param);
 
 
         //ハッシュタグの処理。一度スレッドハッシュタグをリセットして、再度インサートする。
@@ -753,6 +757,13 @@ public class KuchannelDao {
         return jdbcTemplate.update("UPDATE notices SET read_flag = 'f' WHERE id = :noticeId", param);
     }
 
+    //review_imagesテーブルをレビューIDをもとに削除
+    public int deleteImages(Integer reviewId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("reviewId", reviewId);
+
+        return jdbcTemplate.update("DELETE FROM review_images WHERE review_id = :reviewId", param);
+    }
 
     /*------------------------------------*/
 
