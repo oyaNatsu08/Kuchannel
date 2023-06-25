@@ -19,6 +19,7 @@
 
   <div id="app">
 
+    
 
     <div class="pagetop">
       <h1>{{communityName}}へようこそ！</h1>
@@ -206,7 +207,7 @@
           <img src="restaurant-a.jpg" alt="飲食店A" class="restaurant-img">
           <div>
             <input type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2">
-            <a :href="getThreadReviewLink(thread.id)" class="restaurant-name">
+            <a :href="getReviewLink(thread.id)" class="restaurant-name">
               <h3>{{thread.title}}</h3>
             </a>
             <div class="genre">ジャンル：{{thread.genre}}</div>
@@ -270,6 +271,9 @@
           sessionInfo: [],
           sortKey: 'id',
           sortOrder: 'asc',
+          communityName: '',
+          communityId: '',
+          communityUrl:'',
 
           //スレッド新規作成用
           isThreadAddPopup: false,
@@ -293,8 +297,6 @@
           //コミュニティメンバー参照用
           isCommunityMemberPopup: false,
           communityMembers: [],
-          communityName: '',
-          communityId: '',
           newCommunityName:'',
           
 
@@ -323,6 +325,8 @@
           isaddThreadHashtagsSuggest:false,
           suggestions: [], // サジェストされるハッシュタグ
           existingHashTags: [],
+
+          
         }
 
 
@@ -498,7 +502,7 @@
             if (window.confirm('後悔しませんか?')) {
               axios.delete(`/deleteCommunity/${this.communityId}`)
                 .then(res => {
-                  window.location.href = "http://localhost:8080/mypage";
+                  window.location.href = "http://localhost:8080/kuchannel/mypage";
                 });
             }
           }
@@ -556,9 +560,9 @@
         },
 
         //スレッドのレビュー一覧に遷移
-        getThreadReviewLink(threadId) {
-          return `/thread-review/${threadId}`;
-        },
+        // getThreadReviewLink(threadId) {
+        //   return `/thread-review/${threadId}`;
+        // },
 
         //絞り込みリストを表示
         changeRefineView() {
@@ -697,8 +701,8 @@
           return value !== '';
         },
         selectSuggestion(suggestion) {
-          const words0 = this.searchText.split("　");
-          const words = words0.split(" ");
+          const words0 = this.searchText.split(" ").join("　").split("　"); // スペースで分割し、全角スペースでも分割する
+          const words = words0.filter(this.removeEmptyStrings); // 空の文字列を削除する
 
           let lastWord = words[words.length - 1]; // 最後の単語を取得
 
@@ -713,6 +717,11 @@
           this.searchText = newArray.join(" ") + " "; // 入力欄にサジェストを追加
           this.suggestions = []; // サジェストをリセット
         },
+
+        getReviewLink(threadId){
+          const link = this.communityUrl.replace("http://localhost:8080/","");
+          return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
+        }
         
         
   
@@ -724,6 +733,7 @@
         console.log("created");
         this.communityName = `[[${communityName}]]`;
         this.communityId = `[[${communityId}]]`;
+        this.communityUrl = `[[${communityUrl}]]`;
         console.log(this.communityId, this.communityName);
         this.getThreads();
         this.getSessionInfo();

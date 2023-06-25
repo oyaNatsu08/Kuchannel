@@ -16,7 +16,7 @@
   <h3>[[ ${community.name} ]]の、[[ ${userName} ]]さんからの問い合わせ</h3>
   <p>[[ ${inquiry.content} ]]</p>
 
-  <a th:href="@{/notice}" th:text="戻る"></a>
+  <a th:href="@{/kuchannel/notice(id=${community.id})}" th:text="戻る"></a>
   <a th:href="@{/community/thread-list(id=${community.id})}" th:text="該当コミュニティへ"></a>
 
 </div>

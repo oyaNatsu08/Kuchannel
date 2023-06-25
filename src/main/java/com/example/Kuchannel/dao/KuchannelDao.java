@@ -124,7 +124,7 @@ public class KuchannelDao {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
         var result = jdbcTemplate.query("SELECT rev.title AS reviewTitle, CONCAT(LEFT(rev.review,10),'...') AS review, " +
-                "th.title AS threadTitle, co.name AS communityName, DATE(rev.create_date) AS createDate " +
+                "th.title AS threadTitle, co.name AS communityName, DATE(rev.create_date) AS createDate ,co.id AS communityId , co.id AS communityId , co.url AS communityUrl,th.id AS threadId " +
                 "FROM reviews rev JOIN threads th ON rev.thread_id = th.id " +
                 "JOIN communities co ON th.community_id = co.id JOIN community_user cu on co.id = cu.community_id " +
                 "WHERE th.user_id = :userId AND cu.user_id = :userId AND cu.flag = true;", param,
@@ -629,7 +629,7 @@ public class KuchannelDao {
                         "on h.thread_id = t.id\n" +
                         "where t.id = :threadId ORDER BY t.id", param,
                 new DataClassRowMapper<>(CommunityThread.class));
-
+        System.out.println(list);
         return list.isEmpty() ? null : list.get(0);
 
     }
