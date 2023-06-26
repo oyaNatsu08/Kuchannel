@@ -202,7 +202,14 @@ public class KuchannelController {
             model.addAttribute("communityId", communityId);
             model.addAttribute("communityName", inviteCode);
 
-            return "thread-list";
+            var community =kuchannelService.findCommunity(communityId);
+            String url = community.url();
+            String moldedUrl =url.replace("http://localhost:8080/","");
+
+            return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace( "%2F","/") + "/" + community.id() + "/threads";
+
+
+
         }
 
     }
@@ -362,6 +369,7 @@ public class KuchannelController {
 
                 model.addAttribute("thread", thread);
                 model.addAttribute("userId", user.id());
+                model.addAttribute("community",community);
                 return "review-list";
             }else{
                 return "deleted-community";
@@ -558,7 +566,10 @@ public class KuchannelController {
         model.addAttribute("communityId", communityId);
         model.addAttribute("communityName", community.name());
 
-        return "thread-list";
+        String url = community.url();
+        String moldedUrl =url.replace("http://localhost:8080/","");
+
+        return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace( "%2F","/") + "/" + community.id() + "/threads";
 
     }
 
@@ -581,8 +592,13 @@ public class KuchannelController {
 
             model.addAttribute("thread", thread);
             model.addAttribute("userId", user.id());
+            model.addAttribute("community", kuchannelService.findCommunity(thread.getCommunity_id()));
 
-            return "review-list";
+            var community =kuchannelService.findCommunity(thread.getCommunity_id());
+            String url = community.url();
+            String moldedUrl =url.replace("http://localhost:8080/","");
+
+            return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace( "%2F","/") + "/" + community.id() + "/threads/"+threadId+"/reviews";
         }
     }
 
@@ -631,7 +647,11 @@ public class KuchannelController {
             kuchannelService.readNotice(noticeId);
         }
 
-        return "review-detail";
+        var community =kuchannelService.findCommunity(thread.getCommunity_id());
+        String url = community.url();
+        String moldedUrl =url.replace("http://localhost:8080/","");
+
+        return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace( "%2F","/") + "/" + community.id() + "/threads/"+threadId+"/reviews/"+reviewId;
 
     }
 

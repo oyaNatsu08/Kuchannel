@@ -40,7 +40,7 @@
             <tbody>
               <button type="button" @click="openPopupCommu">コミュニティ作成</button>
               <tr v-for="com in belongingCommunities">
-                <td>{{com.communityName}}</td>
+                <td><a :href="getCommunityLink(com.communityUrl,com.communityId)">{{com.communityName}}</a></td>
                 <td><button type="button" @click="copy(com.communityId)">共有</button></td>
                 <td><input type="text" v-model="com.nickName"><button type="button"
                     @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)">変更</button></button>
@@ -87,11 +87,8 @@
             </thead>
             <tbody>
               <tr v-for="thread in myThreads">
-                <td><a
-                    :href="getReviewLink(thread.communityUrl,thread.communityId,thread.threadId)">{{thread.threadTitle}}</a>
-                </td>
-                <td><a :href="getCommunityLink(thread.communityUrl,thread.communityId)">{{thread.communityName}}</a>
-                </td>
+                <td><a :href="getReviewLink(thread.communityUrl,thread.communityId,thread.threadId)">{{thread.threadTitle}}</a></td>
+                <td><a :href="getCommunityLink(thread.communityUrl,thread.communityId)">{{thread.communityName}}</a></td>
               </tr>
 
             </tbody>
@@ -114,14 +111,9 @@
             <tbody>
               <tr v-for="review in myReviews">
                 <td>{{review.reviewTitle}}</td>
-                <td class="review-cell"><a
-                    :href="getReviewDetailLink(review.communityUrl, review.communityId, review.threadId, review.reviewId)">{{review.review}}</a>
-                </td>
-                <td> <a
-                    :href="getReviewLink(review.communityUrl, review.communityId, review.threadId)">{{review.threadTitle}}</a>
-                </td>
-                <td><a :href="getCommunityLink(review.communityUrl,review.communityId)">{{review.communityName}}</a>
-                </td>
+                <td class="review-cell"><a :href="getReviewLink(review.communityUrl,review.communityId,review.threadId,review.reviewId)">{{review.review}}</a></td>
+                <td> <a :href="getReviewLink(review.communityUrl,review.communityId,review.threadId)">{{review.threadTitle}}</a></td>
+                <td><a :href="getCommunityLink(review.communityUrl,review.communityId)">{{review.communityName}}</a></td>
                 <td>{{review.createDate}}</td>
               </tr>
 
@@ -154,7 +146,7 @@
           myReviews: [],
           isPopupCommunity: false,
           showMenu: false,
-          userImage: 'AAAAAAAAAAAAAAAAAA',
+          userImage: '',
         }
 
       },
@@ -164,36 +156,34 @@
         displayTabJudge(tabNum) {
           console.log('tabNum' + tabNum);
 
-          for (let i = 1; i < 4; i++) {
+          for (let i = 1; i < 4; i++) { 
             this['tab' + i] = false;
-            console.log('isPopUo' + this.isPopupCommunity)
+            console.log('isPopUo'+ this.isPopupCommunity)
             document.getElementById(`btn${i}`).classList.remove('active')
-          }
-          this['tab' + tabNum] = true;
+          } 
+          this['tab' + tabNum] = true; 
           selectedTab = document.getElementById(`btn${tabNum}`)
-          selectedTab.className += " active"
+          selectedTab.className += " active" 
         },
         //所属しているコミュニティを取得 
-        getBelongingCommunities() {
-          this.belongingCommunities = []; axios.get('/getBelongingCommunities')
-            .then(res => {
-              for (let i = 0; i < res.data.length; i++) {
-                if (res.data[i].flag === true) { this.belongingCommunities.push(res.data[i]); }
-              }
+        getBelongingCommunities(){ this.belongingCommunities=[]; axios.get('/getBelongingCommunities')
+        .then(res => {
+          for (let i = 0; i < res.data.length; i++) {
+            if (res.data[i].flag === true) { this.belongingCommunities.push(res.data[i]); } 
+          }
+          console.log('belogCommunity',this.belongingCommunities);
             });
         },
         //退会処理 
-        withdrawal(communityId) {
-          axios.request({
-            url: '/withdrawal'
-            , method: 'post', data: communityId, headers: { 'Content-Type': 'text/plain' }
-          }).then(res => {
-            this.getBelongingCommunities();
-          });
-        },
+          withdrawal(communityId){ axios.request({ url: '/withdrawal'
+          , method: 'post', data: communityId, headers: { 'Content-Type': 'text/plain' }
+        }).then(res => {
+          this.getBelongingCommunities();
+        });
+          },
 
         //ニックネームの更新
-        updateNickName(inputNickName, communityId, userId, communityName) {
+        updateNickName(inputNickName, communityId, userId, communityName){
           const updateInfo = {
             communityId: communityId,
             userId: userId,
@@ -208,7 +198,7 @@
         },
 
         //建てたスレッドを取得
-        getMyThreads() {
+        getMyThreads(){
           this.myThreads = [];
           axios.get('/getMyThreads')
             .then(res => {
@@ -218,7 +208,7 @@
         },
 
         //投稿したレビューを取得
-        getMyReviews() {
+        getMyReviews(){
           this.myReviews = [];
           axios.get('/getMyReviews')
             .then(res => {
@@ -232,13 +222,13 @@
           axios.get(`/getUrl?name=${id}`)
             .then(res => {
 
-              //後ほどURLをkucahnnel入りに修正するため、不要
+            //後ほどURLをkucahnnel入りに修正するため、不要
               const gotUrl = res.data;
-              console.log('gotUrl', gotUrl)
-              const replace = gotUrl.replace("http://localhost:8080/", "");
-              console.log('replace', replace)
+              console.log('gotUrl',gotUrl)
+              const replace = gotUrl.replace("http://localhost:8080/","");
+              console.log('replace',replace)
               const molded = `http://localhost:8080/${replace}/${id}/threads`;
-              console.log(molded, 'molded');
+              console.log(molded,'molded');
 
 
               // 取得したURLをクリップボードにコピーする処理を実行
@@ -264,24 +254,24 @@
         },
 
 
-        getCommunityLink(communityLink, communityId) {
-          const link = communityLink.replace("http://localhost:8080/", "");
+//後ほど・・
+        getCommunityLink(communityLink,communityId) {
+          const link = communityLink.replace("http://localhost:8080/","");
           return `http://localhost:8080/${link}/${communityId}/threads`;
         },
-        getReviewLink(communityLink, communityId, threadId) {
-          const link = communityLink.replace("http://localhost:8080/", "");
+        getReviewLink(communityLink,communityId,threadId) {
+          const link = communityLink.replace("http://localhost:8080/","");
           return `http://localhost:8080/${link}/${communityId}/threads/${threadId}/reviews`;
         },
-        getReviewDetailLink(communityUrl, communityId, threadId, reviewId) {
-          const link = communityLink.replace("http://localhost:8080/", "");
+        getReviewLink(communityLink,communityId,threadId,reviewId) {
+          const link = communityLink.replace("http://localhost:8080/","");
           return `http://localhost:8080/${link}/${communityId}/threads/${threadId}/reviews/${reviewId}`;
         },
-
         toggleMenu() {
           this.showMenu = !this.showMenu;
-        }
+        },
 
-      },
+    },
 
       created: function () {
         //console.log("created");
