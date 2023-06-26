@@ -4,6 +4,7 @@ createApp({
     data() {
         return {
             showMenu: false,
+            userImage: '',
         }
     },
     methods: {
@@ -11,4 +12,7 @@ createApp({
             this.showMenu = !this.showMenu;
         }
     },
+    created: function() {
+        //this.userImage = `[[ ${image} ]]`;
+    }
 }).mount('#app0')

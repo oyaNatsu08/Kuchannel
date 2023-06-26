@@ -13,18 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -101,6 +95,13 @@ public class KuchannelRestController {
         return kuchannelService.goodDeal(thread_id,1);
     }
 
+    @GetMapping("/goodDeal/review/{reviewId}")
+    public int GoodReviewDeal(@PathVariable("reviewId") Integer reviewId) {
+        var user = (UserRecord)session.getAttribute("user");
+
+        return kuchannelService.goodDealReview(reviewId, user.id());
+    }
+
     //スレッド削除用
     @DeleteMapping("/deleteThread/{threadId}")
     public boolean deleteThread(@PathVariable("threadId")Integer thread_id){
@@ -111,7 +112,7 @@ public class KuchannelRestController {
     //getThreadと同じで、コミュニティidを渡すようにする。今は１で固定。
     @GetMapping("/getSessionInfo/{communityId}")
     public AccountInformation getSessionInfo(@PathVariable("communityId")Integer communityId){
-        System.out.println("success");
+
         var user = (UserRecord)session.getAttribute("user");
         var accountInfo = kuchannelService.getAccountInfo(user.id(),communityId);
 
@@ -120,26 +121,82 @@ public class KuchannelRestController {
 
     //スレッド作成処理
     @PostMapping("/thread-add")
-    public int addThread(@RequestBody ThreadAddForm inputData) {
+    public int addThread(@RequestParam("threadName") String threadName,
+                         @RequestParam("furigana") String furigana,
+                         @RequestParam("address") String address,
+                         @RequestParam("salesTime") String salesTime,
+                         @RequestParam("genre") String genre,
+                         @RequestParam("hashtag") String hashtag,
+                         @RequestParam("communityId") Integer communityId,
+                         @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {    //@RequestBody ThreadAddForm inputData
         var user = (UserRecord)session.getAttribute("user");
+
+        String encode = null;
+
+        if (image != null) {
+            byte[] bytes = image.getBytes();
+            encode = Base64.getEncoder().encodeToString(bytes);
+        }
+
+        //System.out.println("ハッシュタグ" + hashtag);
+
+        if ("null".equals(hashtag)) {
+            hashtag = null;
+            //System.out.println("ハッシュタグ" + hashtag);
+        }
+
         //threadsテーブルにINSERT処理
-        var result =kuchannelService.threadInsert(inputData,user.id());
+        var result = kuchannelService.threadInsert(new ThreadAddForm(threadName, furigana, address, salesTime, genre, hashtag, communityId, encode),user.id());
         return result;
     }
 
+    //スレッド情報編集
     @PutMapping("/updateThread/{id}")
-    public int threadUpdate(@RequestBody ThreadAddForm inputData,@PathVariable("id") Integer thread_id){
-        var result =kuchannelService.threadUpdate(inputData ,thread_id);
+    public int threadUpdate(@RequestParam("threadName") String threadName,
+                            @RequestParam("furigana") String furigana,
+                            @RequestParam("address") String address,
+                            @RequestParam("salesTime") String salesTime,
+                            @RequestParam("genre") String genre,
+                            @RequestParam("hashtag") String hashtag,
+                            @RequestParam("communityId") Integer communityId,
+                            @RequestParam(value = "image", required = false) MultipartFile image,
+                            @PathVariable("id") Integer thread_id) throws IOException {
+        String encode = null;
+
+        if (image != null) {
+            byte[] bytes = image.getBytes();
+            encode = Base64.getEncoder().encodeToString(bytes);
+        }
+
+        //System.out.println("ハッシュタグ" + hashtag);
+
+        if ("null".equals(hashtag)) {
+            hashtag = null;
+            //System.out.println("ハッシュタグ" + hashtag);
+        }
+
+        var result = kuchannelService.threadUpdate(new ThreadAddForm(threadName, furigana, address, salesTime, genre, hashtag, communityId, encode), thread_id);
+
         return result;
+
     }
 
+    //管理者用。メンバー編集用
     @PutMapping("/memberSetting/{communityId}")
     public int memberSetting(@PathVariable("communityId") Integer communityId,@RequestBody List<AccountInformation> updateInfo){
-        System.out.println(updateInfo);
+        //System.out.println(updateInfo);
         var result =kuchannelService.memberSetting(updateInfo, communityId);
         return result;
     }
 
+    @PutMapping("updateCommunityName/{communityId}/{newCommunityName}")
+    public int updateCommunityName(@PathVariable("communityId") Integer communityId,@PathVariable("newCommunityName") String newCommunityName){
+        System.out.println(newCommunityName);
+        var result =kuchannelService.updateCommunityName(communityId,newCommunityName);
+        return result;
+    }
+
+    //管理者用。コミュニティを消すよう。
     @DeleteMapping("/deleteCommunity/{communityId}")
     public int deleteCommunity(@PathVariable("communityId")Integer communityId){
         var result =kuchannelService.deleteCommunity(communityId);
@@ -160,6 +217,9 @@ public class KuchannelRestController {
     @GetMapping("/getReviews")
     public List<ReviewElementAll> getReviews(@RequestParam("threadId") Integer threadId) {
 
+        //スレッドIDをもとにコミュニティIDを入手
+        var thread = kuchannelService.getThread(threadId);
+
         //データベースからレビュー一覧に表示する情報を全件取得
         var revs = kuchannelService.findReviewAll(threadId);
 
@@ -167,13 +227,22 @@ public class KuchannelRestController {
         List<ReviewElementAll> reviews = new ArrayList<>();
 
         for (var rev : revs) {
+            //ユーザーIDとコミュニティIDをもとにニックネームを入手
+            var reviewAccount = kuchannelService.getAccountInfoNick(rev.userId(), thread.getCommunity_id());
+
             //データベースからレビューの画像情報を取得する
             var reviewImages = kuchannelService.getReviewImages(rev.reviewId());
 
-            //画像をbase64にエンコードする
-
             //データベースからレビューの返信情報を取得する
             var reviewReplies = kuchannelService.getReviewReply(rev.reviewId());
+
+            for (ReviewReply reviewReply : reviewReplies) {
+                //ユーザーIDとコミュニティIDをもとにニックネームを入手
+                var replyAccount = kuchannelService.getAccountInfoNick(reviewReply.getUserId(), thread.getCommunity_id());
+
+                reviewReply.setUserName(replyAccount.getName());
+
+            }
 
             //データベースからレビューのいいね件数を取得する
             var goodCount = kuchannelService.getGoodReview(rev.reviewId());
@@ -186,28 +255,34 @@ public class KuchannelRestController {
         return reviews;
     }
 
-    //画像をbase64にエンコードする処理
-//    public List<ReviewImageRecord> changeBase64(List<ReviewImageRecord> reviewImages) {
-//        for (var image : reviewImages) {
-//
-//        }
-//    }
-
-    //レビューの編集・更新機能処理
-//    @PostMapping("/api/update")
-//    public ResponseEntity<String> update(@RequestParam("title") String title,
-//                                         @RequestParam("content") String content,
-//                                         @RequestParam("images") List<MultipartFile> images){
-//
-//    }
-
-
     //レビューの編集・更新機能処理
     @PutMapping("/review-update")
-    public int update(@RequestBody ReviewUpdateForm reviewUpdateForm){
-
+    public int update(@RequestParam("id") Integer id,
+                      @RequestParam("title") String title,
+                      @RequestParam("content") String content,
+                      @RequestParam(value = "images", required = false) List<MultipartFile> images) throws IOException {
         //reviewsテーブルのレコードの更新処理
-        var reviewUpdate = kuchannelService.reviewUpdate(reviewUpdateForm.getId(),reviewUpdateForm.getTitle(),reviewUpdateForm.getContent());
+        //var reviewUpdate = kuchannelService.reviewUpdate(reviewUpdateForm.getId(),reviewUpdateForm.getTitle(),reviewUpdateForm.getContent());
+        var reviewUpdate = kuchannelService.reviewUpdate(id, title, content);
+
+        //review_imagesテーブルに入ってたデータを削除
+        kuchannelService.deleteImages(id);
+
+        //System.out.println("images:" + images);
+
+        if (images != null) {
+            for (MultipartFile image : images) {
+                //アップロード画像をバイト値に変換
+                byte[] bytes = image.getBytes();
+
+                //画像をエンコード
+                String encode = Base64.getEncoder().encodeToString(bytes);
+
+                //review_Imagesテーブルにインサート処理
+                kuchannelService.reviewImagesInsert(id, encode);
+
+            }
+        }
 
         return reviewUpdate;
 
@@ -218,7 +293,8 @@ public class KuchannelRestController {
     @PostMapping("/add-review")
     public ResponseEntity<String> addReview(@RequestParam("title") String title,
                                             @RequestParam("content") String content,
-                                            @RequestParam(value = "images", required = false) List<MultipartFile> images) {
+                                            @RequestParam("threadId") Integer threadId,
+                                            @RequestParam(value = "images", required = false) List<MultipartFile> images) throws IOException {
 
         //入力値チェック(本文)
         if ("".equals(content)) {
@@ -232,16 +308,19 @@ public class KuchannelRestController {
 
         //reviewsテーブルにインサート処理かつインサートしたIDを取得(thread_id 固定)
         var user = (UserRecord)session.getAttribute("user");
-        int reviewId = kuchannelService.reviewInsert(user.id(), 1, title, content);
+        int reviewId = kuchannelService.reviewInsert(user.id(), threadId, title, content);
 
 
         if (images != null) {
             for (MultipartFile image : images) {
-                // 画像を1枚ずつ保存処理
-                var num = uploadImage(image);
+                //アップロード画像をバイト値に変換
+                byte[] bytes = image.getBytes();
+
+                //画像をエンコード
+                String encode = Base64.getEncoder().encodeToString(bytes);
 
                 //review_Imagesテーブルにインサート処理
-                kuchannelService.reviewImagesInsert(reviewId, num + image.getOriginalFilename());
+                kuchannelService.reviewImagesInsert(reviewId, encode);
 
             }
         }
@@ -250,45 +329,9 @@ public class KuchannelRestController {
 
     }
 
-    //画像アップロード処理 戻り値に画像の名前が被らないように現在時刻を返す
-    private long uploadImage(MultipartFile image) {
-        //ファイル名を取得
-        String fileName = image.getOriginalFilename();
-
-        //現在時刻を取得(画像の名前が被らないようにするため)
-        long currentTimeMillis = System.currentTimeMillis();
-
-        //格納先パスを指定(ひとまず絶対パス)
-        Path filePath = Paths.get("src/main/resources/static/images/reviewImages/" + currentTimeMillis + fileName);
-
-        try {
-            //アップロード画像をバイト値に変換
-            byte[] bytes = image.getBytes();
-
-            //String encode = Base64.getEncoder().encodeToString(bytes);
-
-            //System.out.println(encode);
-
-            // Base64デコード
-            //byte[] decodedBytes = Base64.getDecoder().decode(encode);
-
-
-
-            //バイト値を書き込むファイルを作成し、指定したパスに格納
-            OutputStream stream = Files.newOutputStream(filePath);
-            stream.write(bytes);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return currentTimeMillis;
-
-    }
-
     //レビュー返信登録処理
     @PostMapping("add-reply")
-    public ReviewReplyRecord addReply(@RequestParam("id") Integer reviewId,
+    public ReviewReply addReply(@RequestParam("id") Integer reviewId,
                                            @RequestParam("content") String content) {
         //repliesテーブルにインサート処理
         var user = (UserRecord)session.getAttribute("user");
@@ -311,32 +354,89 @@ public class KuchannelRestController {
     public List<GenreRecord> getGenre() {
         var genre = kuchannelService.getGenres();
 
-        System.out.println("ジャンル：" + genre);
+        //System.out.println("ジャンル：" + genre);
 
         return genre;
     }
 
     //人気のハッシュタグを取得
-    @GetMapping("/getHashtags")
-    public List<HashTagRecord> getHashtags() {
-        var hashtags = kuchannelService.getHashtags();
+    @GetMapping("/getPopularHashtags/{communityId}")
+    public List<PopularHashTag> getHashtags(@PathVariable("communityId")Integer communityId) {
+        var hashtags = kuchannelService.getPopularHashtags(communityId);
 
-        System.out.println("ハッシュタグ上位5件：" + hashtags);
+        for (var hashtag : hashtags) {
+            hashtag.setTagName("#" + hashtag.getTagName());
+        }
 
+        //System.out.println("ハッシュタグ上位5件：" + hashtags);
+
+        return hashtags;
+    }
+
+    //ハッシュタグ全件を取得
+    @GetMapping("/getAllHashtags/{communityId}")
+    public List<HashTag> getAllHashtags(@PathVariable("communityId")Integer communityId) {
+        var hashtags = kuchannelService.getAllHashtags(communityId);
+        System.out.println("ハッシュタグ全件：" + hashtags);
         return hashtags;
     }
 
     //キーワードでスレッドを絞り込む
     @GetMapping("/keywordThreads")
-    public List<CommunityThread> keyThreads(@RequestParam("keyword") String keyword) {
+    public List<CommunityThread> keyThreads(@RequestParam("communityId") Integer communityId,
+                                            @RequestParam("keyword") String keyword) {
         //keywordを空白(半角または全角)ごとに分けて格納
-        String[] keywords = keyword.split("[\\s\\p{Z}]");
+        String[] splittedKeywords = keyword.split("[\\s\\p{Z}]");
+        //"#"と"＃"を除いたキーワードを格納。
+        List<String> filteredKeywords = new ArrayList<>();
+        for (String key : splittedKeywords) {
+            if (!key.isEmpty() && !key.startsWith("#") && !key.startsWith("＃")) {
+                filteredKeywords.add(key);
+            }
+        }
+        String[] keywords = filteredKeywords.toArray(new String[0]);
+        //もし検索欄に何も書いていなければ全件取得
+        if(keywords.length == 0){
+            return kuchannelService.communityThreads(communityId);
+
+        }
 
         //キーワードとスレッドタイトルであいまい検索
-        var threads = kuchannelService.findKeyThread(keywords);
+        var threads = kuchannelService.findKeyThread(communityId, keywords);
 
         return threads;
 
+    }
+
+    //キーワードでレビューからスレッドを絞り込む
+    @GetMapping("/keywordReviews")
+    public List<FindThreadReviews> keyReviews(@RequestParam("communityId") Integer communityId,
+                                            @RequestParam("keyword") String keyword) {
+        //keywordを空白(半角または全角)ごとに分けて格納
+        String[] keywords = keyword.split("[\\s\\p{Z}]");
+
+        //キーワードとレビュータイトルと本文であいまい検索
+        var threads = kuchannelService.findKeyThreadReview(communityId, keywords);
+
+        List<FindThreadReviews> threadReviews = new ArrayList<>();
+
+        for (var thread : threads) {
+            //System.out.println("スレッドID:" + thread.getThreadId() + "キーワード：" + keyword);
+            //スレッドごとにキーワード検索
+            var reviews = kuchannelService.findKeyReview(thread.getThreadId(), keywords);
+            threadReviews.add(new FindThreadReviews(thread.getThreadId(), thread.getUserId(), thread.getCommunityId(), thread.getTitle(),
+                    thread.getGenre(), thread.getGood_count(), thread.getImage_path(), reviews));
+        }
+
+        return threadReviews;
+    }
+
+    //スレッドIDをもとにコミュニティIDを取得する
+    @GetMapping("/getCommunityId")
+    public CommunityThread getCommunityId(@RequestParam("threadId") Integer threadId) {
+        var community = kuchannelService.getThread(threadId);
+
+        return community;
     }
 
     /*-------------------------------------*/
@@ -365,7 +465,7 @@ public class KuchannelRestController {
     public int IntegrateThreads(@RequestBody ThreadAddForm threadInfo){
         var user = (UserRecord)session.getAttribute("user");
         kuchannelService.IntegrateThreads(threadInfo, user.id());
-        System.out.println(threadInfo);
+        //System.out.println(threadInfo);
         return 1;
     }
 

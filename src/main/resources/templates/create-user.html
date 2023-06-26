@@ -13,7 +13,7 @@
         <p class="error" th:text="${error}"></p>
     </div>
 
-    <form action="create-user" method="POST" th:object="${CreateForm}">
+    <form action="/kuchannel/create-user" method="POST" th:object="${CreateForm}">
             <div class="cp_iptxt">
                 <span class="size">ユーザーID</span><input class="base-input" type="text" name="loginId" th:field="*{loginId}">
                 <div class="error" th:each="error: ${#fields.errors('loginId')}">
@@ -34,16 +34,12 @@
                     [[ ${error} ]]
                 </div>
             </div>
-                        <a th:href="@{/login}" class="custom-btn">戻る</a>
+                        <a th:href="@{/kuchannel/login}" class="custom-btn">戻る</a>
                         <button type="submit" class="custom-btn">登録</button>
         </button>
     </form>
 </div>
 <script>
-    'use strict'
-    document.getElementById('login-btn').addEventListener('click', () => {
-      location.href = './menu.html'
-    })
   </script>
 </body>
 </html>

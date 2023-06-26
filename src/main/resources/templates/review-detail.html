@@ -38,14 +38,14 @@
 
     <div id="app">
         <div class="review">
-            <h3>投稿者：<a th:href="@{/user-review/{userId}(userId=${review.userId})}">[[ ${review.userName} ]]</a></h3>
+            <h3>投稿者：<a th:href="@{/kuchannel/user-review/{userId}(userId=${review.userId})}">[[ ${review.userName} ]]</a></h3>
             <p>投稿日：[[ ${review.createDate} ]]</p>
             <h2>[[ ${review.title} ]]</h2>
             <hr>
             <p>[[ ${review.review} ]]</p>
 
             <th:block th:each="image : ${review.reviewImages}">
-                <img th:src="@{ '/images/reviewImages/' + ${image.imagePath} }" style="width: 100px; height: auto;">
+                <img th:src="@{'data:image/png;base64,' + ${image.imagePath} }" style="width: 100px; height: auto;">
             </th:block>
 
         </div>
@@ -54,7 +54,7 @@
         <div class="reply">
             <th:block th:each="reply : ${review.reviewReplies}">
                 <div class="review">
-                    <h4>投稿者：<a th:href="@{/user-review/{userId}(userId=${reply.userId})}">[[ ${reply.userName} ]]</a>
+                    <h4>投稿者：<a th:href="@{/kuchannel/user-review/{userId}(userId=${reply.userId})}">[[ ${reply.userName} ]]</a>
                     </h4>
                     <p>投稿日：[[ ${reply.createDate} ]]</p>
                     <p>[[ ${reply.reply} ]]</p>

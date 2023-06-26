@@ -6,6 +6,7 @@ import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.entity.InformatonRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -128,12 +129,12 @@ public class KuchannelService {
     }
 
     //データベースからレビューの画像情報を取得する
-    public List<ReviewImageRecord> getReviewImages(Integer reviewId) {
+    public List<ReviewImage> getReviewImages(Integer reviewId) {
         return kuchannelDao.getReviewImages(reviewId);
     }
 
     //データベースからレビューの返信情報を取得する
-    public List<ReviewReplyRecord> getReviewReply(Integer reviewId) {
+    public List<ReviewReply> getReviewReply(Integer reviewId) {
         return kuchannelDao.getReviewReply(reviewId);
     }
 
@@ -153,7 +154,7 @@ public class KuchannelService {
     }
 
     //repliesテーブルにインサート処理
-    public ReviewReplyRecord replyInsert(int userId, int reviewId, String content) {
+    public ReviewReply replyInsert(int userId, int reviewId, String content) {
         return kuchannelDao.replyInsert(userId, reviewId, content);
     }
 
@@ -183,20 +184,45 @@ public class KuchannelService {
     }
 
     //人気のハッシュタグを取得する
-    public List<HashTagRecord> getHashtags() {
-        return kuchannelDao.getHashtags();
+    public List<PopularHashTag> getPopularHashtags(Integer communityId) {
+        return kuchannelDao.getPopularHashtags(communityId);
+    }
+
+    //ハッシュタグ全件取得
+    public List<HashTag> getAllHashtags(Integer communityId){
+        return kuchannelDao.getAllHashtags(communityId);
     }
 
     //キーワードとスレッドタイトルであいまい検索
-    public List<CommunityThread> findKeyThread(String[] keywords) {
-        return kuchannelDao.findKeyThread(keywords);
+    public List<CommunityThread> findKeyThread(Integer communityId, String[] keywords) {
+        return kuchannelDao.findKeyThread(communityId, keywords);
+    }
+
+    //キーワードとレビューの本文、タイトルでスレッド情報をあいまい検索
+    public List<FindThread> findKeyThreadReview(Integer communityId, String[] keywords) {
+        return kuchannelDao.findKeyThreadReview(communityId, keywords);
+    }
+
+    //キーワードとレビューのレビューの本文、タイトルで、レビュー情報をあいまい検索
+    public List<FindReview> findKeyReview(Integer threadId, String[] keywords) {
+        return kuchannelDao.findKeyReview(threadId, keywords);
+    }
+
+    //お知らせテーブルの未読フラッグをアップデート
+    public int readNotice(Integer noticeId) {
+        return kuchannelDao.readNotice(noticeId);
+    }
+
+    //review_imagesテーブルをレビューIDをもとに削除
+    public int deleteImages(Integer reviewId) {
+        return kuchannelDao.deleteImages(reviewId);
     }
 
     /*---------------------------------------------*/
 
     //threadテーブルにINSERTする処理
-    public int threadInsert(ThreadAddForm threadAddForm,Integer userId) {
-        return kuchannelDao.threadInsert(threadAddForm,userId);
+    public int threadInsert(ThreadAddForm threadAddForm, Integer userId) {
+        return kuchannelDao.threadInsert(threadAddForm, userId);
     }
 
     //コミュニティIDを元にスレッドを全件取得
@@ -247,7 +273,14 @@ public class KuchannelService {
 
     public AccountInformation getAccountInfo(Integer user_id, Integer community_id){return kuchannelDao.getAccountInfo(user_id,community_id);}
 
+    //getAccountInfoのニックネームがある場合は、ニックネームで取得するバージョン
+    public AccountInformation getAccountInfoNick(Integer userId, Integer communityId) {
+        return kuchannelDao.getAccountInfoNick(userId, communityId);
+    }
+
     public int memberSetting(List<AccountInformation> updateInfo, Integer communityId){return kuchannelDao.memberSetting(updateInfo,communityId);}
+
+    public int updateCommunityName(Integer communityId, String newCommunityName){return kuchannelDao.updateCommunityName(communityId,newCommunityName);}
 
     public int deleteCommunity(Integer communityId){return kuchannelDao.deleteCommunity(communityId);}
 

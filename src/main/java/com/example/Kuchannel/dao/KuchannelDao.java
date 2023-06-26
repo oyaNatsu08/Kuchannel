@@ -84,7 +84,7 @@ public class KuchannelDao {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
         var result = jdbcTemplate.query("SELECT c.id AS communityId ,c_u.user_id,c.name AS community_name,c_u.nick_name ,c_u.flag FROM community_user c_u JOIN communities c ON c_u.community_id = c.id WHERE c_u.user_id = :userId",param,new DataClassRowMapper<>(BelongingCommunities.class));
-        System.out.println(result);
+        //System.out.println(result);
         return result;
     }
 
@@ -115,7 +115,7 @@ public class KuchannelDao {
                         "FROM threads th JOIN communities co ON th.community_id = co.id JOIN community_user cu ON co.id = cu.community_id " +
                         "WHERE th.user_id = :userId AND cu.user_id = :userId AND cu.flag = true;", param,
                 new DataClassRowMapper<>(MyThread.class));
-        System.out.println(result);
+        //System.out.println(result);
         return result;
     }
 
@@ -124,12 +124,12 @@ public class KuchannelDao {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
         var result = jdbcTemplate.query("SELECT rev.title AS reviewTitle, CONCAT(LEFT(rev.review,10),'...') AS review, " +
-                "th.title AS threadTitle, co.name AS communityName, DATE(rev.create_date) AS createDate " +
+                "th.title AS threadTitle, co.name AS communityName, DATE(rev.create_date) AS createDate ,co.id AS communityId , co.id AS communityId , co.url AS communityUrl,th.id AS threadId " +
                 "FROM reviews rev JOIN threads th ON rev.thread_id = th.id " +
                 "JOIN communities co ON th.community_id = co.id JOIN community_user cu on co.id = cu.community_id " +
                 "WHERE th.user_id = :userId AND cu.user_id = :userId AND cu.flag = true;", param,
                 new DataClassRowMapper<>(MyReview.class));
-        System.out.println(result);
+        //System.out.println(result);
         return result;
     }
 
@@ -241,8 +241,8 @@ public class KuchannelDao {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
 
-        var list = jdbcTemplate.query("SELECT rep.user_id AS replyUserId, th.title AS threadTitle, " +
-                        "no.read_flag AS flag, rev.id AS reviewId " +
+        var list = jdbcTemplate.query("SELECT rep.user_id AS replyUserId, th.id AS threadId, th.title AS threadTitle, " +
+                        "no.id AS noticeId, no.read_flag AS flag, rev.id AS reviewId " +
                         "FROM threads th JOIN reviews rev ON th.id = rev.thread_id " +
                         "JOIN replies rep ON rev.id = rep.review_id " +
                         "JOIN notices no ON rep.id = no.reply_id " +
@@ -319,25 +319,25 @@ public class KuchannelDao {
     }
 
     //データベースからレビューの画像情報を取得する
-    public List<ReviewImageRecord> getReviewImages(Integer reviewId) {
+    public List<ReviewImage> getReviewImages(Integer reviewId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("reviewId", reviewId);
 
         var list = jdbcTemplate.query("SELECT review_id, image_path FROM review_images WHERE review_id = :reviewId",
-                param, new DataClassRowMapper<>(ReviewImageRecord.class));
+                param, new DataClassRowMapper<>(ReviewImage.class));
 
         return list;
 
     }
 
     //データベースからレビューの返信情報を取得する
-    public List<ReviewReplyRecord> getReviewReply(Integer reviewId) {
+    public List<ReviewReply> getReviewReply(Integer reviewId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("reviewId", reviewId);
 
         var list = jdbcTemplate.query("SELECT rep.id AS replyId, rep.user_id, u.name AS userName, rep.review_id, " +
                 "rep.reply, to_char(rep.create_date, 'YYYY-MM-DD HH24:MI') AS createDate FROM replies rep JOIN users u ON rep.user_id = u.id " +
-                "WHERE rep.review_id = :reviewId ORDER BY rep.id", param, new DataClassRowMapper<>(ReviewReplyRecord.class));
+                "WHERE rep.review_id = :reviewId ORDER BY rep.id", param, new DataClassRowMapper<>(ReviewReply.class));
 
         return list;
 
@@ -384,7 +384,7 @@ public class KuchannelDao {
     }
 
     //repliesテーブルにインサート処理
-    public ReviewReplyRecord replyInsert(int userId, int reviewId, String content) {
+    public ReviewReply replyInsert(int userId, int reviewId, String content) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
         param.addValue("reviewId", reviewId);
@@ -403,7 +403,7 @@ public class KuchannelDao {
 
         var user = (UserRecord)session.getAttribute("user");
 
-        var reply = new ReviewReplyRecord(
+        var reply = new ReviewReply(
                         Integer.parseInt(keyHolder.getKeys().get("id").toString()),
                         Integer.parseInt(keyHolder.getKeys().get("user_id").toString()),
                         user.name(),
@@ -470,21 +470,21 @@ public class KuchannelDao {
         param.addValue("community_id",threadAddForm.getCommunityId());
         param.addValue("user_id",userId);
 
+        param.addValue("image", threadAddForm.getBase64Image());
+
         KeyHolder keyHolder1 = new GeneratedKeyHolder();
 
         //user_idとコミュニティid今は1で固定。後で修正。06/23スレッドidはThreadAddFormから取得に変更。
         var threadAddResult= jdbcTemplate.update("INSERT INTO threads(user_id, community_id, image_path, " +
-                "title, address, sales_time, genre, create_date) VALUES(:user_id, :community_id, null, :threadName, " +
+                "title, address, sales_time, genre, create_date) VALUES(:user_id, :community_id, :image, :threadName, " +
                 ":address, :salesTime, :genre, now())", param,keyHolder1);
 
         //インサートしたIDを受け取る
         var addThreadId = Integer.parseInt(keyHolder1.getKeys().get("id").toString());
-        System.out.println(addThreadId);
+        //System.out.println(addThreadId);
 
 
         //以下ハッシュタグ追加処理
-
-
         if(threadAddForm.getHashtag() != null){
             //ハッシュタグの内容を取得し、「,」でsplitして分ける。
             String[] inputHashTags = threadAddForm.getHashtag().trim().split(",");
@@ -536,7 +536,9 @@ public class KuchannelDao {
         param.addValue("genre", inputData.getGenre());
         param.addValue("hashtags", inputData.getHashtag());
 
-        var updateThreadResult = jdbcTemplate.update("UPDATE threads SET title=:title,address=:address,sales_time=:sales_time,genre=:genre WHERE id = :thread_id", param);
+        param.addValue("image", inputData.getBase64Image());
+
+        var updateThreadResult = jdbcTemplate.update("UPDATE threads SET title=:title,address=:address,sales_time=:sales_time,genre=:genre,image_path=:image WHERE id = :thread_id", param);
 
 
         //ハッシュタグの処理。一度スレッドハッシュタグをリセットして、再度インサートする。
@@ -604,7 +606,7 @@ public class KuchannelDao {
                         "on h.thread_id = t.id\n" +
                         "where t.community_id = :id ORDER BY t.id", param,
                 new DataClassRowMapper<>(CommunityThread.class));
-        System.out.println(list);
+        //System.out.println(list);
 
         return list;
     }
@@ -649,23 +651,36 @@ public class KuchannelDao {
     }
 
     //人気のハッシュタグを取得する
-    public List<HashTagRecord> getHashtags() {
+    public List<PopularHashTag> getPopularHashtags(Integer communityId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("communityId", communityId);
+        var list = jdbcTemplate.query("SELECT h.id, h.tag_name AS tagName, COUNT(*) AS count FROM hashtags h \n" +
+                "                JOIN thread_hashtag th ON h.id = th.hashtag_id \n" +
+                "                JOIN threads t ON t.id = th.thread_id\n" +
+                "                WHERE t.community_id = :communityId GROUP BY h.id  ORDER BY COUNT(*) DESC LIMIT 5;",param, new DataClassRowMapper<>(PopularHashTag.class));
+        System.out.println(list);
+        return list;
+    }
 
-        var list = jdbcTemplate.query("SELECT h.id, h.tag_name, COUNT(*) AS count FROM hashtags h " +
-                "JOIN thread_hashtag th ON h.id = th.hashtag_id GROUP BY h.id " +
-                "ORDER BY COUNT(*) DESC LIMIT 5", new DataClassRowMapper<>(HashTagRecord.class));
+    //ハッシュタグを全件取得
+    public List<HashTag> getAllHashtags(Integer communityId){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("communityId", communityId);
+        var list = jdbcTemplate.query("SELECT h.id, h.tag_name FROM hashtags h JOIN thread_hashtag th ON h.id = th.hashtag_id JOIN threads t ON t.id = th.thread_id WHERE t.community_id = :communityId ;",param, new DataClassRowMapper<>(HashTag.class));
 
         return list;
 
     }
 
-    //キーワードとスレッドタイトルであいまい検索
-    public List<CommunityThread> findKeyThread(String[] keywords) {
+    //キーワードでスレッドタイトルをあいまい検索
+    public List<CommunityThread> findKeyThread(Integer communityId, String[] keywords) {
         List<CommunityThread> lists = new ArrayList<>();
         Set<CommunityThread> threadSet = new HashSet<>();
+        MapSqlParameterSource param = new MapSqlParameterSource();
+
+        param.addValue("communityId", communityId);
 
         for (String key : keywords) {
-            MapSqlParameterSource param = new MapSqlParameterSource();
             param.addValue("key", "%" + key + "%");
 
             var list = jdbcTemplate.query("select *\n" +
@@ -685,8 +700,9 @@ public class KuchannelDao {
                             "  group by thread_id\n" +
                             ") h\n" +
                             "on h.thread_id = t.id\n" +
-                            "where t.title LIKE :key ORDER BY t.id", param,
-                    new DataClassRowMapper<>(CommunityThread.class));
+                            "where t.community_id = :communityId AND t.title LIKE :key " +
+                            "ORDER BY t.id", param,
+                            new DataClassRowMapper<>(CommunityThread.class));
 
             //listをlistsに詰めなおす
             threadSet.addAll(list);
@@ -698,6 +714,93 @@ public class KuchannelDao {
 
     }
 
+    //キーワードとレビューの本文、タイトルであいまい検索
+    public List<FindThread> findKeyThreadReview(Integer communityId, String[] keywords) {
+
+        List<FindThread> lists = new ArrayList<>();
+        Set<FindThread> threadSet = new HashSet<>();
+        MapSqlParameterSource param = new MapSqlParameterSource();
+
+        param.addValue("communityId", communityId);
+
+        for (String key : keywords) {
+            param.addValue("key", "%" + key + "%");
+
+            var list = jdbcTemplate.query("select t.id AS threadId, t.user_id, t.community_id, t.title, t.genre, good_count, t.image_path " +
+                            "from threads t\n" +
+                            "left join (\n" +
+                            "  select thread_id, count(*) good_count\n" +
+                            "  from thread_goods\n" +
+                            "  group by thread_id) g\n" +
+                            "  on t.id = g.thread_id\n" +
+                            "\n" +
+                            "left join \n" +
+                            "(\n" +
+                            "  select thread_id, string_agg(tag_name, ',') AS hashtags\n" +
+                            "  from hashtags h\n" +
+                            "  join thread_hashtag th\n" +
+                            "  on h.id = th.hashtag_id\n" +
+                            "  group by thread_id\n" +
+                            ") h\n" +
+                            "on h.thread_id = t.id\n " +
+                            "join reviews r on t.id = r.thread_id " +
+                            "where (r.title like :key or r.review like :key) " +
+                            "and t.community_id = :communityId ORDER BY t.id", param,
+                            new DataClassRowMapper<>(FindThread.class));
+
+            //listをlistsに詰めなおす
+            threadSet.addAll(list);
+
+        }
+
+        lists.addAll(threadSet);
+        return lists;
+    }
+
+    //キーワードとレビューの本文、タイトルであいまい検索
+    public List<FindReview> findKeyReview(Integer threadId, String[] keywords) {
+
+        List<FindReview> lists = new ArrayList<>();
+        Set<FindReview> threadSet = new HashSet<>();
+        MapSqlParameterSource param = new MapSqlParameterSource();
+
+        param.addValue("threadId", threadId);
+
+        for (String key : keywords) {
+            param.addValue("key", "%" + key + "%");
+
+            var list = jdbcTemplate.query("SELECT r.id AS reviewId, t.id AS threadId, r.title AS reviewTitle, r.review AS reviewContent, " +
+                            "u.id AS userId, u.name AS userName FROM reviews r JOIN threads t ON r.thread_id = t.id " +
+                            "JOIN users u ON r.user_id = u.id " +
+                            "WHERE (r.title LIKE :key OR r.review LIKE :key) " +
+                            "AND t.id = :threadId ORDER BY r.id", param,
+                    new DataClassRowMapper<>(FindReview.class));
+
+            //listをlistsに詰めなおす
+            threadSet.addAll(list);
+
+        }
+
+        lists.addAll(threadSet);
+        return lists;
+    }
+
+    //お知らせテーブルの未読フラッグをアップデート
+    public int readNotice(Integer noticeId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("noticeId", noticeId);
+
+        return jdbcTemplate.update("UPDATE notices SET read_flag = 'f' WHERE id = :noticeId", param);
+    }
+
+    //review_imagesテーブルをレビューIDをもとに削除
+    public int deleteImages(Integer reviewId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("reviewId", reviewId);
+
+        return jdbcTemplate.update("DELETE FROM review_images WHERE review_id = :reviewId", param);
+    }
+
     /*------------------------------------*/
 
     //プロフィール編集（start）
@@ -707,11 +810,11 @@ public class KuchannelDao {
 
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("name", name);
-        System.out.println(name);
+        //System.out.println(name);
         param.addValue("password", password);
-        System.out.println(password);
+        //System.out.println(password);
         param.addValue("loginId",loginId);
-        System.out.println(loginId);
+        //System.out.println(loginId);
         try {
             jdbcTemplate.update(sql, param);
 
@@ -819,6 +922,7 @@ public class KuchannelDao {
 
 /*----------------------------------------------------------*/
 
+
     //いいねボタンが押されたとき、そのユーザーがそのスレッドへいいねを押していない場合インサート、すでに押している場合は削除。そののちにその時のいいね数をCOUNTして数字で返したい。
     public int goodDeal(Integer thread_id,Integer user_id){
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -873,7 +977,23 @@ public class KuchannelDao {
                         "On u.id = cu.user_id\n" +
                         "WHERE cu.community_id = :community_id AND user_id = :user_id;", param,
                 new DataClassRowMapper<>(AccountInformation.class));
-        System.out.println(list.get(0));
+        //System.out.println(list.get(0));
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    //getAccountInfoのニックネームがある場合は、ニックネームで取得するバージョン
+    public AccountInformation getAccountInfoNick(Integer userId, Integer communityId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("community_id", communityId);
+        param.addValue("user_id", userId);
+        List<AccountInformation> list = jdbcTemplate.query("SELECT u.id, " +
+                        "CASE WHEN cu.nick_name IS NULL THEN u.name " +
+                        "ELSE cu.nick_name END AS name, " +
+                        "cu.role FROM users u JOIN community_user cu " +
+                        "On u.id = cu.user_id\n" +
+                        "WHERE cu.community_id = :community_id AND user_id = :user_id;", param,
+                new DataClassRowMapper<>(AccountInformation.class));
+        //System.out.println(list.get(0));
         return list.isEmpty() ? null : list.get(0);
     }
 
@@ -903,6 +1023,16 @@ public class KuchannelDao {
 
         }
         return 1;
+    }
+
+    public int updateCommunityName(Integer communityId,String newCommunityName){
+        MapSqlParameterSource param =new MapSqlParameterSource();
+        param.addValue("community_id",communityId);
+        param.addValue("newName",newCommunityName);
+
+        return jdbcTemplate.update("UPDATE communities SET name = :newName WHERE id = :community_id;",param);
+
+
     }
 
     public int deleteCommunity(Integer communityId){

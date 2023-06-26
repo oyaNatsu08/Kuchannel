@@ -1,12 +1,12 @@
 <header>
     <div style="display: flex;">
-        <h1 class="me-auto"><a th:href="@{/mypage}" class="a-tag">口ゃんねる(口コミ)</a></h1>
-        <a th:href="@{/notice}"><img src="/images/bell.png" alt="通知" style="width: 50px; height: 50px;"></a>
-        <p @click="toggleMenu">アイコン</p>
+        <h1 class="me-auto"><a th:href="@{/kuchannel/mypage}" class="a-tag">口ゃんねる(口コミ)</a></h1>
+        <a th:href="@{/kuchannel/notice}"><img src="/images/bell.png" alt="通知" style="width: 50px; height: 50px;"></a>
+        <p @click="toggleMenu">アイコン</p><!-- <img :src="'data:image/png;base64,' + userImage"> -->
         <ul v-if="showMenu">
-            <li><a th:href="@{/mypage}">マイページへ</a></li>
-           <li><a th:href="@{/profile-details}">プロフィール閲覧</a></li>
-            <li><a th:href="@{/logout}">ログアウト</a></li>
+            <li><a th:href="@{/kuchannel/mypage}">マイページへ</a></li>
+           <li><a th:href="@{/kuchannel/profile-details}">プロフィール閲覧</a></li>
+            <li><a th:href="@{/kuchannel/logout}">ログアウト</a></li>
         </ul>
     </div>
 
