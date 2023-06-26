@@ -124,13 +124,19 @@ public class KuchannelRestController {
                          @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {    //@RequestBody ThreadAddForm inputData
         var user = (UserRecord)session.getAttribute("user");
 
-        byte[] bytes = image.getBytes();
+        String encode = null;
 
-        if ("".equals(hashtag)) {
-            hashtag = null;
+        if (image != null) {
+            byte[] bytes = image.getBytes();
+            encode = Base64.getEncoder().encodeToString(bytes);
         }
+        
+        //System.out.println("ハッシュタグ" + hashtag);
 
-        String encode = Base64.getEncoder().encodeToString(bytes);
+        if ("null".equals(hashtag)) {
+            hashtag = null;
+            //System.out.println("ハッシュタグ" + hashtag);
+        }
 
         //threadsテーブルにINSERT処理
         var result = kuchannelService.threadInsert(new ThreadAddForm(threadName, furigana, address, salesTime, genre, hashtag, communityId, encode),user.id());
@@ -147,20 +153,24 @@ public class KuchannelRestController {
                             @RequestParam("communityId") Integer communityId,
                             @RequestParam(value = "image", required = false) MultipartFile image,
                             @PathVariable("id") Integer thread_id) throws IOException {
-        byte[] bytes = image.getBytes();
+        String encode = null;
 
-        if ("".equals(hashtag)) {
-            hashtag = null;
+        if (image != null) {
+            byte[] bytes = image.getBytes();
+            encode = Base64.getEncoder().encodeToString(bytes);
         }
 
-        String encode = Base64.getEncoder().encodeToString(bytes);
+        //System.out.println("ハッシュタグ" + hashtag);
 
-        var result = kuchannelService.threadUpdate(new ThreadAddForm(threadName, furigana, address, salesTime, genre, hashtag, communityId, encode) ,thread_id);
+        if ("null".equals(hashtag)) {
+            hashtag = null;
+            //System.out.println("ハッシュタグ" + hashtag);
+        }
 
-    @DeleteMapping("/deleteCommunity/{communityId}")
-    public int deleteCommunity(@PathVariable("communityId")Integer communityId){
-        var result =kuchannelService.deleteCommunity(communityId);
+        var result = kuchannelService.threadUpdate(new ThreadAddForm(threadName, furigana, address, salesTime, genre, hashtag, communityId, encode), thread_id);
+
         return result;
+
     }
 
     @PutMapping("/memberSetting/{communityId}")

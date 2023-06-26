@@ -215,8 +215,8 @@ public class KuchannelService {
     /*---------------------------------------------*/
 
     //threadテーブルにINSERTする処理
-    public int threadInsert(ThreadAddForm threadAddForm) {
-        return kuchannelDao.threadInsert(threadAddForm);
+    public int threadInsert(ThreadAddForm threadAddForm, Integer userId) {
+        return kuchannelDao.threadInsert(threadAddForm, userId);
     }
 
     //コミュニティIDを元にスレッドを全件取得
