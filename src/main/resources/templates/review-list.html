@@ -58,12 +58,14 @@
 
   <div id="app0">
 
-    <th:block th:insert="common/header"></th:block>
+    <th:block th:insert="~{common/header}"></th:block>
 
   </div>
 
   <div id="app">
     <h2>スレッド名：{{ updateThreadTitle }}</h2>
+
+    <a :href="backThread()">スレッド一覧へ戻る</a>
 
     <button type="button" @click="openUpdateThread()">情報編集</button>
 
@@ -126,7 +128,7 @@
           <p class="review-cell" style="width: 300px; margin-right: 20px;">{{review.review}}</p>
           <div v-for="(image, index) in review.reviewImages">
             <div v-if="index === 0">
-              <img :src="'/images/reviewImages/' + image.imagePath" style="width: 50px; height: auto;">
+              <img :src="'data:image/png;base64,' + image.imagePath" style="width: 50px; height: auto;">
             </div>
           </div>
         </div>
@@ -185,8 +187,12 @@
         <h2>編集</h2>
         <p>タイトル：<input type="text" v-model="editingReview.title"></p>
         <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
-        <p>写真の追加：<input type="file" ref="fileInput" multiple />
-        </p>
+        <p>写真の追加：<input type="file" ref="fileInput" multiple /></p>
+        <p>更新前の画像</p>
+        <div style="display: flex; justify-content: center;">
+            <img v-for="image in editingReview.imageReview" :src="'data:image/png;base64,' + image.imagePath" style="width: 50px; height: auto;">
+        </div>
+
         <button type="button" @click="closePopup">キャンセル</button>
         <button type="button" @click="updateReview">更新</button>
       </div>
@@ -212,7 +218,8 @@
           editingReview: {
             id: '',
             title: '',
-            content: ''
+            content: '',
+            imageReview: [],
           },
           threadId: '',
           addError: '',
@@ -234,6 +241,8 @@
           showDeletePopup: false,
 
           userId: '',
+
+          community: [],
 
         }
       },
@@ -264,6 +273,7 @@
 
           console.log(this.reviewTitle, this.content);
           const formData = new FormData();
+          formData.append("threadId", `[[ ${threadId} ]]`);
           formData.append("title", this.reviewTitle);
           formData.append("content", this.content);
 
@@ -305,19 +315,32 @@
           this.editingReview.id = review.reviewId;
           this.editingReview.title = review.title;
           this.editingReview.content = review.review;
+          this.editingReview.imageReview = review.reviewImages;
         },
         updateReview() {
-          const updatedReview = {
-            id: this.editingReview.id,
-            title: this.editingReview.title,
-            content: this.editingReview.content
-          };
+          const formData = new FormData();
+          // 複数の画像をFormDataに追加
+          for (let i = 0; i < this.$refs.fileInput.files.length; i++) {
+            formData.append('images', this.$refs.fileInput.files[i]);
+          }
 
-          axios.put('/review-update', updatedReview)
+          formData.append('id', this.editingReview.id);
+          formData.append('title', this.editingReview.title);
+          formData.append('content', this.editingReview.content);
+
+          // const updatedReview = {
+          //   id: this.editingReview.id,
+          //   title: this.editingReview.title,
+          //   content: this.editingReview.content
+          // };
+
+          //formData.append('updatedReview', updatedReview);
+
+          axios.put('/review-update', formData)
             .then(res => {
               this.getReviews(`[[ ${threadId} ]]`);
               this.closePopup();
-              console.log(updatedReview)
+              //console.log(updatedReview)
               console.log(res);
 
             });
@@ -436,13 +459,32 @@
               this.updateThreadHashtags = this.thread.hashtags;
             }
             );
-        }
+        },
+
+        //スレッド一覧へ戻る
+        backThread() {
+          return `/community/thread-list/${this.community.community_id}`;
+        },
+
+        //コミュニティIDを取得する
+        getCommunityId() {
+          axios.get('/getCommunityId', {
+            params: {
+              threadId: `[[ ${threadId} ]]`
+            }
+          })
+            .then(res => {
+              this.community = res.data;
+            }
+            );
+        },
 
       },
       created: function () {
         // this.threadId = `[[ ${threadId} ]]`;
         // this.getReviews(this.threadId);
         this.getReviews(`[[ ${threadId} ]]`);
+        this.getCommunityId(`[[ ${threadId} ]]`);
 
         this.updateThreadId = `[[ ${thread.id} ]]`;
         this.updateThreadTitle = `[[ ${thread.title} ]]`;

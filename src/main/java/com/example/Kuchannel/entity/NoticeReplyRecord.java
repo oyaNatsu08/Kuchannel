@@ -1,4 +1,4 @@
 package com.example.Kuchannel.entity;
 
-public record NoticeReplyRecord(Integer replyUserId, String threadTitle, Boolean flag, Integer reviewId) {
+public record NoticeReplyRecord(Integer replyUserId, Integer threadId, String threadTitle, Integer noticeId, Boolean flag, Integer reviewId) {
 }

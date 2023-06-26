@@ -30,7 +30,7 @@ public class CommunityThread {
     public CommunityThread(Integer id, Integer user_id, Integer community_id, String image_path, String title, String address, String sales_time, String genre,
                             LocalDate create_date,Integer good_count,String hashTags ){
         this.id = id;
-        this.user_id =user_id;
+        this.user_id = user_id;
         this.community_id = community_id;
         this.image_path = image_path;
         this.title = title;

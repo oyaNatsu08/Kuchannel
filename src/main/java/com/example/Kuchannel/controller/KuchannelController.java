@@ -13,14 +13,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.util.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SimpleTimeZone;
-import java.util.UUID;
 
 @Controller
 public class KuchannelController {
@@ -56,8 +55,10 @@ public class KuchannelController {
             model.addAttribute("error", "IDまたはパスワードが不正です");
             return "login";
         }
+
         //セッション
         session.setAttribute("user", user);
+        model.addAttribute("image", user.imagePath());
 
         return "my-page";
 
@@ -99,7 +100,7 @@ public class KuchannelController {
     @PostMapping("create-user")
     public String accountAdd(@Validated @ModelAttribute("CreateForm") CreateForm createForm,
                              BindingResult bindingResult,
-                             Model model) {
+                             Model model) throws IOException {
         //バリデーション
         if (bindingResult.hasErrors()) {
             return "create-user";
@@ -107,10 +108,36 @@ public class KuchannelController {
         String loginId = createForm.getLoginId();
         String password = createForm.getPassword();
         String name = createForm.getName();
-        String image_path = createForm.getImage_path();
-        CreateRecord create = new CreateRecord(loginId, password, name, image_path);
-        kuchannelService.create(loginId, password, name, image_path);
+        //String image_path = createForm.getImage_path();
+
+        File directory = new File("src/main/resources/static/images/icons");
+
+        File[] files = directory.listFiles();
+
+        List<File> imageFiles = new ArrayList<>();
+        for (File file : files) {
+            if (file.isFile() && isImageFile(file)) {
+                imageFiles.add(file);
+            }
+        }
+
+        int randomIndex = new Random().nextInt(imageFiles.size());
+        File randomImageFile = imageFiles.get(randomIndex);
+
+        byte[] bytes = Files.readAllBytes(randomImageFile.toPath());
+
+        String encode = Base64.getEncoder().encodeToString(bytes);
+
+        CreateRecord create = new CreateRecord(loginId, password, name, encode);
+        kuchannelService.create(loginId, password, name, encode);
         return "redirect:/login";
+    }
+
+    // 画像ファイルの拡張子を確認するメソッド
+    private boolean isImageFile(File file) {
+        String name = file.getName();
+        String extension = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
+        return extension.equals("jpg") || extension.equals("jpeg") || extension.equals("png");
     }
 
     /*----------------------------------------*/
@@ -156,7 +183,8 @@ public class KuchannelController {
                 kuchannelService.communityUserInsert(user.id(), communityId, communityAddForm.getNickName(), 2);
             }
 
-            model.addAttribute("name", inviteCode);
+            model.addAttribute("communityId", communityId);
+            model.addAttribute("communityName", inviteCode);
 
             return "thread-list";
         }
@@ -222,7 +250,7 @@ public class KuchannelController {
             List<NoticeReplyRecord2> notices2 = new ArrayList<>();
             for (NoticeReplyRecord notice : notices) {
                 UserRecord replyUser = kuchannelService.findUser(notice.replyUserId());
-                notices2.add(new NoticeReplyRecord2(replyUser.name(), notice.threadTitle(), notice.flag(), notice.reviewId()));
+                notices2.add(new NoticeReplyRecord2(replyUser.name(), notice.threadId(), notice.threadTitle(), notice.noticeId(), notice.flag(), notice.reviewId()));
             }
 
             //お問い合わせ情報を表示する
@@ -276,7 +304,8 @@ public class KuchannelController {
 
             }
 
-            model.addAttribute("name", community.name());
+            model.addAttribute("communityId", community.id());
+            model.addAttribute("communityName", community.name());
 
             return "thread-list";
 
@@ -340,8 +369,8 @@ public class KuchannelController {
 
         var userData = (UserRecord)session.getAttribute("user");
         //セッションのユーザーID
-//        var userId = userData.id();
-        var userId = 1;
+        var userId = userData.id();
+        //var userId = 1;
         var communityId = 1;
         String content = informationForm.getInformation();
         boolean flag = false;
@@ -389,10 +418,18 @@ public class KuchannelController {
     @GetMapping("/review-detail")
     public String reviewDetail(@RequestParam("reviewId") Integer reviewId,
                                @RequestParam("threadId") Integer threadId,
+                               @RequestParam(value = "noticeId", required = false) Integer noticeId,
+                               @RequestParam(value = "flag", required = false) Boolean readFlag,
                                Model model) {
+
+        //スレッドIDをもとにコミュニティIDを入手
+        var thread = kuchannelService.getThread(threadId);
 
         //レビューIDを元にreviewsテーブルから情報を取得する
         var review = kuchannelService.findReview(reviewId);
+
+        //ユーザーIDとコミュニティIDをもとにニックネームを入手
+        var reviewAccount = kuchannelService.getAccountInfoNick(review.userId(), thread.getCommunity_id());
 
         //データベースからレビューの画像情報を取得する
         var reviewImages = kuchannelService.getReviewImages(reviewId);
@@ -400,13 +437,27 @@ public class KuchannelController {
         //データベースからレビューの返信情報を取得する
         var reviewReplies = kuchannelService.getReviewReply(reviewId);
 
+        for (ReviewReply reviewReply : reviewReplies) {
+            //ユーザーIDとコミュニティIDをもとにニックネームを入手
+            var replyAccount = kuchannelService.getAccountInfoNick(reviewReply.getUserId(), thread.getCommunity_id());
+
+            reviewReply.setUserName(replyAccount.getName());
+
+        }
+
         //データベースからレビューのいいね件数を取得する
         var goodCount = kuchannelService.getGoodReview(reviewId);
 
-        model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
+        model.addAttribute("review", new ReviewElementAll(review.userId(), reviewAccount.getName(), review.reviewId(), review.title(),
                 review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
         model.addAttribute("reviewId", reviewId);
         model.addAttribute("threadId", threadId);
+
+        //お知らせ画面からの遷移か判断する, 未読フラッグがtrueならfalseに変える
+        if ((noticeId != null) && (readFlag)) {
+            //お知らせテーブルの未読フラッグをアップデート
+            kuchannelService.readNotice(noticeId);
+        }
 
         return "review-detail";
 
