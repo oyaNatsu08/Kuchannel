@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>口ゃんねる</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link href="css/mypage.css" rel="stylesheet">
+    <link href="/css/mypage.css" rel="stylesheet">
     <style>
         .notice-list {
             margin: 0 auto;
@@ -54,6 +54,7 @@
                     </th:block>
                 </div>
 
+
                 <div v-if="inquiryView">
                     <th:block th:each="inquiry : ${inquires}">
                         <a th:href="@{/inquiry(id=${inquiry.id})}">
@@ -78,6 +79,7 @@
                 return {
                     replyView: true,
                     inquiryView: false,
+                    noticeList:[],
                 }
             },
             methods: {
@@ -89,6 +91,11 @@
                     this.inquiryView = true;
                     this.replyView = false;
                 },
+            },
+            created: function (){
+                console.log('created')
+                this.noticeList =`[[${notices}]]`
+                console.log(this.noticeList);
             },
         }).mount('#app2')
     </script>

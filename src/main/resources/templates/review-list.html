@@ -58,7 +58,7 @@
 
   <div id="app0">
 
-    <th:block th:insert="~{common/header}"></th:block>
+    <th:block th:insert="common/header"></th:block>
 
   </div>
 
@@ -160,11 +160,13 @@
       <button type="button" v-if="review.userId == userId" @click="showEditPopup(review)">編集</button>
       <button type="button" @click="openReply(review.reviewId)">返信</button>
 
-      <form action="/review-detail" method="get" style="margin-top: 20px;">
+      <!-- <form action="/review-detail" method="get" style="margin-top: 20px;">
         <input type="hidden" name="reviewId" :value="review.reviewId" />
         <input type="hidden" name="threadId" th:value="${threadId}" />
         <button type="submit">詳細画面へ</button>
-      </form>
+      </form> -->
+
+      <a :href="getReviewDetailLink(review.reviewId)">詳細画面へ</a>
       <!-- いいねボタン -->
       <div>
         <button @click="goodDeal(review.reviewId)">いいね</button>
@@ -382,7 +384,7 @@
         },
         //ユーザーのレビュー一覧に遷移
         getUserReviewLink(userId) {
-          return `/user-review/${userId}`;
+          return `/kuchannel/user-review/${userId}`;
         },
         //いいねボタン押された時の挙動
         goodDeal(reviewId) {
@@ -460,6 +462,16 @@
             }
             );
         },
+
+        getReviewDetailLink(reviewId){
+          const currentURL = window.location.href;
+          console.log(currentURL);
+          const returnURL =`${currentURL}/${reviewId}`
+          console.log(returnURL);
+          return returnURL;
+
+        },
+        
 
         //スレッド一覧へ戻る
         backThread() {

@@ -13,6 +13,8 @@ public class MyReview {
     private String threadTitle;
     private String communityName;
     private LocalDate createDate;
-
+    private Integer communityId;
+    private String communityUrl;
+    private Integer threadId;
 
 }

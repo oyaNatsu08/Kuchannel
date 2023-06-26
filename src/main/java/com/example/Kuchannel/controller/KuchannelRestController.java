@@ -1,10 +1,17 @@
 package com.example.Kuchannel.controller;
 
+import com.example.Kuchannel.KuchannelApplication;
+import com.example.Kuchannel.entity.*;
+import com.example.Kuchannel.entity.*;
+import com.example.Kuchannel.form.ThreadAddForm;
+import com.example.Kuchannel.form.ReviewUpdateForm;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -130,7 +137,7 @@ public class KuchannelRestController {
             byte[] bytes = image.getBytes();
             encode = Base64.getEncoder().encodeToString(bytes);
         }
-        
+
         //System.out.println("ハッシュタグ" + hashtag);
 
         if ("null".equals(hashtag)) {
@@ -143,6 +150,7 @@ public class KuchannelRestController {
         return result;
     }
 
+    //スレッド情報編集
     @PutMapping("/updateThread/{id}")
     public int threadUpdate(@RequestParam("threadName") String threadName,
                             @RequestParam("furigana") String furigana,
@@ -173,6 +181,7 @@ public class KuchannelRestController {
 
     }
 
+    //管理者用。メンバー編集用
     @PutMapping("/memberSetting/{communityId}")
     public int memberSetting(@PathVariable("communityId") Integer communityId,@RequestBody List<AccountInformation> updateInfo){
         //System.out.println(updateInfo);
@@ -180,6 +189,14 @@ public class KuchannelRestController {
         return result;
     }
 
+    @PutMapping("updateCommunityName/{communityId}/{newCommunityName}")
+    public int updateCommunityName(@PathVariable("communityId") Integer communityId,@PathVariable("newCommunityName") String newCommunityName){
+        System.out.println(newCommunityName);
+        var result =kuchannelService.updateCommunityName(communityId,newCommunityName);
+        return result;
+    }
+
+    //管理者用。コミュニティを消すよう。
     @DeleteMapping("/deleteCommunity/{communityId}")
     public int deleteCommunity(@PathVariable("communityId")Integer communityId){
         var result =kuchannelService.deleteCommunity(communityId);
@@ -230,9 +247,7 @@ public class KuchannelRestController {
             //データベースからレビューのいいね件数を取得する
             var goodCount = kuchannelService.getGoodReview(rev.reviewId());
 
-            //System.out.println("ニックネーム" + reviewAccount.getName());
-
-            reviews.add(new ReviewElementAll(rev.userId(), reviewAccount.getName(), rev.reviewId(), rev.title(),
+            reviews.add(new ReviewElementAll(rev.userId(), rev.userName(), rev.reviewId(), rev.title(),
                     rev.review(), rev.createDate(), reviewImages, reviewReplies, goodCount));
 
         }
@@ -345,9 +360,9 @@ public class KuchannelRestController {
     }
 
     //人気のハッシュタグを取得
-    @GetMapping("/getHashtags")
-    public List<PopularHashTag> getHashtags() {
-        var hashtags = kuchannelService.getHashtags();
+    @GetMapping("/getPopularHashtags/{communityId}")
+    public List<PopularHashTag> getHashtags(@PathVariable("communityId")Integer communityId) {
+        var hashtags = kuchannelService.getPopularHashtags(communityId);
 
         for (var hashtag : hashtags) {
             hashtag.setTagName("#" + hashtag.getTagName());
@@ -358,12 +373,33 @@ public class KuchannelRestController {
         return hashtags;
     }
 
+    //ハッシュタグ全件を取得
+    @GetMapping("/getAllHashtags/{communityId}")
+    public List<HashTag> getAllHashtags(@PathVariable("communityId")Integer communityId) {
+        var hashtags = kuchannelService.getAllHashtags(communityId);
+        System.out.println("ハッシュタグ全件：" + hashtags);
+        return hashtags;
+    }
+
     //キーワードでスレッドを絞り込む
     @GetMapping("/keywordThreads")
     public List<CommunityThread> keyThreads(@RequestParam("communityId") Integer communityId,
                                             @RequestParam("keyword") String keyword) {
         //keywordを空白(半角または全角)ごとに分けて格納
-        String[] keywords = keyword.split("[\\s\\p{Z}]");
+        String[] splittedKeywords = keyword.split("[\\s\\p{Z}]");
+        //"#"と"＃"を除いたキーワードを格納。
+        List<String> filteredKeywords = new ArrayList<>();
+        for (String key : splittedKeywords) {
+            if (!key.isEmpty() && !key.startsWith("#") && !key.startsWith("＃")) {
+                filteredKeywords.add(key);
+            }
+        }
+        String[] keywords = filteredKeywords.toArray(new String[0]);
+        //もし検索欄に何も書いていなければ全件取得
+        if(keywords.length == 0){
+            return kuchannelService.communityThreads(communityId);
+
+        }
 
         //キーワードとスレッドタイトルであいまい検索
         var threads = kuchannelService.findKeyThread(communityId, keywords);
