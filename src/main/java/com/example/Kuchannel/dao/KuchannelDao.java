@@ -804,9 +804,9 @@ public class KuchannelDao {
     /*------------------------------------*/
 
     //プロフィール編集（start）
-    public ProfileEditRecord edit(String loginId, String name, String password) {
+    public ProfileEditRecord edit(String loginId, String name, String password, String image) {
         //更新のSQL文
-        String sql = "UPDATE users SET name = :name, password = :password WHERE login_id = :loginId";
+        String sql = "UPDATE users SET name = :name, password = :password, image_path = :image WHERE login_id = :loginId";
 
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("name", name);
@@ -815,10 +815,11 @@ public class KuchannelDao {
         //System.out.println(password);
         param.addValue("loginId",loginId);
         //System.out.println(loginId);
+        param.addValue("image", image);
         try {
             jdbcTemplate.update(sql, param);
 
-            ProfileEditRecord editRecord = new ProfileEditRecord(loginId,name, password);
+            ProfileEditRecord editRecord = new ProfileEditRecord(loginId, name, password);
             return editRecord;
         }catch (DataAccessException  e){
             e.printStackTrace();

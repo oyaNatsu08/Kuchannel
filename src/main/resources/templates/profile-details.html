@@ -9,39 +9,68 @@
 </head>
 
 <body>
-    <div id="app0">
+    <div id="app">
         <th:block th:insert="common/header"></th:block>
+
+        <div class="login-form">
+            <form action="/kuchannel/profile-edit" method="get">
+                <div>
+                    <label>名前</label>
+                    <span type="text" name="name" th:text="${profile.name}" readonly class="base-text"></span>
+                    <input type="hidden" name="name" th:value="${profile.name}">
+                </div>
+                <div>
+                    <label>ユーザーID</label>
+                    <span type="text" name="loginId" th:text="${profile.loginId}" readonly class="base-text"></span>
+                    <input type="hidden" name="loginId" th:value="${profile.loginId}">
+                </div>
+                <div>
+                    <label>パスワード</label>
+                    <span type="text" name="password" th:text="${profile.password}" readonly class="base-text"></span>
+                    <input type="hidden" name="password" th:value="${profile.password}">
+                </div>
+                <div>
+                    <label>プロフィール画像</label>
+                    <img :src="'data:image/png;base64,' + userImage" class="base-text"
+                        style="width: 50px; height: 50px;">
+                </div>
+
+                <button type="submit" th:text="プロフィール編集"></button>
+            </form>
+
+        </div>
+
     </div>
 
-    <div class="login-form">
-        <form action="/kuchannel/profile-edit" method="get">
-            <div>
-                <label>名前</label>
-                <span type="text" name="name" th:text="${profile.name}" readonly class="base-text"></span>
-                <input type="hidden" name="name" th:value="${profile.name}">
-            </div>
-            <div>
-                <label>ユーザーID</label>
-                <span type="text" name="loginId" th:text="${profile.loginId}" readonly class="base-text"></span>
-                <input type="hidden" name="loginId" th:value="${profile.loginId}">
-            </div>
-            <div>
-                <label>パスワード</label>
-                <span type="text" name="password" th:text="${profile.password}" readonly class="base-text"></span>
-                <input type="hidden" name="password" th:value="${profile.password}">
-            </div>
-            <div>
-                <label>プロフィール画像</label>
-                <span type="text" name="imagePath" th:text="${profile.imagePath}" readonly class="base-text"></span>
-                <input type="hidden" name="imagePath" th:value="${profile.imagePath}">
-            </div>
+    <!-- <script src="/js/base.js"></script> -->
 
-            <button type="submit" th:text="プロフィール編集"></button>
-        </form>
+    <script>
 
-    </div>
+        const { createApp } = Vue
 
-    <script src="/js/base.js"></script>
+        createApp({
+            data() {
+                return {
+                    showMenu: false,
+                    userImage: '',
+                }
+
+            },
+
+            methods: {
+                toggleMenu() {
+                    this.showMenu = !this.showMenu;
+                },
+
+            },
+
+            created: function () {
+                this.userImage = `[[ ${image} ]]`;
+            }
+
+        }).mount('#app')
+
+    </script>
 
 </body>
 

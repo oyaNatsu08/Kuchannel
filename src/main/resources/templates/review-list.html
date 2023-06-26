@@ -56,13 +56,14 @@
 
 <body>
 
-  <div id="app0">
+<!--  <div id="app0">-->
 
-    <th:block th:insert="common/header"></th:block>
+<!--    <th:block th:insert="common/header"></th:block>-->
 
-  </div>
+<!--  </div>-->
 
   <div id="app">
+    <th:block th:insert="common/header"></th:block>
     <h2>スレッド名：{{ updateThreadTitle }}</h2>
 
     <a :href="backThread()">スレッド一覧へ戻る</a>
@@ -202,9 +203,10 @@
 
   </div>
 
-  <script src="/js/base.js"></script>
+<!--  <script src="/js/base.js"></script>-->
 
   <script>
+const { createApp } = Vue
 
     createApp({
       data() {
@@ -245,6 +247,9 @@
           userId: '',
 
           community: [],
+
+          showMenu: false,
+                    userImage: '',
 
         }
       },
@@ -491,6 +496,10 @@
             );
         },
 
+        toggleMenu() {
+                    this.showMenu = !this.showMenu;
+                },
+
       },
       created: function () {
         // this.threadId = `[[ ${threadId} ]]`;
@@ -506,6 +515,8 @@
         this.updateThreadHashtags = `[[ ${thread.hashtags} ]]`;
 
         this.userId = `[[ ${userId} ]]`;
+
+        this.userImage = `[[ ${image} ]]`;
 
       },
     }).mount('#app')

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SimpleTimeZone;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Controller
 public class KuchannelController {
@@ -63,9 +64,9 @@ public class KuchannelController {
             model.addAttribute("error", "IDまたはパスワードが不正です");
             return "login";
         }
+
         //セッション
         session.setAttribute("user", user);
-        model.addAttribute("image", user.imagePath());
 
         return "redirect:/kuchannel/mypage";
 
@@ -92,6 +93,8 @@ public class KuchannelController {
         var user_id = userData.loginId();
 
         var list = model.addAttribute("profile", kuchannelService.detail(user_id));
+
+        model.addAttribute("image", userData.imagePath());
         return "/profile-details";
     }
 
@@ -121,6 +124,8 @@ public class KuchannelController {
 
         File[] files = directory.listFiles();
 
+        System.out.println(files);
+
         List<File> imageFiles = new ArrayList<>();
         for (File file : files) {
             if (file.isFile() && isImageFile(file)) {
@@ -128,7 +133,8 @@ public class KuchannelController {
             }
         }
 
-        int randomIndex = new Random().nextInt(imageFiles.size());
+        int randomIndex = ThreadLocalRandom.current().nextInt(imageFiles.size()) + 1;
+        System.out.println(randomIndex);
         File randomImageFile = imageFiles.get(randomIndex);
 
         byte[] bytes = Files.readAllBytes(randomImageFile.toPath());
@@ -152,10 +158,13 @@ public class KuchannelController {
     //マイページの表示
     @GetMapping("/kuchannel/mypage")
     public String myPage(@ModelAttribute("UserForm") UserForm userForm,
-                         @ModelAttribute("communityAdd") CommunityAddForm communityAddForm) {
+                         @ModelAttribute("communityAdd") CommunityAddForm communityAddForm,
+                         Model model) {
         if (session.getAttribute("user") == null) {
             return "login";
         } else {
+            var user = (UserRecord)session.getAttribute("user");
+            model.addAttribute("image", user.imagePath());
             return "my-page";
         }
     }
@@ -648,13 +657,15 @@ public class KuchannelController {
     public String profileUpdate(@RequestParam("name") String name,
                                 @RequestParam("loginId") String loginId,
                                 @RequestParam("password") String password,
-                                @RequestParam("imagePath") String imagePath,
                                 @ModelAttribute("EditForm")EditForm editForm,
                                 Model model){
 
-        UserRecord user = new UserRecord(null, loginId, name, password, imagePath);
+        var sessionUser = (UserRecord)session.getAttribute("user");
+        UserRecord user = new UserRecord(null, loginId, name, password, sessionUser.imagePath());
 
         model.addAttribute("user", user);
+        model.addAttribute("loginId", loginId);
+        model.addAttribute("image", sessionUser.imagePath());
 
         return "profile-edit";
     }
@@ -662,19 +673,41 @@ public class KuchannelController {
     @PostMapping("/kuchannel/profile-edit")
     public String profileUpdate(@Validated @ModelAttribute("EditForm") EditForm editForm,
                                 BindingResult bindingResult,
-                                Model model){
+                                @RequestParam("loginId") String loginId,
+                                @RequestParam("updateImage") MultipartFile updateImage,
+                                Model model) throws IOException {
+
+        var user = (UserRecord) session.getAttribute(("user"));
+        model.addAttribute("image", user.imagePath());
+
         //バリデーション
         if(bindingResult.hasErrors()){
+            model.addAttribute("image", user.imagePath());
             return "profile-edit";
         }
-        String loginId = editForm.getLoginId();
+
+        String encode = null;
+
+        if (updateImage != null) {
+            byte[] bytes = updateImage.getBytes();
+            encode = Base64.getEncoder().encodeToString(bytes);
+        }
+
+        //String loginId = editForm.getLoginId();
         String name = editForm.getName();
         String password = editForm.getPassword();
-        kuchannelService.edit(loginId, name, password);
+        kuchannelService.edit(loginId, name, password, encode);
         UserRecord userData = (UserRecord) session.getAttribute("user");
         var user_id = userData.loginId();
 
-        model.addAttribute("profile", kuchannelService.detail(user_id));
+        var profile = kuchannelService.detail(user_id);
+
+        //セッション情報を更新
+        var newSession = kuchannelService.findUser(userData.id());
+        session.setAttribute("user", newSession);
+
+        model.addAttribute("profile", profile);
+        model.addAttribute("image", newSession.imagePath());
 
         return "/profile-details";
     }

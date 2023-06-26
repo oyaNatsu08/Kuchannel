@@ -20,11 +20,13 @@
 
 <body>
 
-    <div id="app0">
-        <th:block th:insert="common/header"></th:block>
-    </div>
+<!--    <div id="app0">-->
+<!--        <th:block th:insert="common/header"></th:block>-->
+<!--    </div>-->
 
-    <div id="app2">
+    <div id="app">
+
+        <th:block th:insert="common/header"></th:block>-->
 
         <div class="tab-container">
             <h1>お知らせ</h1>
@@ -70,9 +72,11 @@
 
     </div>
 
-    <script src="/js/base.js"></script>
+<!--    <script src="/js/base.js"></script>-->
 
     <script>
+
+const { createApp } = Vue
 
         createApp({
             data() {
@@ -80,6 +84,8 @@
                     replyView: true,
                     inquiryView: false,
                     noticeList:[],
+                    showMenu: false,
+                    userImage: '',
                 }
             },
             methods: {
@@ -91,13 +97,17 @@
                     this.inquiryView = true;
                     this.replyView = false;
                 },
+                toggleMenu() {
+                    this.showMenu = !this.showMenu;
+                },
             },
             created: function (){
                 console.log('created')
                 this.noticeList =`[[${notices}]]`
                 console.log(this.noticeList);
+                this.userImage = `[[ ${image} ]]`;
             },
-        }).mount('#app2')
+        }).mount('#app')
     </script>
 
 </body>

@@ -9,7 +9,7 @@
 
 <body>
 
-<div id="app0">
+<div id="app">
 
   <th:block th:insert="common/header"></th:block>
 
@@ -23,10 +23,32 @@
 
 </div>
 
-<script src="/js/base.js"></script>
+<!--<script src="/js/base.js"></script>-->
 
 <script>
+const { createApp } = Vue
 
+        createApp({
+            data() {
+                return {
+                    showMenu: false,
+                    userImage: '',
+                }
+
+            },
+
+            methods: {
+                toggleMenu() {
+                    this.showMenu = !this.showMenu;
+                }
+
+            },
+
+            created: function () {
+                this.userImage = `[[ ${image} ]]`;
+            }
+
+        }).mount('#app')
 </script>
 
 </body>

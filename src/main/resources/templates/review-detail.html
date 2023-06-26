@@ -32,11 +32,12 @@
 </head>
 
 <body>
-    <div id="app0">
-        <th:block th:insert="common/header"></th:block>
-    </div>
+<!--    <div id="app0">-->
+<!--        <th:block th:insert="common/header"></th:block>-->
+<!--    </div>-->
 
     <div id="app">
+        <th:block th:insert="common/header"></th:block>
         <div class="review">
             <h3>投稿者：<a th:href="@{/kuchannel/user-review/{userId}(userId=${review.userId})}">[[ ${review.userName} ]]</a></h3>
             <p>投稿日：[[ ${review.createDate} ]]</p>
@@ -86,8 +87,10 @@
 
     </div>
 
-    <script src="/js/base.js"></script>
+<!--    <script src="/js/base.js"></script>-->
     <script>
+    const { createApp } = Vue
+
         createApp({
             data() {
                 return {
@@ -95,6 +98,8 @@
                     replies: [],
                     replyContent: '',
                     reviewId: 0,
+                    showMenu: false,
+                    userImage: '',
                 }
             },
             methods: {
@@ -127,9 +132,13 @@
                 getUserReviewLink(userId) {
                     return `/user-review/${userId}`;
                 },
+                toggleMenu() {
+                    this.showMenu = !this.showMenu;
+                },
             },
             created: function () {
                 this.reviewId = `[[ ${reviewId} ]]`;
+                this.userImage = `[[ ${image} ]]`;
             },
         }).mount('#app')
     </script>

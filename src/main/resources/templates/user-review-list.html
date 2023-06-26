@@ -30,9 +30,9 @@
 
 <body>
 
-  <div id="app0">
+  <div id="app">
     <th:block th:insert="common/header"></th:block>
-  </div>
+
 
   <div class="review-container">
 
@@ -65,11 +65,37 @@
 
   </div>
 
-  <script src="/js/base.js"></script>
+  </div>
+
+<!--  <script src="/js/base.js"></script>-->
 
   <script>
 
-  </script>
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    showMenu: false,
+                    userImage: '',
+                }
+
+            },
+
+            methods: {
+                toggleMenu() {
+                    this.showMenu = !this.showMenu;
+                },
+
+            },
+
+            created: function () {
+                this.userImage = `[[ ${image} ]]`;
+            }
+
+        }).mount('#app')
+
+    </script>
 
 </body>
 

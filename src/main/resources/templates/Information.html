@@ -2,11 +2,14 @@
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>お問い合わせ</title>
+  <title>口ゃんねる</title>
   <link href="/css/commons.css" rel="stylesheet">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
+<div id="app">
 
+  <th:block th:insert="common/header"></th:block>
 <div class="login-form">
   <h1>お問い合わせ</h1>
   <form action="/kuchannel/Information" method="post" th:object="${informationForm}">
@@ -21,5 +24,33 @@
 
   </form>
 </div>
+</div>
+
+<script>
+const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    showMenu: false,
+                    userImage: '',
+                }
+
+            },
+
+            methods: {
+                toggleMenu() {
+                    this.showMenu = !this.showMenu;
+                },
+
+            },
+
+            created: function () {
+                this.userImage = `[[ ${image} ]]`;
+            }
+
+        }).mount('#app')
+</script>
+
 </body>
 </html>

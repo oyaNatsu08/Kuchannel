@@ -13,13 +13,13 @@
 
 <body>
 
-  <div id="app0">
-    <th:block th:insert="common/header"></th:block>
-  </div>
+<!--  <div id="app0">-->
+<!--    <th:block th:insert="common/header"></th:block>-->
+<!--  </div>-->
 
   <div id="app">
 
-
+    <th:block th:insert="common/header"></th:block>
 
     <div class="pagetop">
       <h1>{{communityName}}へようこそ！</h1>
@@ -308,10 +308,10 @@
   </div>
   </div>
 
-  <script src="/js/base.js"></script>
+<!--  <script src="/js/base.js"></script>-->
 
   <script>
-    // const { createApp } = Vue;
+    const { createApp } = Vue;
 
     createApp({
       data() {
@@ -381,6 +381,9 @@
           isaddThreadHashtagsSuggest: false,
           suggestions: [], // サジェストされるハッシュタグ
           existingHashTags: [],
+
+          showMenu: false,
+                    userImage: '',
 
 
         }
@@ -831,9 +834,11 @@
         getReviewLink(threadId) {
           const link = this.communityUrl.replace("http://localhost:8080/", "");
           return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
-        }
+        },
 
-
+      toggleMenu() {
+                    this.showMenu = !this.showMenu;
+                },
 
 
       },
@@ -850,6 +855,7 @@
         this.getPopularHashtags();
         this.getAllHashtags();
 
+this.userImage = `[[ ${image} ]]`;
 
       }
 
