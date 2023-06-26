@@ -13,14 +13,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.util.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SimpleTimeZone;
-import java.util.UUID;
 
 @Controller
 public class KuchannelController {
@@ -56,8 +55,10 @@ public class KuchannelController {
             model.addAttribute("error", "IDまたはパスワードが不正です");
             return "login";
         }
+
         //セッション
         session.setAttribute("user", user);
+        model.addAttribute("image", user.imagePath());
 
         return "my-page";
 
@@ -99,7 +100,7 @@ public class KuchannelController {
     @PostMapping("create-user")
     public String accountAdd(@Validated @ModelAttribute("CreateForm") CreateForm createForm,
                              BindingResult bindingResult,
-                             Model model) {
+                             Model model) throws IOException {
         //バリデーション
         if (bindingResult.hasErrors()) {
             return "create-user";
@@ -107,10 +108,36 @@ public class KuchannelController {
         String loginId = createForm.getLoginId();
         String password = createForm.getPassword();
         String name = createForm.getName();
-        String image_path = createForm.getImage_path();
-        CreateRecord create = new CreateRecord(loginId, password, name, image_path);
-        kuchannelService.create(loginId, password, name, image_path);
+        //String image_path = createForm.getImage_path();
+
+        File directory = new File("src/main/resources/static/images/icons");
+
+        File[] files = directory.listFiles();
+
+        List<File> imageFiles = new ArrayList<>();
+        for (File file : files) {
+            if (file.isFile() && isImageFile(file)) {
+                imageFiles.add(file);
+            }
+        }
+
+        int randomIndex = new Random().nextInt(imageFiles.size());
+        File randomImageFile = imageFiles.get(randomIndex);
+
+        byte[] bytes = Files.readAllBytes(randomImageFile.toPath());
+
+        String encode = Base64.getEncoder().encodeToString(bytes);
+
+        CreateRecord create = new CreateRecord(loginId, password, name, encode);
+        kuchannelService.create(loginId, password, name, encode);
         return "redirect:/login";
+    }
+
+    // 画像ファイルの拡張子を確認するメソッド
+    private boolean isImageFile(File file) {
+        String name = file.getName();
+        String extension = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
+        return extension.equals("jpg") || extension.equals("jpeg") || extension.equals("png");
     }
 
     /*----------------------------------------*/

@@ -7,14 +7,24 @@
   <link href="css/mypage.css" rel="stylesheet">
   <link href="css/base.css" rel="stylesheet">
   <link href="css/popup.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </head>
 
 <body>
-  <div id="app0">
-    <th:block th:insert="common/header"></th:block>
-  </div>
-  
+
   <div id="app">
+
+    <div style="display: flex;">
+      <h1><a th:href="@{/mypage}" class="a-tag">口ゃんねる(口コミ)</a></h1>
+      <a th:href="@{/notice}"><img src="/images/bell.png" alt="通知" style="width: 50px; height: 50px;"></a>
+      <img :src="'data:image/png;base64,' + userImage" @click="toggleMenu" style="width:50px; height: 50px;">
+      <ul v-if="showMenu">
+        <li><a th:href="@{/mypage}">マイページへ</a></li>
+        <li><a th:href="@{/profile-details}">プロフィール閲覧</a></li>
+        <li><a th:href="@{/logout}">ログアウト</a></li>
+      </ul>
+    </div>
 
     <div class="tab-container">
       <div class="tab-buttons">
@@ -124,10 +134,10 @@
 
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
-  <script src="/js/base.js"></script>
+  <!-- <script src="/js/base.js"></script> -->
   <script>
 
-    // const { createApp } = Vue
+    const { createApp } = Vue
 
     createApp({
       data() {
@@ -142,6 +152,8 @@
           myThreads: [],
           myReviews: [],
           isPopupCommunity: false,
+          userImage: '',
+          showMenu: false,
         }
 
       },
@@ -151,33 +163,36 @@
         displayTabJudge(tabNum) {
           console.log('tabNum' + tabNum);
 
-          for (let i = 1; i < 4; i++) { 
+          for (let i = 1; i < 4; i++) {
             this['tab' + i] = false;
-            console.log('isPopUo'+ this.isPopupCommunity)
+            console.log('isPopUo' + this.isPopupCommunity)
             document.getElementById(`btn${i}`).classList.remove('active')
-          } 
-          this['tab' + tabNum] = true; 
+          }
+          this['tab' + tabNum] = true;
           selectedTab = document.getElementById(`btn${tabNum}`)
-          selectedTab.className += " active" 
+          selectedTab.className += " active"
         },
         //所属しているコミュニティを取得 
-        getBelongingCommunities(){ this.belongingCommunities=[]; axios.get('/getBelongingCommunities')
-        .then(res => {
-          for (let i = 0; i < res.data.length; i++) {
-            if (res.data[i].flag === true) { this.belongingCommunities.push(res.data[i]); } 
-          }
+        getBelongingCommunities() {
+          this.belongingCommunities = []; axios.get('/getBelongingCommunities')
+            .then(res => {
+              for (let i = 0; i < res.data.length; i++) {
+                if (res.data[i].flag === true) { this.belongingCommunities.push(res.data[i]); }
+              }
             });
         },
         //退会処理 
-          withdrawal(communityId){ axios.request({ url: '/withdrawal'
-          , method: 'post', data: communityId, headers: { 'Content-Type': 'text/plain' }
-        }).then(res => {
-          this.getBelongingCommunities();
-        });
-          },
+        withdrawal(communityId) {
+          axios.request({
+            url: '/withdrawal'
+            , method: 'post', data: communityId, headers: { 'Content-Type': 'text/plain' }
+          }).then(res => {
+            this.getBelongingCommunities();
+          });
+        },
 
         //ニックネームの更新
-        updateNickName(inputNickName, communityId, userId, communityName){
+        updateNickName(inputNickName, communityId, userId, communityName) {
           const updateInfo = {
             communityId: communityId,
             userId: userId,
@@ -192,7 +207,7 @@
         },
 
         //建てたスレッドを取得
-        getMyThreads(){
+        getMyThreads() {
           this.myThreads = [];
           axios.get('/getMyThreads')
             .then(res => {
@@ -202,7 +217,7 @@
         },
 
         //投稿したレビューを取得
-        getMyReviews(){
+        getMyReviews() {
           this.myReviews = [];
           axios.get('/getMyReviews')
             .then(res => {
@@ -243,17 +258,23 @@
           return `community/thread-list/${communityId}`;
         },
 
-    },
+        toggleMenu() {
+          this.showMenu = !this.showMenu;
+        },
 
-    created: function() {
-      console.log("created");
+      },
 
-      this.getBelongingCommunities();
-      this.getMyThreads();
-      this.getMyReviews();
-    }
+      created: function () {
+        console.log("created");
 
-      }).mount('#app')
+        this.getBelongingCommunities();
+        this.getMyThreads();
+        this.getMyReviews();
+        this.userImage = `[[ ${image} ]]`;
+
+      }
+
+    }).mount('#app')
 
   </script>
 

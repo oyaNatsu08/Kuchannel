@@ -652,11 +652,11 @@ public class KuchannelDao {
     }
 
     //人気のハッシュタグを取得する
-    public List<HashTagRecord> getHashtags() {
+    public List<PopularHashTag> getHashtags() {
 
         var list = jdbcTemplate.query("SELECT h.id, h.tag_name, COUNT(*) AS count FROM hashtags h " +
                 "JOIN thread_hashtag th ON h.id = th.hashtag_id GROUP BY h.id " +
-                "ORDER BY COUNT(*) DESC LIMIT 5", new DataClassRowMapper<>(HashTagRecord.class));
+                "ORDER BY COUNT(*) DESC LIMIT 5", new DataClassRowMapper<>(PopularHashTag.class));
 
         return list;
 
@@ -705,10 +705,10 @@ public class KuchannelDao {
     }
 
     //キーワードとレビューの本文、タイトルであいまい検索
-    public List<CommunityThread> findKeyReview(Integer communityId, String[] keywords) {
+    public List<FindThread> findKeyThreadReview(Integer communityId, String[] keywords) {
 
-        List<CommunityThread> lists = new ArrayList<>();
-        Set<CommunityThread> threadSet = new HashSet<>();
+        List<FindThread> lists = new ArrayList<>();
+        Set<FindThread> threadSet = new HashSet<>();
         MapSqlParameterSource param = new MapSqlParameterSource();
 
         param.addValue("communityId", communityId);
@@ -716,7 +716,7 @@ public class KuchannelDao {
         for (String key : keywords) {
             param.addValue("key", "%" + key + "%");
 
-            var list = jdbcTemplate.query("select * " +
+            var list = jdbcTemplate.query("select t.id AS threadId, t.user_id, t.community_id, t.title, t.genre, good_count, t.image_path " +
                             "from threads t\n" +
                             "left join (\n" +
                             "  select thread_id, count(*) good_count\n" +
@@ -736,12 +736,38 @@ public class KuchannelDao {
                             "join reviews r on t.id = r.thread_id " +
                             "where (r.title like :key or r.review like :key) " +
                             "and t.community_id = :communityId ORDER BY t.id", param,
-                            new DataClassRowMapper<>(CommunityThread.class));
+                            new DataClassRowMapper<>(FindThread.class));
 
             //listをlistsに詰めなおす
             threadSet.addAll(list);
 
-            //System.out.println("review検索" + list);
+        }
+
+        lists.addAll(threadSet);
+        return lists;
+    }
+
+    //キーワードとレビューの本文、タイトルであいまい検索
+    public List<FindReview> findKeyReview(Integer threadId, String[] keywords) {
+
+        List<FindReview> lists = new ArrayList<>();
+        Set<FindReview> threadSet = new HashSet<>();
+        MapSqlParameterSource param = new MapSqlParameterSource();
+
+        param.addValue("threadId", threadId);
+
+        for (String key : keywords) {
+            param.addValue("key", "%" + key + "%");
+
+            var list = jdbcTemplate.query("SELECT r.id AS reviewId, t.id AS threadId, r.title AS reviewTitle, r.review AS reviewContent, " +
+                            "u.id AS userId, u.name AS userName FROM reviews r JOIN threads t ON r.thread_id = t.id " +
+                            "JOIN users u ON r.user_id = u.id " +
+                            "WHERE (r.title LIKE :key OR r.review LIKE :key) " +
+                            "AND t.id = :threadId ORDER BY r.id", param,
+                    new DataClassRowMapper<>(FindReview.class));
+
+            //listをlistsに詰めなおす
+            threadSet.addAll(list);
 
         }
 

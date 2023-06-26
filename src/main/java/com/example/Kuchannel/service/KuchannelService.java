@@ -182,7 +182,7 @@ public class KuchannelService {
     }
 
     //人気のハッシュタグを取得する
-    public List<HashTagRecord> getHashtags() {
+    public List<PopularHashTag> getHashtags() {
         return kuchannelDao.getHashtags();
     }
 
@@ -191,9 +191,14 @@ public class KuchannelService {
         return kuchannelDao.findKeyThread(communityId, keywords);
     }
 
-    //キーワードとレビューの本文、タイトルであいまい検索
-    public List<CommunityThread> findKeyReview(Integer communityId, String[] keywords) {
-        return kuchannelDao.findKeyReview(communityId, keywords);
+    //キーワードとレビューの本文、タイトルでスレッド情報をあいまい検索
+    public List<FindThread> findKeyThreadReview(Integer communityId, String[] keywords) {
+        return kuchannelDao.findKeyThreadReview(communityId, keywords);
+    }
+
+    //キーワードとレビューのレビューの本文、タイトルで、レビュー情報をあいまい検索
+    public List<FindReview> findKeyReview(Integer threadId, String[] keywords) {
+        return kuchannelDao.findKeyReview(threadId, keywords);
     }
 
     //お知らせテーブルの未読フラッグをアップデート

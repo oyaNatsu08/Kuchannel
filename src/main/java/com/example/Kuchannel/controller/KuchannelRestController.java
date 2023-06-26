@@ -1,30 +1,15 @@
 package com.example.Kuchannel.controller;
 
-import com.example.Kuchannel.KuchannelApplication;
-import com.example.Kuchannel.entity.*;
-import com.example.Kuchannel.entity.*;
-import com.example.Kuchannel.form.ThreadAddForm;
-import com.example.Kuchannel.form.ReviewUpdateForm;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.service.KuchannelService;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -170,7 +155,7 @@ public class KuchannelRestController {
 
         String encode = Base64.getEncoder().encodeToString(bytes);
 
-        var result =kuchannelService.threadUpdate(new ThreadAddForm(threadName, furigana, address, salesTime, genre, hashtag, communityId, encode) ,thread_id);
+        var result = kuchannelService.threadUpdate(new ThreadAddForm(threadName, furigana, address, salesTime, genre, hashtag, communityId, encode) ,thread_id);
 
         return result;
     }
@@ -348,8 +333,12 @@ public class KuchannelRestController {
 
     //人気のハッシュタグを取得
     @GetMapping("/getHashtags")
-    public List<HashTagRecord> getHashtags() {
+    public List<PopularHashTag> getHashtags() {
         var hashtags = kuchannelService.getHashtags();
+
+        for (var hashtag : hashtags) {
+            hashtag.setTagName("#" + hashtag.getTagName());
+        }
 
         //System.out.println("ハッシュタグ上位5件：" + hashtags);
 
@@ -372,15 +361,25 @@ public class KuchannelRestController {
 
     //キーワードでレビューからスレッドを絞り込む
     @GetMapping("/keywordReviews")
-    public List<CommunityThread> keyReviews(@RequestParam("communityId") Integer communityId,
+    public List<FindThreadReviews> keyReviews(@RequestParam("communityId") Integer communityId,
                                             @RequestParam("keyword") String keyword) {
         //keywordを空白(半角または全角)ごとに分けて格納
         String[] keywords = keyword.split("[\\s\\p{Z}]");
 
-        //キーワードとスレッドタイトルであいまい検索
-        var threads = kuchannelService.findKeyReview(communityId, keywords);
+        //キーワードとレビュータイトルと本文であいまい検索
+        var threads = kuchannelService.findKeyThreadReview(communityId, keywords);
 
-        return threads;
+        List<FindThreadReviews> threadReviews = new ArrayList<>();
+
+        for (var thread : threads) {
+            //System.out.println("スレッドID:" + thread.getThreadId() + "キーワード：" + keyword);
+            //スレッドごとにキーワード検索
+            var reviews = kuchannelService.findKeyReview(thread.getThreadId(), keywords);
+            threadReviews.add(new FindThreadReviews(thread.getThreadId(), thread.getUserId(), thread.getCommunityId(), thread.getTitle(),
+                    thread.getGenre(), thread.getGood_count(), thread.getImage_path(), reviews));
+        }
+
+        return threadReviews;
     }
 
     //スレッドIDをもとにコミュニティIDを取得する
