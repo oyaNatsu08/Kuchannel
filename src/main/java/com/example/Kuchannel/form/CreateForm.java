@@ -2,18 +2,22 @@ package com.example.Kuchannel.form;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 @Data
 public class CreateForm {
     private int id;
 
-    @NotEmpty
+    @NotEmpty(message = "ユーザーIDは必須です")
+    @Length (min = 1, max = 50)
     private String loginId;
 
-    //    @NotEmpty
+    @NotEmpty(message = "名前は必須です")
+    @Length (min = 1, max = 50)
     private String name;
 
-    @NotEmpty
+    @NotEmpty(message = "パスワードは必須です")
+    @Length (min = 1, max = 50)
     private String password;
 
 

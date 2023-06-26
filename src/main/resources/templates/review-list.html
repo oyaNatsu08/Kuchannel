@@ -6,58 +6,8 @@
   <title>レビュー一覧</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
-  <style>
-    body {
-      text-align: center;
-    }
+  <link href="/css/review-list.css" rel="stylesheet">
 
-    .review {
-      border: 1px solid black;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 10px;
-      margin-left: 20%;
-      margin-right: 20%;
-    }
-
-    .image-review-container {
-      display: flex;
-      margin-top: 10px;
-    }
-    .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(150, 150, 150, 0.5);
-    display: flex;
-    justify-content: center;
-    /* align-items: center; */
-    animation: fade-in 0.5s ease-in;
-}
-
-@keyframes fade-in {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-.popup {
-    width: 60%;
-    height: 80%;
-    text-align: center;
-    margin-top: 30px;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-}
-/*ここまでポップアップのcss*/
-  </style>
 </head>
 
 <body>
@@ -68,10 +18,12 @@
 
 </div>
 
-<div id="app">
-  <h2>登録したお店の情報</h2>
-  <hr>
 
+<div id="app">
+
+<div class="review-area">
+  <h2 style="padding: 10px;">登録したお店の情報</h2>
+  <hr>
   <div class="review">
     <p>
       タイトル：
@@ -111,7 +63,7 @@
     <button type="button" @click="showEditPopup(review)">編集</button>
 
   </div>
-
+</div>
   <!-- <p th:text="'クリックされたレビューは、' + ${review} + 'です。'"></p> -->
 
   <!-- 編集ポップアップ -->
@@ -149,6 +101,7 @@
       methods: {
         // レビュー投稿処理
         addReview() {
+
           console.log(this.reviewTitle, this.content);
           const formData = new FormData();
           formData.append("title", this.reviewTitle);

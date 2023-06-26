@@ -1,38 +1,48 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>プロフィール</title>
     <link href="/css/commons.css" rel="stylesheet">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
+
 <body>
     <div id="app0">
         <th:block th:insert="common/header"></th:block>
     </div>
 
     <div class="login-form">
-        <form method="post">
-        <div>
-            <label>名前</label>
-            <span type="text" name="name" th:text="${profile.name}" readonly class="base-text"></span>
-           </div>
-        <div>
-            <label>ユーザーID</label>
-            <span type="text" name="loginId" th:text="${profile.loginId}" readonly class="base-text"></span>
-      </div>
-      <div>
-            <label>パスワード</label>
-          <span type="text" name="password" th:text="${profile.password}" readonly class="base-text"></span>
-     </div>
-     <div>
-           <label>プロフィール画像</label>
-         <span type="text" name="imagePath" th:text="${profile.imagePath}" readonly class="base-text"></span>
-     </div>
+        <form action="/profile-edit" method="get">
+            <div>
+                <label class="base-text">名前：</label>
+                <span type="text" name="name" th:text="${profile.name}" readonly class="base-text"></span>
+                <input class="base-input" type="hidden" name="name" th:value="${profile.name}">
+            </div>
+            <div>
+                <label class="base-text">ユーザーID：</label>
+                <span type="text" name="loginId" th:text="${profile.loginId}" readonly class="base-text"></span>
+                <input class="base-input" type="hidden" name="loginId" th:value="${profile.loginId}">
+            </div>
+            <div>
+                <label class="base-text">パスワード：</label>
+                <span type="text" name="password" th:text="${profile.password}" readonly class="base-text"></span>
+                <input class="base-input" type="hidden" name="password" th:value="${profile.password}">
+            </div>
+            <div>
+                <label class="base-text-images">プロフィール画像：</label>
+                <span type="text" name="imagePath" th:text="${profile.imagePath}" readonly class="base-text"></span>
+                <input class="base-input" type="hidden" name="imagePath" th:value="${profile.imagePath}">
+            </div>
+
+            <button class="custom-btn" type="submit" th:text="プロフィール編集"></button>
         </form>
+
     </div>
 
     <script src="/js/base.js"></script>
 
 </body>
+
 </html>

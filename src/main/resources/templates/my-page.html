@@ -16,34 +16,35 @@
   <div id="app">
 
     <div class="tab-container">
-      <div class="tab-buttons">
-        <button class="tab-button active" @click="displayTabJudge(1)" id="btn1">コミュニティ一覧</button>
-        <button class="tab-button" @click="displayTabJudge(2)" id="btn2">自分のスレッド</button>
-        <button class="tab-button" @click="displayTabJudge(3)" id="btn3">自分のレビュー</button>
-      </div>
 
       <div class="tab-content-area">
+
+        <div class="tab-buttons">
+          <button class="tab-button active" @click="displayTabJudge(1)" id="btn1">コミュニティ一覧</button>
+          <button class="tab-button" @click="displayTabJudge(2)" id="btn2">自分のスレッド</button>
+          <button class="tab-button" @click="displayTabJudge(3)" id="btn3">自分のレビュー</button>
+        </div>
+
         <div id="tab1" v-if="tab1" class="tab-content">
 
-          <table>
-
+          <table class="community-table">
             <thead>
-              <tr>
+              <tr style="background-color: #FFA629; text-align: center;" >
                 <th>コミュニティ名</th>
-                <th>共有リンクのコピー</th>
+                <th style="width: 100px;">共有リンクのコピー</th>
                 <th>ニックネーム</th>
                 <th>退会する</th>
               </tr>
             </thead>
             <tbody>
-              <button type="button" @click="openPopupCommu">コミュニティ作成</button>
-              <tr v-for="com in belongingCommunities">
+              <button type="button" @click="openPopupCommu" style="margin-bottom: 10px; background-color: #FFA931; " class="tab-button">コミュニティ作成</button>
+              <tr v-for="com in belongingCommunities" class="community-tr">
                 <td>{{com.communityName}}</td>
-                <td><button type="button" @click="copy(com.communityId)">共有</button></td>
-                <td><input type="text" v-model="com.nickName"><button type="button"
-                    @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)">変更</button></button>
+                <td><button type="button" @click="copy(com.communityId)" >共有</button></td>
+                <td><input type="text" v-model="com.nickName" class="nickname-css"><button type="button"
+                    @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)" style="background-color: #f9dfb2;border: #755e36 solid 1px;">変更</button></button>
                 </td>
-                <td><button type="button" @click="withdrawal(com.communityId)">退会</button></td>
+                <td><button type="button" @click="withdrawal(com.communityId)" style="background-color: #FF3535;color: white;border: red;">退会</button></td>
               </tr>
             </tbody>
           </table>
@@ -77,15 +78,15 @@
           <table>
 
             <thead>
-              <tr>
+              <tr style="background-color: #FFA629; text-align: center;">
                 <th>スレッド名</th>
                 <th>コミュニティ名</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="thread in myThreads">
-                <td><a href="#">{{thread.threadTitle}}</a></td>
-                <td><a href="#">{{thread.communityName}}</a></td>
+                <td><a href="#" style="color: #0D99FF;">{{thread.threadTitle}}</a></td>
+                <td><a :href="getCommunityLink(thread.communityId)" style="color: #0D99FF;">{{thread.communityName}}</a></td>
               </tr>
 
             </tbody>
@@ -96,7 +97,7 @@
           <table>
 
             <thead>
-              <tr>
+              <tr style="background-color: #FFA629; text-align: center;">
                 <th>タイトル</th>
                 <th>本文</th>
                 <th>スレッド名</th>
@@ -106,7 +107,7 @@
             </thead>
             <tbody>
               <tr v-for="review in myReviews">
-                <td><a href="#">{{review.reviewTitle}}</a></td>
+                <td><a href="#" style="color: #0D99FF;">{{review.reviewTitle}}</a></td>
                 <td class="review-cell">{{review.review}}</td>
                 <td>{{review.threadTitle}}</td>
                 <td>{{review.communityName}}</td>
@@ -237,11 +238,15 @@
           this.isPopupCommunity = false;
         },
 
+        // コミュニティのリンクを動的に生成するロジックを実装
+        getCommunityLink(communityId) {
+          return `community/thread-list/${communityId}`;
+        },
+
     },
 
     created: function() {
       console.log("created");
-      console.log('isPopUo'+ this.isPopupCommunity)
 
       this.getBelongingCommunities();
       this.getMyThreads();

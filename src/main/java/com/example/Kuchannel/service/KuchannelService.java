@@ -3,8 +3,12 @@ package com.example.Kuchannel.service;
 import com.example.Kuchannel.dao.KuchannelDao;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
+import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.entity.InformatonRecord;
 import com.example.Kuchannel.entity.ThreadRecord;
+import com.example.Kuchannel.form.ThreadAddForm;
+import com.example.Kuchannel.entity.InformatonRecord;
+//import com.example.Kuchannel.entity.ThreadRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -97,11 +101,6 @@ public class KuchannelService {
         return kuchannelDao.communityUserUpdate(userId, communityId, nickName);
     }
 
-    //ユーザーIDをもとにレビューをセレクト
-    public ReviewRecord findReviews(Integer review) {
-        return  kuchannelDao.findReviews(review);
-    }
-
     //ユーザーのお知らせ一覧(返信)をセレクト
     public List<NoticeReplyRecord> userNotice(Integer userId) {
         return kuchannelDao.userNotice(userId);
@@ -117,14 +116,14 @@ public class KuchannelService {
         return kuchannelDao.findUser(userId);
     }
 
-    //お知らせ詳細情報を取得する
-    public InquiryDetailRecord findInquiry(Integer inquiryId) {
-        return kuchannelDao.findInquiry(inquiryId);
-    }
-
     //コミュニティIDを元にコミュニティを特定する
     public CommunityRecord findCommunity(Integer communityId) {
         return kuchannelDao.findCommunity(communityId);
+    }
+
+    //お知らせ詳細情報を取得する
+    public InquiryDetailRecord findInquiry(Integer inquiryId) {
+        return kuchannelDao.findInquiry(inquiryId);
     }
 
     //データベースからレビュー一覧に表示する情報を全件取得
@@ -135,6 +134,11 @@ public class KuchannelService {
     //データベースからレビューの画像情報を取得する
     public List<ReviewImageRecord> getReviewImages(Integer reviewId) {
         return kuchannelDao.getReviewImages(reviewId);
+    }
+
+    //データベースからレビューの返信情報を取得する
+    public List<ReviewReplyRecord> getReviewReply(Integer reviewId) {
+        return kuchannelDao.getReviewReply(reviewId);
     }
 
     //reviewsテーブルにインサート処理
@@ -152,14 +156,30 @@ public class KuchannelService {
         return kuchannelDao.reviewImagesInsert(reviewId, imagePath);
     }
 
-    /*-------------------------------------------------*/
+    //repliesテーブルにインサート処理
+    public ReviewReplyRecord replyInsert(int userId, int reviewId, String content) {
+        return kuchannelDao.replyInsert(userId, reviewId, content);
+    }
+
+    //レビューIDを元にreviewsテーブルから情報を取得する
+    public ReviewRecord findReview(Integer reviewId) {
+        return kuchannelDao.findReview(reviewId);
+    }
+
+    //ユーザーのレビュー一覧に必要な情報を取得する
+    public List<UserReviewList> getUserReview(Integer userId) {
+        return kuchannelDao.getUserReview(userId);
+    }
+
+    /*---------------------------------------------*/
+
     //threadテーブルにINSERTする処理
     public int threadInsert(ThreadAddForm threadAddForm) {
         return kuchannelDao.threadInsert(threadAddForm);
     }
 
     //コミュニティIDを元にスレッドを全件取得
-    public List<ThreadRecord> communityThreads(Integer communityId){
+    public List<CommunityThread> communityThreads(Integer communityId) {
         return kuchannelDao.communityThreads(communityId);
     }
 
@@ -167,4 +187,22 @@ public class KuchannelService {
     public int information(InformatonRecord informatonRecord){
         return kuchannelDao.information(informatonRecord);
     }
+
+    /*-----------------------------------------------------*/
+
+    //プロフィール編集
+    public  ProfileEditRecord edit(String loginId,String name , String password){
+        return kuchannelDao.edit(loginId, name, password);
+    }
+
+    public int goodDeal(Integer thread_id, Integer user_id){
+        return kuchannelDao.goodDeal(thread_id,user_id);
+    }
+
+    public boolean deleteThread(Integer thread_id){
+        return kuchannelDao.deleteThread(thread_id);
+    }
+
+    public int threadUpdate(ThreadAddForm inputData,Integer thread_id){return kuchannelDao.threadUpdate(inputData,thread_id);}
+
 }

@@ -16,34 +16,36 @@ body {
 .tab-buttons {
     display: flex;
     justify-content: center;
+    margin: 30px;
 }
 
 .tab-button {
-    background-color: #f2f2f2;
+    background-color: #FCD19C;
     border: none;
     outline: none;
     cursor: pointer;
     padding: 8px 16px;
     margin-right: 8px;
     transition: background-color 0.3s ease;
+    border-radius: 6px;
 }
 
 .tab-button.active {
-    background-color: #ccc;
+    background-color: #FFA931;
 }
 
 .tab-content-area {
     width: 75%;
-    height: 70%;
-    background-color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+    height: auto;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: block;
+    border-radius: 30px;
+    }
 
 .tab-content {
     /* display: none; */
-    text-align: center;
+    text-align: right;
+    margin: 30px
 }
 
 table{
@@ -53,4 +55,28 @@ table{
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+.community-table {
+    border: solid #DB8E23 2px;
+}
+
+td {
+    padding: 2px
+}
+
+.nickname-css{
+    margin-right: 50px;
+}
+
+/* 奇数行 */
+tr:nth-child(odd) {
+  background-color: #FFE8A3;
+  text-align: center;
+}
+
+/* 偶数行 */
+tr:nth-child(even) {
+  background-color: #ffffff;
+  text-align: center;
 }

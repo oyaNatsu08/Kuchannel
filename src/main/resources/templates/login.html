@@ -17,7 +17,7 @@
 
     <form action="/login" method="post" th:object="${UserForm}">
             <div class="cp_iptxt">
-                <span class="size">ユーザーID</span><input class="base-input" type="text" name="loginId" th:field="*{loginId}">
+                <span class="base-text">ユーザーID</span><input class="base-input" type="text" name="loginId" th:field="*{loginId}">
                 <div class="error" th:each="error: ${#fields.errors('loginId')}">
                     [[ ${error} ]]
                 </div>
