@@ -39,7 +39,7 @@
             <tbody>
               <button type="button" @click="openPopupCommu">コミュニティ作成</button>
               <tr v-for="com in belongingCommunities">
-                <td>{{com.communityName}}</td>
+                <td><a :href="getCommunityLink(com.communityUrl,com.communityId)">{{com.communityName}}</a></td>
                 <td><button type="button" @click="copy(com.communityId)">共有</button></td>
                 <td><input type="text" v-model="com.nickName"><button type="button"
                     @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)">変更</button></button>
@@ -110,7 +110,7 @@
             <tbody>
               <tr v-for="review in myReviews">
                 <td>{{review.reviewTitle}}</td>
-                <td class="review-cell"><a href="#">{{review.review}}</a></td>
+                <td class="review-cell"><a :href="getReviewLink(review.communityUrl,review.communityId,review.threadId,review.reviewId)">{{review.review}}</a></td>
                 <td> <a :href="getReviewLink(review.communityUrl,review.communityId,review.threadId)">{{review.threadTitle}}</a></td>
                 <td><a :href="getCommunityLink(review.communityUrl,review.communityId)">{{review.communityName}}</a></td>
                 <td>{{review.createDate}}</td>
@@ -168,6 +168,7 @@
           for (let i = 0; i < res.data.length; i++) {
             if (res.data[i].flag === true) { this.belongingCommunities.push(res.data[i]); } 
           }
+          console.log('belogCommunity',this.belongingCommunities);
             });
         },
         //退会処理 
@@ -258,6 +259,10 @@
         getReviewLink(communityLink,communityId,threadId) {
           const link = communityLink.replace("http://localhost:8080/","");
           return `http://localhost:8080/${link}/${communityId}/threads/${threadId}/reviews`;
+        },
+        getReviewLink(communityLink,communityId,threadId,reviewId) {
+          const link = communityLink.replace("http://localhost:8080/","");
+          return `http://localhost:8080/${link}/${communityId}/threads/${threadId}/reviews/${reviewId}`;
         },
 
     },

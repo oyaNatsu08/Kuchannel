@@ -8,6 +8,7 @@ import lombok.Data;
 public class BelongingCommunities {
 
     private int communityId;
+    private String communityUrl;
     private Integer userId;
     private String communityName;
     private String nickName;
