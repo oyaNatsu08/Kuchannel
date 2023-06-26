@@ -13,7 +13,7 @@
         <p class="error" th:text="${error}"></p>
     </div>
 
-    <form action="profile-edit" method="POST" th:object="${EditForm}">
+    <form action="/kuchannel/profile-edit" method="POST" th:object="${EditForm}">
         <div class="cp-iptxt">
             <span class="size">名前</span>
             <input class="base-input" type="name" name="name" th:field="*{name}" th:value="${user.name}">

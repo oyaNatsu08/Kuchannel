@@ -108,6 +108,7 @@
               </tr>
             </tbody>
           </table>
+          <p v-if="sessionInfo.role ===1"><a href="/kuchannel/Information">問い合わせ</a></p>
           <button type="button" v-if="sessionInfo.role ===1">問い合わせ</button>
           <button type="button" v-if="sessionInfo.role ===2" @click="applyChenge">この内容で変更する</button>
           <button @click.self="closePopup('CommunityMember')">閉じる</button>
