@@ -38,7 +38,7 @@
 
     <div id="app">
         <th:block th:insert="common/header"></th:block>
-        <div class="review">
+        <div class="review" style="margin-top: 20px;">
             <h3>投稿者：<a th:href="@{/kuchannel/user-review/{userId}(userId=${review.userId})}">[[ ${review.userName} ]]</a></h3>
             <p>投稿日：[[ ${review.createDate} ]]</p>
             <h2>[[ ${review.title} ]]</h2>

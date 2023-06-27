@@ -15,26 +15,26 @@
         <div class="login-form">
             <form action="/kuchannel/profile-edit" method="get">
                 <div>
-                    <label>名前：</label>
-                    <span type="text" name="name" th:text="${profile.name}" readonly class="base-text"></span>
+                    <label class="base-text">名前：</label>
+                    <span class="base-text" type="text" name="name" th:text="${profile.name}" readonly></span>
                 </div>
                 <div>
-                    <label>ユーザーID：</label>
-                    <span type="text" name="loginId" th:text="${profile.loginId}" readonly class="base-text"></span>
+                    <label class="base-text">ユーザーID：</label>
+                    <span class="base-text" type="text" name="loginId" th:text="${profile.loginId}" readonly></span>
                 </div>
                 <div>
-                    <label>パスワード：</label>
-                    <span type="text" name="password" th:text="${profile.password}" readonly class="base-text"></span>
+                    <label class="base-text">パスワード：</label>
+                    <span class="base-text" type="text" name="password" th:text="${profile.password}" readonly></span>
                 </div>
                 <div>
-                    <label>プロフィール画像：</label>
+                    <label class="base-text-images">プロフィール画像：</label>
                     <div v-if="userImage != ''">
                         <img :src="'data:image/png;base64,' + userImage" class="base-text"
                             style="width: 50px; height: 50px;">
                     </div>
                 </div>
 
-                <button type="submit" th:text="プロフィール編集"></button>
+                <button class="custom-btn" type="submit" th:text="プロフィール編集"></button>
             </form>
 
         </div>

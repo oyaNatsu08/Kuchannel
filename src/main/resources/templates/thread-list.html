@@ -21,9 +21,10 @@
 
     <th:block th:insert="common/header"></th:block>
 
+    <div class="thread-area">
 
     <div class="pagetop">
-      <h1>{{communityName}}へようこそ！</h1>
+      <h1 class="community-name">{{communityName}}へようこそ！</h1>
       <button @click.self="getCommunityMember">コミュニティメンバーの確認</button>
     </div>
 
@@ -120,7 +121,7 @@
 
 
       <!-- スレッドの新規作成 -->
-      <button type="button" @click="openPopup('ThreadAdd')">スレッドの新規作成</button>
+      <button class="thread-create-button" type="button" @click="openPopup('ThreadAdd')">スレッドの新規作成</button>
       <div v-if="isThreadAddPopup" class="popup-overlay" @click.self="closePopup('ThreadAdd')">
         <div class="popup">
           <h1>スレッド新規作成</h1>
@@ -277,7 +278,7 @@
             </div>
             <div class="opening-hours">営業時間：{{thread.sales_time}}</div>
             <div class="hashtags">
-              <ul class="hashtag" v-for="hashtag in thread.hashTagList">
+              <ul class="thread-list-ul" v-for="hashtag in thread.hashTagList">
                 <li>
                   <p style="color: blue;" @click="searchAdd(hashtag.tag_name)"> {{hashtag.tag_name}}</p>
                 </li>
@@ -328,10 +329,7 @@
   </div>
 
   </div>
-  </div>
 
-
-  <!--  <script src="/js/base.js"></script>-->
 
   <script>
     const { createApp } = Vue;
@@ -634,7 +632,7 @@
             if (window.confirm('後悔しませんか?')) {
               axios.delete(`/deleteCommunity/${this.communityId}`)
                 .then(res => {
-                  window.location.href = "http://localhost:8080/kuchannel/mypage";
+                  window.location.href = "http://192.168.33.99:8080/kuchannel/mypage";
                 });
             }
           }
@@ -861,8 +859,8 @@
         },
 
         getReviewLink(threadId) {
-          const link = this.communityUrl.replace("http://localhost:8080/", "");
-          return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
+          const link = this.communityUrl.replace("http://192.168.33.99:8080/", "");
+          return `http://192.168.33.99:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
         },
 
         updateSuggestions(inputAreaName) {

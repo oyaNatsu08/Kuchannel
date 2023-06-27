@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -286,4 +288,8 @@ public class KuchannelService {
 
     public int IntegrateThreads(ThreadAddForm threadInfo,Integer userId){return kuchannelDao.IntegrateThreads(threadInfo,userId);}
 
+    //画像生成
+    public void userImageCreate(List<File> imageFiles) throws IOException {
+        kuchannelDao.userImageCreate(imageFiles);
+    }
 }

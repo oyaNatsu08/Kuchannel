@@ -1,0 +1,27 @@
+.header {
+    background-color: #f99247b0;
+}
+
+.header-body {
+    display: flex;
+    justify-content: space-between;
+        align-items: center;
+}
+
+.header-h1 {
+    text-align: left;
+    margin: 10px 50px;
+}
+
+.header-icon {
+    display:flex;
+    align-items: center;
+}
+
+.border-bottom {
+    text-decoration: none;
+}
+
+header-ul{
+    margin:10px 20px;
+}

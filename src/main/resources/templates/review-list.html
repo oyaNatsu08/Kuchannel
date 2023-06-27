@@ -8,8 +8,9 @@
   <link href="/css/popup.css" rel="stylesheet">
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+  <link href="/css/review-list.css" rel="stylesheet">
   <style>
-    body {
+    /* body {
       text-align: center;
     }
 
@@ -50,7 +51,7 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-    }
+    } */
   </style>
 </head>
 
@@ -64,151 +65,155 @@
 
   <div id="app">
     <th:block th:insert="common/header"></th:block>
-    <h2>スレッド名：{{ updateThreadTitle }}</h2>
 
-    <a :href="backThread()">スレッド一覧へ戻る</a>
+    <div class="review-area">
+      <h2>スレッド名：{{ updateThreadTitle }}</h2>
 
-    <button type="button" @click="openUpdateThread()">情報編集</button>
+      <a :href="backThread()">スレッド一覧へ戻る</a>
 
-    <div v-if="isThreadUpdatePopup" class="popup-overlay" @click.self="closeUpdateThread()">
-      <div class="popup">
-        <h1>スレッド情報編集</h1>
-        <p>スレッド名(店名)：<input type="text" v-model="updateThreadTitle"> <!-- String threadName;と対応させる --></p>
-        <p>フリガナ：<input type="text" v-model="updateThreadFurigana"></p>
-        <p>お店の住所：<input type="text" v-model="updateThreadAddress"></p>
-        <p>営業時間：<input type="text" v-model="updateThreadSalesTime"></p>
-        <p>ジャンル：
-          <select v-model="updateThreadGenre">
-            <option value="和食" selected>和食</option>
-            <option value="中華">中華</option>
-            <option value="イタリアン">イタリアン</option>
-          </select>
-        </p>
-        <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags"></p>
-        <p>写真の追加：<input type="file" ref="fileInputThread" /></p>
-        <div v-if="imageThread != ''">
-          <p>更新前の画像</p>
-          <div style="display: flex; justify-content: center;">
-            <img :src="'data:image/png;base64,' + imageThread" style="width: 50px; height: auto;">
-          </div>
-        </div>
+      <button type="button" @click="openUpdateThread()">情報編集</button>
 
-        <button @click.self="updateThread">更新</button>
-        <button @click.self="closeUpdateThread()">閉じる</button>
-      </div>
-    </div>
-
-    <div>
-      <label><input type="radio" name="sortSelect" @click="sortItems('id')"></button>投稿の新しい順にする</label>
-      <label><input type="radio" name="sortSelect" @click="sortItems('good_count')"></button>いいねの多い順にする</label>
-    </div>
-
-    <hr>
-
-    <div class="review-all">
-      <span class="red">{{ addError }}</span>
-      <p>
-        タイトル：
-        <input type="text" v-model="reviewTitle">
-      </p>
-      <p>
-        本文<span class="red">(必須)</span>：
-        <textarea cols="30" rows="10" v-model="content"></textarea>
-      </p>
-      <p>
-        写真の追加：
-        <input type="file" ref="fileInput" multiple />
-      </p>
-
-      <button type="button" @click="addReview">投稿</button>
-    </div>
-
-    <!-- レビュー一覧を表示する -->
-    <div class="review-all" v-for="review in reviews">
-
-      <div class="review">
-
-        <p><a :href="getUserReviewLink(review.userId)">{{ review.userName }}さん</a></p>
-        <h3>{{review.title}}</h3>
-        <p>投稿日：{{ review.createDate }}</p>
-
-        <div class="image-review-container">
-          <p class="review-cell" style="width: 300px; margin-right: 20px;">{{review.review}}</p>
-          <div v-for="(image, index) in review.reviewImages">
-            <div v-if="index === 0">
-              <img :src="'data:image/png;base64,' + image.imagePath" style="width: 50px; height: auto;">
+      <div v-if="isThreadUpdatePopup" class="popup-overlay" @click.self="closeUpdateThread()">
+        <div class="popup">
+          <h1>スレッド情報編集</h1>
+          <p>スレッド名(店名)：<input type="text" v-model="updateThreadTitle"> <!-- String threadName;と対応させる --></p>
+          <p>フリガナ：<input type="text" v-model="updateThreadFurigana"></p>
+          <p>お店の住所：<input type="text" v-model="updateThreadAddress"></p>
+          <p>営業時間：<input type="text" v-model="updateThreadSalesTime"></p>
+          <p>ジャンル：
+            <select v-model="updateThreadGenre">
+              <option value="和食" selected>和食</option>
+              <option value="中華">中華</option>
+              <option value="イタリアン">イタリアン</option>
+            </select>
+          </p>
+          <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags"></p>
+          <p>写真の追加：<input type="file" ref="fileInputThread" /></p>
+          <div v-if="imageThread != ''">
+            <p>更新前の画像</p>
+            <div style="display: flex; justify-content: center;">
+              <img :src="'data:image/png;base64,' + imageThread" style="width: 50px; height: auto;">
             </div>
           </div>
-        </div>
 
+          <button @click.self="updateThread">更新</button>
+          <button @click.self="closeUpdateThread()">閉じる</button>
+        </div>
+      </div>
+
+      <div>
+        <label><input type="radio" name="sortSelect" @click="sortItems('id')"></button>投稿の新しい順にする</label>
+        <label><input type="radio" name="sortSelect" @click="sortItems('good_count')"></button>いいねの多い順にする</label>
       </div>
 
       <hr>
 
-      <div v-for="(reply, index) in review.reviewReplies">
-        <div v-if="index === 0" class="reply">
-          <p><a :href="getUserReviewLink(reply.userId)">{{ reply.userName }}さん</a></p>
-          <p class="review-cell" style="width: 300px;">{{ reply.reply }}</p>
-          <p>投稿日：{{ reply.createDate }}</p>
-        </div>
-      </div>
-
-      <div v-if="isReplyView && reviewId == review.reviewId" style="margin-bottom: 20px;">
-        <h3>返信</h3>
-        <p>
-          本文：
-          <textarea cols="30" rows="10" v-model="replyContent"></textarea>
+      <div class="review-all">
+        <span class="red">{{ addError }}</span>
+        <p class="font-size">
+          タイトル：
+          <input type="text" v-model="reviewTitle">
         </p>
-        <button type="button" @click="closeReply">閉じる</button>
-        <button type="button" @click="addReply(review.reviewId)">送信</button>
+        <p class="font-size">
+          本文<span class="red">(必須)</span>：
+          <textarea cols="30" rows="10" v-model="content"></textarea>
+        </p>
+        <p class="font-size">
+          写真の追加：
+          <input type="file" ref="fileInput" multiple />
+        </p>
+
+        <button type="button" @click="addReview">投稿</button>
       </div>
 
-      <button type="button" v-if="review.userId == userId || sessionInfo.role === 2"
-        @click="showDeleteConfirmation(review.reviewId)">削除</button>
-      <button type="button" v-if="review.userId == userId" @click="showEditPopup(review)">編集</button>
-      <button type="button" @click="openReply(review.reviewId)">返信</button>
+      <!-- レビュー一覧を表示する -->
+      <div class="review-all" v-for="review in reviews">
 
-      <!-- <form action="/review-detail" method="get" style="margin-top: 20px;">
+        <div class="review">
+
+          <p><a :href="getUserReviewLink(review.userId)">{{ review.userName }}さん</a></p>
+          <h3>{{review.title}}</h3>
+          <p>投稿日：{{ review.createDate }}</p>
+
+          <div class="image-review-container">
+            <p class="review-cell" style="width: 300px; margin-right: 20px;">{{review.review}}</p>
+            <div v-for="(image, index) in review.reviewImages">
+              <div v-if="index === 0">
+                <img :src="'data:image/png;base64,' + image.imagePath" style="width: 50px; height: auto;">
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <hr>
+
+        <div v-for="(reply, index) in review.reviewReplies">
+          <div v-if="index === 0" class="reply">
+            <p><a :href="getUserReviewLink(reply.userId)">{{ reply.userName }}さん</a></p>
+            <p class="review-cell" style="width: 300px;">{{ reply.reply }}</p>
+            <p>投稿日：{{ reply.createDate }}</p>
+          </div>
+        </div>
+
+        <div v-if="isReplyView && reviewId == review.reviewId" style="margin-bottom: 20px;">
+          <h3>返信</h3>
+          <p>
+            本文：
+            <textarea cols="30" rows="10" v-model="replyContent"></textarea>
+          </p>
+          <button type="button" @click="closeReply">閉じる</button>
+          <button type="button" @click="addReply(review.reviewId)">送信</button>
+        </div>
+
+        <button type="button" v-if="review.userId == userId || sessionInfo.role === 2"
+          @click="showDeleteConfirmation(review.reviewId)">削除</button>
+        <button type="button" v-if="review.userId == userId" @click="showEditPopup(review)">編集</button>
+        <button type="button" @click="openReply(review.reviewId)">返信</button>
+
+        <!-- <form action="/review-detail" method="get" style="margin-top: 20px;">
         <input type="hidden" name="reviewId" :value="review.reviewId" />
         <input type="hidden" name="threadId" th:value="${threadId}" />
         <button type="submit">詳細画面へ</button>
       </form> -->
 
-      <a :href="getReviewDetailLink(review.reviewId)">詳細画面へ</a>
-      <!-- いいねボタン -->
-      <div>
-        <button @click="goodDeal(review.reviewId)">いいね</button>
-        <span>{{ review.goodCount }}</span>
-      </div>
-
-      <div v-if="showDeletePopup" class="popup-overlay">
-        <div class="popup">
-          <h2>削除しますか？</h2>
-          <button type="button" @click="deleteReview(reviewToDelete)">OK</button>
-          <button type="button" @click="cancelDelete">キャンセル</button>
+        <a :href="getReviewDetailLink(review.reviewId)">詳細画面へ</a>
+        <!-- いいねボタン -->
+        <div>
+          <button @click="goodDeal(review.reviewId)">いいね</button>
+          <span>{{ review.goodCount }}</span>
         </div>
-      </div>
 
-    </div>
-
-    <!-- 編集ポップアップ -->
-    <div v-if="showPopup" class="popup-overlay">
-      <div class="popup">
-        <h2>編集</h2>
-        <p>タイトル：<input type="text" v-model="editingReview.title"></p>
-        <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
-        <p>写真の追加：<input type="file" ref="fileInput" multiple /></p>
-        <div v-if="editingReview.imageReview != ''">
-          <p>更新前の画像</p>
-          <div style="display: flex; justify-content: center;">
-            <img v-for="image in editingReview.imageReview" :src="'data:image/png;base64,' + image.imagePath"
-              style="width: 50px; height: auto;">
+        <div v-if="showDeletePopup" class="popup-overlay">
+          <div class="popup">
+            <h2>削除しますか？</h2>
+            <button type="button" @click="deleteReview(reviewToDelete)">OK</button>
+            <button type="button" @click="cancelDelete">キャンセル</button>
           </div>
         </div>
 
-        <button type="button" @click="closePopup">キャンセル</button>
-        <button type="button" @click="updateReview">更新</button>
       </div>
+
+      <!-- 編集ポップアップ -->
+      <div v-if="showPopup" class="popup-overlay">
+        <div class="popup">
+          <h2>編集</h2>
+          <p>タイトル：<input type="text" v-model="editingReview.title"></p>
+          <p>本文：<textarea cols="30" rows="10" v-model="editingReview.content"></textarea></p>
+          <p>写真の追加：<input type="file" ref="fileInput" multiple /></p>
+          <div v-if="editingReview.imageReview != ''">
+            <p>更新前の画像</p>
+            <div style="display: flex; justify-content: center;">
+              <img v-for="image in editingReview.imageReview" :src="'data:image/png;base64,' + image.imagePath"
+                style="width: 50px; height: auto;">
+            </div>
+          </div>
+
+          <button type="button" @click="closePopup">キャンセル</button>
+          <button type="button" @click="updateReview">更新</button>
+        </div>
+      </div>
+
     </div>
 
   </div>

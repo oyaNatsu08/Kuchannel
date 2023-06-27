@@ -14,10 +14,11 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Repository
 public class KuchannelDao {
@@ -1081,6 +1082,31 @@ public class KuchannelDao {
 
 
         return 1;
+    }
+
+    //画像生成
+    public void userImageCreate(List<File> imageFiles) throws IOException {
+        //エンコードした画像情報をもつリスト
+        List<String> encodes = new ArrayList<>();
+
+        MapSqlParameterSource param = new MapSqlParameterSource();
+
+        for (int i = 1; i <= 40; i++) {
+            int randomIndex = ThreadLocalRandom.current().nextInt(imageFiles.size());
+            //System.out.println(randomIndex);
+            File randomImageFile = imageFiles.get(randomIndex);
+
+            byte[] bytes = Files.readAllBytes(randomImageFile.toPath());
+
+            String encode = Base64.getEncoder().encodeToString(bytes);
+
+            param.addValue("image", encode);
+            param.addValue("userId", i);
+
+            jdbcTemplate.update("UPDATE users SET image_path = :image WHERE id = :userId", param);
+
+        }
+
     }
 
 }

@@ -31,22 +31,22 @@
           <table>
 
             <thead>
-              <tr>
-                <th>コミュニティ名</th>
-                <th>共有リンクのコピー</th>
+              <tr style="background-color: #FFA629; text-align: center;">
+                <th style="padding: 10px;">コミュニティ名</th>
+                <th style="width: 180px;">共有リンクのコピー</th>
                 <th>ニックネーム</th>
                 <th>退会する</th>
               </tr>
             </thead>
             <tbody>
-              <button type="button" @click="openPopupCommu">コミュニティ作成</button>
-              <tr v-for="com in belongingCommunities">
+              <button type="button" @click="openPopupCommu" style="margin-bottom: 10px; background-color: #FFA931; " class="tab-button">コミュニティ作成</button>
+              <tr v-for="com in belongingCommunities" class="community-tr">
                 <td><a :href="getCommunityLink(com.communityUrl,com.communityId)">{{com.communityName}}</a></td>
-                <td><button type="button" @click="copy(com.communityId)">共有</button></td>
-                <td><input type="text" v-model="com.nickName"><button type="button"
-                    @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)">変更</button></button>
+                <td><button type="button" @click="copy(com.communityId)" style="font-size: 21px;">共有</button></td>
+                <td><input type="text" v-model="com.nickName" class="nickname-css">
+                  <button type="button" @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)" style="background-color: #f9dfb2;border: #755e36 solid 1px; font-size: 20px;">変更</button>
                 </td>
-                <td><button type="button" @click="withdrawal(com.communityId)">退会</button></td>
+                <td><button type="button" @click="withdrawal(com.communityId)" style="background-color: rgb(255 156 156); color: black; font-size: 20px;}">退会</button></td>
               </tr>
             </tbody>
           </table>
@@ -78,18 +78,18 @@
 
         <!-- 自分のスレッド -->
         <div id="tab2" v-if="tab2" class="tab-content">
-          <table>
+          <table class="community-table">
 
             <thead>
-              <tr>
-                <th>スレッド名</th>
+              <tr style="background-color: #FFA629; text-align: center;">
+                <th style="padding: 10px;">スレッド名</th>
                 <th>コミュニティ名</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="thread in myThreads">
-                <td><a :href="getReviewLink(thread.communityUrl,thread.communityId,thread.threadId)">{{thread.threadTitle}}</a></td>
-                <td><a :href="getCommunityLink(thread.communityUrl,thread.communityId)">{{thread.communityName}}</a></td>
+                <td><a :href="getReviewLink(thread.communityUrl,thread.communityId,thread.threadId)" style="color: rgb(0 88 255);">{{thread.threadTitle}}</a></td>
+                <td><a :href="getCommunityLink(thread.communityUrl,thread.communityId)" style="color: rgb(0 88 255);">{{thread.communityName}}</a></td>
               </tr>
 
             </tbody>
@@ -98,11 +98,11 @@
 
         <!-- 自分のレビュー -->
         <div id="tab3" v-if="tab3" class="tab-content">
-          <table>
+          <table class="community-table">
 
             <thead>
-              <tr>
-                <th>タイトル</th>
+              <tr style="background-color: #FFA629; text-align: center;">
+                <th style="padding: 10px;">タイトル</th>
                 <th>本文</th>
                 <th>スレッド名</th>
                 <th>コミュニティ名</th>
@@ -111,7 +111,7 @@
             </thead>
             <tbody>
               <tr v-for="review in myReviews">
-                <td>{{review.reviewTitle}}</td>
+                <td style="color: rgb(0, 88, 255);">{{review.reviewTitle}}</td>
 
                 <td class="review-cell"><a :href="getReviewLink(review.communityUrl,review.communityId,review.threadId,review.reviewId)">{{review.review}}</a></td>
 
@@ -230,7 +230,7 @@
               console.log('gotUrl',gotUrl)
               const replace = gotUrl.replace("http://localhost:8080/","");
               console.log('replace',replace)
-              const molded = `http://localhost:8080/${replace}/${id}/threads`;
+              const molded = `http://192.168.33.99:8080/${replace}/${id}/threads`;
               console.log(molded,'molded');
 
 
