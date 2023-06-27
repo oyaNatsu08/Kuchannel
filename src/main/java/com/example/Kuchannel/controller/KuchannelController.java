@@ -667,7 +667,7 @@ public class KuchannelController {
     public String profileUpdate(@Validated @ModelAttribute("EditForm") EditForm editForm,
                                 BindingResult bindingResult,
                                 @RequestParam("loginId") String loginId,
-                                @RequestParam("updateImage") MultipartFile updateImage,
+                                @RequestParam(value = "updateImage", required = false) MultipartFile updateImage,
                                 Model model) throws IOException {
 
         var user = (UserRecord) session.getAttribute(("user"));
@@ -681,7 +681,12 @@ public class KuchannelController {
 
         String encode = null;
 
-        if (updateImage != null) {
+        //画像をエンコード　nullの場合は固定の画像をエンコード
+        if (updateImage.isEmpty()) {
+            File file = new File("src/main/resources/static/images/noImage/no-icon.png");
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            encode = Base64.getEncoder().encodeToString(bytes);
+        } else {
             byte[] bytes = updateImage.getBytes();
             encode = Base64.getEncoder().encodeToString(bytes);
         }

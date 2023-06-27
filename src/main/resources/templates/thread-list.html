@@ -191,9 +191,11 @@
           </div>
 
           <p>写真の追加：<input type="file" ref="fileInput" /></p>
-          <p>更新前の画像</p>
-          <div style="display: flex; justify-content: center;">
-            <img :src="'data:image/png;base64,' + imageThread" style="width: 50px; height: auto;">
+          <div v-if="imageThread != null">
+            <p>更新前の画像</p>
+            <div style="display: flex; justify-content: center;">
+              <img :src="'data:image/png;base64,' + imageThread" style="width: 50px; height: auto;">
+            </div>
           </div>
 
           <button @click.self="updateThread">更新</button>

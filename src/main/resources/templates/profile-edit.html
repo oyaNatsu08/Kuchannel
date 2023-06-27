@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 
-    <body class="create-body">
+<body class="create-body">
     <div id="app">
         <th:block th:insert="common/header"></th:block>
         <div class="create-form">
@@ -34,9 +34,11 @@
                         [[ ${error} ]]
                     </div>
                 </div>
-                <p>更新前の画像</p>
-                <div>
-                    <img :src="'data:image/png;base64,' + userImage" style="width: 50px; height: auto;">
+                <div v-if="userImage != ''">
+                    <p>更新前の画像</p>
+                    <div>
+                        <img :src="'data:image/png;base64,' + userImage" style="width: 50px; height: auto;">
+                    </div>
                 </div>
                 <p>写真の追加：<input type="file" name="updateImage"></p>
                 <div>
@@ -48,33 +50,33 @@
                 </button>
             </form>
         </div>
-</div>
-<script>
-    const { createApp } = Vue
+    </div>
+    <script>
+        const { createApp } = Vue
 
-    createApp({
-        data() {
-            return {
-                showMenu: false,
-                userImage: '',
+        createApp({
+            data() {
+                return {
+                    showMenu: false,
+                    userImage: '',
+                }
+
+            },
+
+            methods: {
+                toggleMenu() {
+                    this.showMenu = !this.showMenu;
+                }
+
+            },
+
+            created: function () {
+                this.userImage = `[[ ${image} ]]`;
             }
 
-        },
+        }).mount('#app')
 
-        methods: {
-            toggleMenu() {
-                this.showMenu = !this.showMenu;
-            }
-
-        },
-
-        created: function () {
-            this.userImage = `[[ ${image} ]]`;
-        }
-
-    }).mount('#app')
-
-</script>
+    </script>
 </body>
 
 </html>
