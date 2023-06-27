@@ -56,11 +56,11 @@
 
 <body>
 
-<!--  <div id="app0">-->
+  <!--  <div id="app0">-->
 
-<!--    <th:block th:insert="common/header"></th:block>-->
+  <!--    <th:block th:insert="common/header"></th:block>-->
 
-<!--  </div>-->
+  <!--  </div>-->
 
   <div id="app">
     <th:block th:insert="common/header"></th:block>
@@ -156,8 +156,7 @@
         <button type="button" @click="addReply(review.reviewId)">送信</button>
       </div>
 
-      <!-- 投稿ユーザーだけ表示される(後でやる) -->
-      <button type="button" v-if="review.userId == userId" @click="showDeleteConfirmation(review.reviewId)">削除</button>
+      <button type="button" v-if="review.userId == userId || sessionInfo.role === 2" @click="showDeleteConfirmation(review.reviewId)">削除</button>
       <button type="button" v-if="review.userId == userId" @click="showEditPopup(review)">編集</button>
       <button type="button" @click="openReply(review.reviewId)">返信</button>
 
@@ -193,7 +192,8 @@
         <p>写真の追加：<input type="file" ref="fileInput" multiple /></p>
         <p>更新前の画像</p>
         <div style="display: flex; justify-content: center;">
-            <img v-for="image in editingReview.imageReview" :src="'data:image/png;base64,' + image.imagePath" style="width: 50px; height: auto;">
+          <img v-for="image in editingReview.imageReview" :src="'data:image/png;base64,' + image.imagePath"
+            style="width: 50px; height: auto;">
         </div>
 
         <button type="button" @click="closePopup">キャンセル</button>
@@ -203,16 +203,16 @@
 
   </div>
 
-<!--  <script src="/js/base.js"></script>-->
+  <!--  <script src="/js/base.js"></script>-->
 
   <script>
-const { createApp } = Vue
+    const { createApp } = Vue
 
     createApp({
       data() {
         return {
-          communityId:'',
-          communityUrl:'',
+          communityId: '',
+          communityUrl: '',
           reviewTitle: '',
           content: '',
           reviews: [],
@@ -251,7 +251,9 @@ const { createApp } = Vue
           community: [],
 
           showMenu: false,
-                    userImage: '',
+          userImage: '',
+
+          sessionInfo:[],
 
         }
       },
@@ -337,7 +339,11 @@ const { createApp } = Vue
           formData.append('title', this.editingReview.title);
           formData.append('content', this.editingReview.content);
 
-          // const updatedReview = {
+          if (this.editingReview.content == '') {
+            alert('本文が未入力です。入力してください。');
+          } else {
+           
+             // const updatedReview = {
           //   id: this.editingReview.id,
           //   title: this.editingReview.title,
           //   content: this.editingReview.content
@@ -353,6 +359,8 @@ const { createApp } = Vue
               console.log(res);
 
             });
+          }
+
         },
         //返信画面表示
         openReply(reviewId) {
@@ -368,16 +376,23 @@ const { createApp } = Vue
           const formData = new FormData();
           formData.append("id", reviewId);
           formData.append("content", this.replyContent);
-          axios.post('/add-reply', formData)
+
+          if (this.replyContent == '') {
+            alert('本文が未入力です。入力してください。');
+          } else {
+            
+            axios.post('/add-reply', formData)
             .then(res => {
               // アップロードが成功した場合の処理
               this.isReplyView = false;
+              this.replyContent = '';
               this.getReviews(`[[ ${threadId} ]]`);
               console.log(res);
             })
             .catch(error => {
               // エラーが発生した場合の処理
             });
+          }
         },
         closePopup() {
           this.showPopup = false;
@@ -437,7 +452,7 @@ const { createApp } = Vue
             formData.append("address", this.updateThreadAddress);
             formData.append("salesTime", this.updateThreadSalesTime);
             formData.append("genre", this.updateThreadGenre);
-           
+
 
             if (this.updateThreadHashtags == '') {
               formData.append("hashtag", null);
@@ -453,10 +468,10 @@ const { createApp } = Vue
 
 
             axios.put(`/updateThread/${this.updateThreadId}`, formData)
-            .then(res => {
-              this.findThread(this.updateThreadId);
-              this.closeUpdateThread();
-            });
+              .then(res => {
+                this.findThread(this.updateThreadId);
+                this.closeUpdateThread();
+              });
 
           };
 
@@ -482,15 +497,15 @@ const { createApp } = Vue
             );
         },
 
-        getReviewDetailLink(reviewId){
+        getReviewDetailLink(reviewId) {
           const currentURL = window.location.href;
           console.log(currentURL);
-          const returnURL =`${currentURL}/${reviewId}`
+          const returnURL = `${currentURL}/${reviewId}`
           console.log(returnURL);
           return returnURL;
 
         },
-        
+
 
         //スレッド一覧へ戻る
         backThread() {
@@ -511,8 +526,18 @@ const { createApp } = Vue
         },
 
         toggleMenu() {
-                    this.showMenu = !this.showMenu;
-                },
+          this.showMenu = !this.showMenu;
+        },
+
+        getSessionInfo() {
+          axios.get(`/getSessionInfo/${this.communityId}`)
+            .then(res => {
+              this.sessionInfo = res.data;
+              console.log(this.sessionInfo);
+              console.log(res.data);
+            });
+
+        },
 
       },
       created: function () {
@@ -520,7 +545,7 @@ const { createApp } = Vue
         // this.getReviews(this.threadId);
         this.getReviews(`[[ ${threadId} ]]`);
         this.getCommunityId(`[[ ${threadId} ]]`);
-
+        
         this.updateThreadId = `[[ ${thread.id} ]]`;
         this.updateThreadTitle = `[[ ${thread.title} ]]`;
         this.updateThreadAddress = `[[ ${thread.address} ]]`;
@@ -533,6 +558,8 @@ const { createApp } = Vue
         this.userId = `[[ ${userId} ]]`;
 
         this.userImage = `[[ ${image} ]]`;
+
+        this.getSessionInfo();
 
       },
     }).mount('#app')

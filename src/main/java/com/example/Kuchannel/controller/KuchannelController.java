@@ -344,30 +344,38 @@ public class KuchannelController {
         //レビュー詳細画面へ
         @GetMapping("/kuchannel/community/{randomString}/{code}/{communityId}/threads/{threadId}/reviews/{reviewId}")
         public String reviewDetail2(@PathVariable("reviewId") Integer reviewId,
-                @PathVariable("threadId") Integer threadId,
-                Model model) {
+                                    @ModelAttribute("UserForm") UserForm userForm,
+                                    @PathVariable("threadId") Integer threadId,
+                                    Model model) {
 
-            //レビューIDを元にreviewsテーブルから情報を取得する
-            var review = kuchannelService.findReview(reviewId);
+            //ログインしているか確認
+            if (session.getAttribute("user") == null) {
+                return "login";
+            } else {
 
-            //データベースからレビューの画像情報を取得する
-            var reviewImages = kuchannelService.getReviewImages(reviewId);
+                //レビューIDを元にreviewsテーブルから情報を取得する
+                var review = kuchannelService.findReview(reviewId);
 
-            //データベースからレビューの返信情報を取得する
-            var reviewReplies = kuchannelService.getReviewReply(reviewId);
+                //データベースからレビューの画像情報を取得する
+                var reviewImages = kuchannelService.getReviewImages(reviewId);
 
-            //データベースからレビューのいいね件数を取得する
-            var goodCount = kuchannelService.getGoodReview(reviewId);
+                //データベースからレビューの返信情報を取得する
+                var reviewReplies = kuchannelService.getReviewReply(reviewId);
 
-            var user = (UserRecord)session.getAttribute("user");
-            model.addAttribute("image", user.imagePath());
+                //データベースからレビューのいいね件数を取得する
+                var goodCount = kuchannelService.getGoodReview(reviewId);
 
-            model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
-                    review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
-            model.addAttribute("reviewId", reviewId);
-            model.addAttribute("threadId", threadId);
+                var user = (UserRecord) session.getAttribute("user");
+                model.addAttribute("image", user.imagePath());
 
-            return "review-detail";
+                model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
+                        review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
+                model.addAttribute("reviewId", reviewId);
+                model.addAttribute("threadId", threadId);
+
+                return "review-detail";
+
+            }
 
         }
 
@@ -486,6 +494,7 @@ public class KuchannelController {
 
         var user = (UserRecord)session.getAttribute("user");
         model.addAttribute("image", user.imagePath());
+        model.addAttribute("communityId", communityId);
 
         //バリデーション
         if (bindingResult.hasErrors()){
@@ -503,7 +512,6 @@ public class KuchannelController {
 
         var informationDetails = kuchannelService.information(informatonRecord);
 
-        model.addAttribute("communityId", communityId);
         model.addAttribute("communityName", community.name());
 
         String url = community.url();
@@ -607,6 +615,7 @@ public class KuchannelController {
     //ユーザーのレビュー一覧画面に遷移
     @GetMapping("/kuchannel/user-review/{userId}")
     public String userReviewView(@PathVariable("userId") Integer userId,
+                                 @ModelAttribute("UserForm") UserForm userForm,
                                  Model model) {
 
         //ログインしているか確認

@@ -277,7 +277,7 @@
           </div>
           <div class="delete-update">
             <button type="button" @click="openUpdateThread(thread.id)">情報編集</button>
-            <button type="button" v-if="thread.user_id == sessionInfo.id" @click="deleteThread(thread.id)">削除</button>
+            <button type="button" v-if="thread.user_id == sessionInfo.id || thread.user_id == 2" @click="deleteThread(thread.id)">削除</button>
 
           </div>
 
@@ -297,11 +297,11 @@
 
             <div v-for="review in threadReview.reviews">
               <div class="review-background">
-                <p>投稿者：{{ review.userName }}</p>
+                <p>投稿者：<a :href="getUserReviewLink(review.userId)">{{ review.userName }}</a></p>
                 <div class="review-content">
                   <h5>レビュータイトル：{{ review.reviewTitle }}</h5>
                   <p class="review-cell"><span style="width: 500px;">本文：{{ review.reviewContent }}</span></p>
-                  <a href="#">レビュー詳細へ</a> <!--　getReviewDetailLink(thread.id, review.reviewId)でリンクへ飛ぶ　-->
+                  <a :href="getReviewDetailLink(review.threadId,review.reviewId)">レビュー詳細へ</a> <!--　getReviewDetailLink(thread.id, review.reviewId)でリンクへ飛ぶ　-->
                 </div>
               </div>
             </div>
@@ -516,6 +516,13 @@
               .then(res => {
                 this.getThreads();
                 this.closePopup('ThreadAdd');
+                this.addThreadTitle = '';
+                this.addThreadFurigana = '';
+                this.addThreadAddress = '';
+                this.addThreadSalesTime = '';
+                this.addThreadGenre = '和食';
+                this.addThreadHashtags = '';
+                this.suggestions = [];
               });
           };
 
@@ -686,7 +693,7 @@
 
         //絞り込みリストを表示
         changeRefineView() {
-          getPopularHashtags()
+          this.getPopularHashtags();
           this.refineView = !this.refineView;
         },
 
@@ -861,6 +868,9 @@
         getReviewDetailLink(threadId,reviewId) {
           const link = this.communityUrl.replace("http://localhost:8080/", "");
           return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews/${reviewId}`;
+        },
+        getUserReviewLink(userId) {
+          return `/kuchannel/user-review/${userId}`;
         },
         getUserReviewLink(userId) {
           return `/kuchannel/user-review/${userId}`;

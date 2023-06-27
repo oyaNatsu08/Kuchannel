@@ -81,7 +81,7 @@
         </div>
 
         <form th:action="@{/thread-review/{threadId}(threadId=${threadId})}" method="get">
-            <button type="submit">戻る</button>
+            <button type="button" onclick="history.back()">戻る</button>
             <button type="button" @click="openReply(reviewId)">返信する</button>
         </form>
 
