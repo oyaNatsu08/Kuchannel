@@ -67,6 +67,7 @@ public class KuchannelController {
 
         //セッション
         session.setAttribute("user", user);
+        model.addAttribute("image", user.imagePath());
 
         return "redirect:/kuchannel/mypage";
 
@@ -124,7 +125,7 @@ public class KuchannelController {
 
         File[] files = directory.listFiles();
 
-        System.out.println(files);
+        //System.out.println(files);
 
         List<File> imageFiles = new ArrayList<>();
         for (File file : files) {
@@ -134,7 +135,7 @@ public class KuchannelController {
         }
 
         int randomIndex = ThreadLocalRandom.current().nextInt(imageFiles.size()) + 1;
-        System.out.println(randomIndex);
+        //System.out.println(randomIndex);
         File randomImageFile = imageFiles.get(randomIndex);
 
         byte[] bytes = Files.readAllBytes(randomImageFile.toPath());
@@ -201,6 +202,7 @@ public class KuchannelController {
 
             model.addAttribute("communityId", communityId);
             model.addAttribute("communityName", inviteCode);
+            model.addAttribute("image", user.imagePath());
 
             var community =kuchannelService.findCommunity(communityId);
             String url = community.url();
@@ -220,60 +222,6 @@ public class KuchannelController {
         String randomString = uuid.toString().replace("-", "");
         return randomString;
     }
-
-//    //任意のスレッド一覧にとぶ(コミュニティへ飛ぶ、URLで飛ぶ場合)
-//    @GetMapping("/community/{randomString}/{code}")
-//    public String threadView(@ModelAttribute("communityAdd") CommunityAddForm communityAddForm,
-//                             @ModelAttribute("communityJoin") CommunityJoinForm communityForm,
-//                             @ModelAttribute("UserForm") UserForm userForm,
-//                             @PathVariable("randomString") String str,
-//                             //コミュニティの名前
-//                             @PathVariable("code") String code,
-//                             Model model) {
-//
-//        //ログインしているか確認
-//        if (session.getAttribute("user") == null) {
-//            return "login";
-//        } else {
-//            //コミュニティに初めて参加する場合は、参加確認画面へ飛んで、community_userテーブルを更新
-//            //コミュニティに参加しているかチェック
-//            var user = (UserRecord)session.getAttribute("user");
-//            var communityUser = kuchannelService.checkJoin(user.id(), "http://localhost:8080/community/" + str + "/" + code);
-//            if (communityUser == null) {
-//                model.addAttribute("communityName", code);
-//                model.addAttribute("url", "http://localhost:8080/community/" + str + "/" + code);
-//                //参加確認画面へ
-//                return "community-join";
-//            } else {
-//
-//                var community = kuchannelService.getCommunity("http://localhost:8080/community/" + str + "/" + code);
-//                //削除日が空なら、表示。
-//                if(community.deleteDate()==null){
-//                    model.addAttribute("communityId", community.id());
-//                    model.addAttribute("communityName", code);
-//                    return "thread-list";
-//                }
-//                else{
-//                    return "deleted-community";
-//                }
-//
-//            }
-//        }
-//    }
-
-//    //コミュニティのスレッド一覧へ遷移する(ボタンなどでの遷移)
-//    @GetMapping("/kuchannel/community/thread-list/{communityId}")
-//    public String threadListView(@PathVariable("communityId") Integer communityId,
-//                                 Model model) {
-//        //コミュニティIDを元にコミュニティを特定する
-//        CommunityRecord community = kuchannelService.findCommunity(communityId);
-//        model.addAttribute("communityId",communityId );
-//        model.addAttribute("communityName", community.name());
-//        System.out.println(community.name());
-//        model.addAttribute("name", community.name());
-//
-//        return "thread-list";
-//    }
 
     //コミュニティのスレッド一覧へ遷移する(ボタンなどでの遷移)
     @GetMapping("/kuchannel/community/{randomString}/{code}/{communityId}/threads")
@@ -299,6 +247,9 @@ public class KuchannelController {
             //コミュニティに初めて参加する場合は、参加確認画面へ飛んで、community_userテーブルを更新
             //コミュニティに参加しているかチェック
             var user = (UserRecord)session.getAttribute("user");
+
+            model.addAttribute("image", user.imagePath());
+
             var communityUser = kuchannelService.checkJoin(user.id(), "http://localhost:8080/kuchannel/community/" + str + "/" + code);
             if (communityUser == null) {
                 model.addAttribute("communityName", code);
@@ -313,6 +264,7 @@ public class KuchannelController {
                     model.addAttribute("communityId", community.id());
                     model.addAttribute("communityName", code);
                     model.addAttribute("communityUrl",community.url() );
+
                     return "thread-list";
                 }else{
                     return "deleted-community";
@@ -321,31 +273,6 @@ public class KuchannelController {
             }
         }
     }
-
-
-//    //スレッドのレビュー一覧へ飛ぶ
-//    @GetMapping("/thread-review/{threadId}")
-//    public String reviewListView(@PathVariable("threadId") Integer threadId,
-//                                 @ModelAttribute("UserForm") UserForm userForm,
-//                                 Model model) {
-//
-//        //ログインしているか確認
-//        if (session.getAttribute("user") == null) {
-//            return "login";
-//        } else {
-//
-//            //スレッドIDをもとに、スレッド情報を取得する
-//            var thread = kuchannelService.getThread(threadId);
-//
-//            //ユーザー情報を取得
-//            var user = (UserRecord)session.getAttribute("user");
-//
-//            model.addAttribute("thread", thread);
-//            model.addAttribute("userId", user.id());
-//
-//            return "review-list";
-//        }
-//    }
 
     //レビュー一覧に飛ぶ。消されていたら飛べない。
     @GetMapping("/kuchannel/community/{randomString}/{code}/{communityId}/threads/{threadId}/reviews")
@@ -363,13 +290,16 @@ public class KuchannelController {
             var thread = kuchannelService.getThread(threadId);
             var community = kuchannelService.findCommunity(communityId);
 
+            //ユーザー情報を取得
+            var user = (UserRecord)session.getAttribute("user");
+            model.addAttribute("image", user.imagePath());
+
             if(community.deleteDate() == null){
-                //ユーザー情報を取得
-                var user = (UserRecord)session.getAttribute("user");
 
                 model.addAttribute("thread", thread);
                 model.addAttribute("userId", user.id());
                 model.addAttribute("community",community);
+
                 return "review-list";
             }else{
                 return "deleted-community";
@@ -402,6 +332,7 @@ public class KuchannelController {
             //お問い合わせ情報を表示する
             List<InquiryRecord> inquires = kuchannelService.userInquiry(user.id());
 
+            model.addAttribute("image", user.imagePath());
             model.addAttribute("notices", notices2);
             model.addAttribute("inquires", inquires);
 
@@ -427,6 +358,9 @@ public class KuchannelController {
 
             //データベースからレビューのいいね件数を取得する
             var goodCount = kuchannelService.getGoodReview(reviewId);
+
+            var user = (UserRecord)session.getAttribute("user");
+            model.addAttribute("image", user.imagePath());
 
             model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
                     review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
@@ -478,6 +412,7 @@ public class KuchannelController {
 
             model.addAttribute("communityId", community.id());
             model.addAttribute("communityName", community.name());
+            model.addAttribute("image", user.imagePath());
 
             String moldedUrl =url.replace("http://localhost:8080/","");
             String URlToJump = moldedUrl+"/"+community.id() +"/"+ "/threads";
@@ -487,8 +422,6 @@ public class KuchannelController {
 
         }
     }
-
-
 
     //お問い合わせ詳細画面へ
     @GetMapping("/inquiry")
@@ -508,11 +441,11 @@ public class KuchannelController {
             model.addAttribute("userName", user.name());
             model.addAttribute("community", community);
 
+            model.addAttribute("image", user.imagePath());
+
             return "inquiry-detail";
         }
     }
-
-
 
     //コミュニティのスレッド一覧へ遷移する(ボタンなどでの遷移)
     @GetMapping("/community/thread-list/{communityId}")
@@ -522,8 +455,11 @@ public class KuchannelController {
         CommunityRecord community = kuchannelService.findCommunity(communityId);
         model.addAttribute("communityId",communityId );
         model.addAttribute("communityName", community.name());
-        System.out.println(community.name());
+        //System.out.println(community.name());
         model.addAttribute("name", community.name());
+
+        var user = (UserRecord)session.getAttribute("user");
+        model.addAttribute("image", user.imagePath());
 
         return "thread-list";
     }
@@ -533,6 +469,9 @@ public class KuchannelController {
     public String info(@RequestParam("communityId") Integer communityId,
                        @ModelAttribute("informationForm") InformationForm informationForm,
                        Model model) {
+
+        var user = (UserRecord)session.getAttribute("user");
+        model.addAttribute("image", user.imagePath());
 
         model.addAttribute("communityId", communityId);
 
@@ -545,14 +484,15 @@ public class KuchannelController {
                               @RequestParam(name="communityId") Integer communityId,
                               Model model){
 
+        var user = (UserRecord)session.getAttribute("user");
+        model.addAttribute("image", user.imagePath());
+
         //バリデーション
         if (bindingResult.hasErrors()){
             return "Information";
         }
 
-        var userData = (UserRecord)session.getAttribute("user");
-        var userId = userData.id();
-        //コミュニティid1に固定している。
+        var userId = user.id();
         String content = informationForm.getInformation();
         boolean flag = false;
 
@@ -589,6 +529,7 @@ public class KuchannelController {
 
             //ユーザー情報を取得
             var user = (UserRecord)session.getAttribute("user");
+            model.addAttribute("image", user.imagePath());
 
             model.addAttribute("thread", thread);
             model.addAttribute("userId", user.id());
@@ -610,49 +551,57 @@ public class KuchannelController {
                                @RequestParam(value = "flag", required = false) Boolean readFlag,
                                Model model) {
 
-        //スレッドIDをもとにコミュニティIDを入手
-        var thread = kuchannelService.getThread(threadId);
+        //ログインしているか確認
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
 
-        //レビューIDを元にreviewsテーブルから情報を取得する
-        var review = kuchannelService.findReview(reviewId);
+            //スレッドIDをもとにコミュニティIDを入手
+            var thread = kuchannelService.getThread(threadId);
 
-        //ユーザーIDとコミュニティIDをもとにニックネームを入手
-        var reviewAccount = kuchannelService.getAccountInfoNick(review.userId(), thread.getCommunity_id());
+            //レビューIDを元にreviewsテーブルから情報を取得する
+            var review = kuchannelService.findReview(reviewId);
 
-        //データベースからレビューの画像情報を取得する
-        var reviewImages = kuchannelService.getReviewImages(reviewId);
-
-        //データベースからレビューの返信情報を取得する
-        var reviewReplies = kuchannelService.getReviewReply(reviewId);
-
-        for (ReviewReply reviewReply : reviewReplies) {
             //ユーザーIDとコミュニティIDをもとにニックネームを入手
-            var replyAccount = kuchannelService.getAccountInfoNick(reviewReply.getUserId(), thread.getCommunity_id());
+            var reviewAccount = kuchannelService.getAccountInfoNick(review.userId(), thread.getCommunity_id());
 
-            reviewReply.setUserName(replyAccount.getName());
+            //データベースからレビューの画像情報を取得する
+            var reviewImages = kuchannelService.getReviewImages(reviewId);
 
+            //データベースからレビューの返信情報を取得する
+            var reviewReplies = kuchannelService.getReviewReply(reviewId);
+
+            for (ReviewReply reviewReply : reviewReplies) {
+                //ユーザーIDとコミュニティIDをもとにニックネームを入手
+                var replyAccount = kuchannelService.getAccountInfoNick(reviewReply.getUserId(), thread.getCommunity_id());
+
+                reviewReply.setUserName(replyAccount.getName());
+
+            }
+
+            //データベースからレビューのいいね件数を取得する
+            var goodCount = kuchannelService.getGoodReview(reviewId);
+
+            model.addAttribute("review", new ReviewElementAll(review.userId(), reviewAccount.getName(), review.reviewId(), review.title(),
+                    review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
+            model.addAttribute("reviewId", reviewId);
+            model.addAttribute("threadId", threadId);
+
+            //お知らせ画面からの遷移か判断する, 未読フラッグがtrueならfalseに変える
+            if ((noticeId != null) && (readFlag)) {
+                //お知らせテーブルの未読フラッグをアップデート
+                kuchannelService.readNotice(noticeId);
+            }
+
+            var user = (UserRecord) session.getAttribute("user");
+            model.addAttribute("image", user.imagePath());
+
+            var community = kuchannelService.findCommunity(thread.getCommunity_id());
+            String url = community.url();
+            String moldedUrl = url.replace("http://localhost:8080/", "");
+
+            return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace("%2F", "/") + "/" + community.id() + "/threads/" + threadId + "/reviews/" + reviewId;
         }
-
-        //データベースからレビューのいいね件数を取得する
-        var goodCount = kuchannelService.getGoodReview(reviewId);
-
-        model.addAttribute("review", new ReviewElementAll(review.userId(), reviewAccount.getName(), review.reviewId(), review.title(),
-                review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
-        model.addAttribute("reviewId", reviewId);
-        model.addAttribute("threadId", threadId);
-
-        //お知らせ画面からの遷移か判断する, 未読フラッグがtrueならfalseに変える
-        if ((noticeId != null) && (readFlag)) {
-            //お知らせテーブルの未読フラッグをアップデート
-            kuchannelService.readNotice(noticeId);
-        }
-
-        var community =kuchannelService.findCommunity(thread.getCommunity_id());
-        String url = community.url();
-        String moldedUrl =url.replace("http://localhost:8080/","");
-
-        return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace( "%2F","/") + "/" + community.id() + "/threads/"+threadId+"/reviews/"+reviewId;
-
     }
 
     //ユーザーのレビュー一覧画面に遷移
@@ -660,34 +609,46 @@ public class KuchannelController {
     public String userReviewView(@PathVariable("userId") Integer userId,
                                  Model model) {
 
-        //ユーザーのレビュー一覧に必要な情報を取得する
-        var reviews = kuchannelService.getUserReview(userId);
+        //ログインしているか確認
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
 
-        model.addAttribute("reviews", reviews);
+            //ユーザーのレビュー一覧に必要な情報を取得する
+            var reviews = kuchannelService.getUserReview(userId);
 
-        return "user-review-list";
+            model.addAttribute("reviews", reviews);
+
+            var user = (UserRecord) session.getAttribute("user");
+            model.addAttribute("image", user.imagePath());
+
+            return "user-review-list";
+
+        }
+
     }
 
-
-    /*------------------------------------------------*/
-
-
-    //    /*-------------------------Update(プロフィール編集)--------------------------*/
+    /*-------------------------Update(プロフィール編集)--------------------------*/
     @GetMapping("/kuchannel/profile-edit")
-    public String profileUpdate(@RequestParam("name") String name,
-                                @RequestParam("loginId") String loginId,
-                                @RequestParam("password") String password,
-                                @ModelAttribute("EditForm")EditForm editForm,
+    public String profileUpdate(@ModelAttribute("EditForm")EditForm editForm,
                                 Model model){
 
-        var sessionUser = (UserRecord)session.getAttribute("user");
-        UserRecord user = new UserRecord(null, loginId, name, password, sessionUser.imagePath());
+        //ログインしているか確認
+        if (session.getAttribute("user") == null) {
+            return "login";
+        } else {
 
-        model.addAttribute("user", user);
-        model.addAttribute("loginId", loginId);
-        model.addAttribute("image", sessionUser.imagePath());
+            var sessionUser = (UserRecord) session.getAttribute("user");
+            UserRecord user = new UserRecord(null, sessionUser.loginId(), sessionUser.name(), sessionUser.password(), sessionUser.imagePath());
 
-        return "profile-edit";
+            model.addAttribute("user", user);
+            model.addAttribute("loginId", sessionUser.loginId());
+            model.addAttribute("image", sessionUser.imagePath());
+
+            return "profile-edit";
+
+        }
+
     }
 
     @PostMapping("/kuchannel/profile-edit")
@@ -731,5 +692,16 @@ public class KuchannelController {
 
         return "/profile-details";
     }
-//    /*------------------------------------------------------------------------*/
+
+    @GetMapping("/backToThread")
+    public String backToThread(@RequestParam(name="communityId")Integer communityId){
+
+
+        var community =kuchannelService.findCommunity(communityId);
+        String url = community.url();
+        String moldedUrl =url.replace("http://localhost:8080/","");
+
+        return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace( "%2F","/") + "/" + community.id() + "/threads";
+    }
+
 }

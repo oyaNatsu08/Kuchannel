@@ -254,7 +254,7 @@
       <!-- スレッドの表示。 -->
       <div v-for="thread in threads" v-if="threadMainView">
         <div class="restaurant" v-if="genreIncludeCheck(thread.genre)">
-          <img :src="'data:image/png;base64,' + thread.image_path" class="restaurant-img">
+          <img :src="'data:image/png;base64,' + thread.image_path" class="restaurant-img" v-if="thread.image_path != null">
           <div>
             <input type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2">
             <a :href="getReviewLink(thread.id)" class="restaurant-name">
