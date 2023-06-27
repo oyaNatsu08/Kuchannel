@@ -383,9 +383,11 @@ public class KuchannelRestController {
 
     //キーワードでスレッドを絞り込む
     @GetMapping("/keywordThreads")
+
     public List<CommunityThread> keyThreads(@RequestParam("keyword") String keyword
                                             ,@RequestParam("communityId") Integer communityId
                                             ) {
+
         //keywordを空白(半角または全角)ごとに分けて格納
         String[] splittedKeywords = keyword.split("[\\s\\p{Z}]");
         //"#"と"＃"を除いたキーワードを格納。

@@ -14,6 +14,7 @@
     <th:block th:insert="common/header"></th:block>
   </div> -->
 
+
   <div id="app">
     <th:block th:insert="common/header"></th:block>
 
@@ -111,7 +112,9 @@
             <tbody>
               <tr v-for="review in myReviews">
                 <td>{{review.reviewTitle}}</td>
+
                 <td class="review-cell"><a :href="getReviewLink(review.communityUrl,review.communityId,review.threadId,review.reviewId)">{{review.review}}</a></td>
+
                 <td> <a :href="getReviewLink(review.communityUrl,review.communityId,review.threadId)">{{review.threadTitle}}</a></td>
                 <td><a :href="getCommunityLink(review.communityUrl,review.communityId)">{{review.communityName}}</a></td>
                 <td>{{review.createDate}}</td>
@@ -262,6 +265,7 @@
         getReviewLink(communityLink,communityId,threadId) {
           const link = communityLink.replace("http://localhost:8080/","");
           return `http://localhost:8080/${link}/${communityId}/threads/${threadId}/reviews`;
+
         },
         getReviewLink(communityLink,communityId,threadId,reviewId) {
           const link = communityLink.replace("http://localhost:8080/","");
@@ -269,6 +273,7 @@
         },
         toggleMenu() {
           this.showMenu = !this.showMenu;
+
         },
 
     },
