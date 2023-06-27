@@ -96,6 +96,7 @@ public class KuchannelController {
         var list = model.addAttribute("profile", kuchannelService.detail(user_id));
 
         model.addAttribute("image", userData.imagePath());
+
         return "/profile-details";
     }
 
@@ -124,8 +125,6 @@ public class KuchannelController {
         File directory = new File("src/main/resources/static/images/icons");
 
         File[] files = directory.listFiles();
-
-        //System.out.println(files);
 
         List<File> imageFiles = new ArrayList<>();
         for (File file : files) {
@@ -210,8 +209,6 @@ public class KuchannelController {
 
             return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace( "%2F","/") + "/" + community.id() + "/threads";
 
-
-
         }
 
     }
@@ -271,6 +268,7 @@ public class KuchannelController {
                 }
 
             }
+
         }
     }
 
@@ -420,7 +418,9 @@ public class KuchannelController {
 
             model.addAttribute("communityId", community.id());
             model.addAttribute("communityName", community.name());
+
             model.addAttribute("image", user.imagePath());
+
 
             String moldedUrl =url.replace("http://localhost:8080/","");
             String URlToJump = moldedUrl+"/"+community.id() +"/"+ "/threads";
@@ -430,6 +430,8 @@ public class KuchannelController {
 
         }
     }
+
+
 
     //お問い合わせ詳細画面へ
     @GetMapping("/inquiry")
@@ -502,6 +504,7 @@ public class KuchannelController {
         }
 
         var userId = user.id();
+
         String content = informationForm.getInformation();
         boolean flag = false;
 

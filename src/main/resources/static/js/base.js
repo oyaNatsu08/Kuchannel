@@ -1,6 +1,7 @@
 const { createApp } = Vue
 
 createApp({
+
    data() {
        return {
            showMenu: false,
@@ -15,4 +16,5 @@ createApp({
    created: function() {
       // this.userImage = `[[ ${image} ]]`;
    }
+
 }).mount('#app0')

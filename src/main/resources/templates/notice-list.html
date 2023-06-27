@@ -84,8 +84,10 @@ const { createApp } = Vue
                     replyView: true,
                     inquiryView: false,
                     noticeList:[],
+
                     showMenu: false,
                     userImage: '',
+
                 }
             },
             methods: {
@@ -107,7 +109,9 @@ const { createApp } = Vue
                 console.log(this.noticeList);
                 this.userImage = `[[ ${image} ]]`;
             },
+
         }).mount('#app')
+
     </script>
 
 </body>

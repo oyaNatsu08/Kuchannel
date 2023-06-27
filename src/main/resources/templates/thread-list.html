@@ -21,6 +21,7 @@
 
     <th:block th:insert="common/header"></th:block>
 
+
     <div class="pagetop">
       <h1>{{communityName}}へようこそ！</h1>
       <button @click.self="getCommunityMember">コミュニティメンバーの確認</button>
@@ -139,6 +140,7 @@
           <p>ハッシュタグ：<input type="text" v-model="addThreadHashtags" @input="updateSuggestions('addThreadHashtags')"></p>
           <div v-if="isaddThreadHashtagsSuggest" class="suggest-area">
             <ul>
+
               <li v-for="suggestion in suggestions" :key="suggestion" class="suggest-content">
                 <a @click="selectSuggestion(suggestion)">{{ suggestion }}</a>
               </li>
@@ -161,7 +163,7 @@
         <label><input type="radio" name="sortSelect" @click="sortItems('good_count')"></button>いいねの多い順にする</label>
       </div>
 
-      <!-- スレッド情報編集 -->
+
       <div v-if="isThreadUpdatePopup" class="popup-overlay" @click.self="closePopup('ThreadUpdate')">
         <div class="popup">
           <h1>スレッド情報編集</h1>
@@ -176,6 +178,7 @@
               <option value="イタリアン">イタリアン</option>
             </select>
           </p>
+
           <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags" @input="updateSuggestions('updateThreadHashtags')"></p>
 
           <div v-if="iseditThreadHashtagsSuggest" class="suggest-area">
@@ -254,7 +257,9 @@
       <!-- スレッドの表示。 -->
       <div v-for="thread in threads" v-if="threadMainView">
         <div class="restaurant" v-if="genreIncludeCheck(thread.genre)">
+
           <img :src="'data:image/png;base64,' + thread.image_path" class="restaurant-img" v-if="thread.image_path != null">
+
           <div>
             <input type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2">
             <a :href="getReviewLink(thread.id)" class="restaurant-name">
@@ -290,7 +295,9 @@
           <img :src="'data:image/png;base64,' + threadReview.image_path" class="restaurant-img">
           <div>
             <!-- <input type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2"> -->
+
             <a :href="getReviewLink(threadReview.id)" class="restaurant-name">
+
               <h3>{{threadReview.title}}</h3>
             </a>
             <p class="genre">ジャンル：{{threadReview.genre}}</p>
@@ -316,6 +323,7 @@
 
   </div>
   </div>
+
 
 <!--  <script src="/js/base.js"></script>-->
 
@@ -388,13 +396,13 @@
           //サジェスト用
           issearchTextSuggest: false,
           isaddThreadHashtagsSuggest: false,
+
           iseditThreadHashtagsSuggest:false,
           suggestions: [], // サジェストされるハッシュタグ
           existingHashTags: [],
 
           showMenu: false,
           userImage: '',
-
 
         }
 
@@ -490,7 +498,6 @@
             //   addInfo.hashtag = null
             // }
 
-
             const formData = new FormData();
             formData.append("threadName", this.addThreadTitle);
             formData.append("furigana", this.addThreadFurigana);
@@ -501,12 +508,14 @@
             if (this.addThreadHashtags == '') {
               formData.append("hashtag", null);
             } else {
+
               //入力値の揺れを修ある程度修正
               const splited = this.addThreadHashtags.split(/(　| |、)/);
               const replaced = splited.map(item => item.replace(/[＃#]/g, ""));
               const filtered = replaced.filter(item => item !== " " && item !== "、");
               const trimed = filtered.map(item => item.trim());
               formData.append("hashtag", trimed);
+
             }
 
             formData.append("communityId", this.communityId);
@@ -567,11 +576,13 @@
             if (this.updateThreadHashtags == '') {
               formData.append("hashtag", null);
             } else {
+
               const splited = this.updateThreadHashtags.split(/(　| |、)/);
               const replaced = splited.map(item => item.replace(/[＃#]/g, ""));
               const filtered = replaced.filter(item => item !== " " && item !== "、");
               const trimed = filtered.map(item => item.trim());
               formData.append("hashtag", trimed);
+
             }
 
             formData.append("communityId", this.communityId);
@@ -680,6 +691,7 @@
         getThreadReviewLink(threadId) {
          return `/thread-review/${threadId}`;
         },
+
         getReviewLink(threadId) {
           const link = this.communityUrl.replace("http://localhost:8080/", "");
           return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
@@ -722,6 +734,15 @@
             });
 
         },
+        getAllHashtags() {
+          axios.get(`/getAllHashtags/${this.communityId}`)
+            .then(res => {
+              this.existingHashTags = res.data;
+              console.log(this.existingHashTags);
+
+            });
+
+        },
 
         //ジャンルの絞り込みチェック
         genreIncludeCheck(genreName) {
@@ -750,6 +771,7 @@
             axios.get(`/keywordThreads`, {
               params: {
                 keyword: this.searchText,
+
                 communityId: this.communityId
               }
             })
@@ -810,9 +832,35 @@
             if (searchTagsArray.includes(hashTag.tag_name)) {
               count++;
             }
+
           }
           return count;
         },
+        selectSuggestion(suggestion) {
+          const words0 = this.searchText.split(" ").join("　").split("　"); // スペースで分割し、全角スペースでも分割する
+          const words = words0.filter(this.removeEmptyStrings); // 空の文字列を削除する
+
+          let lastWord = words[words.length - 1]; // 最後の単語を取得
+
+          if (lastWord.startsWith("#") || lastWord.startsWith("＃")) {
+            // 最後の単語がハッシュタグで始まっている場合は削除
+            words.splice(-1, 1);
+          }
+
+          let newArray = words.filter(this.removeEmptyStrings);
+          newArray.push(suggestion); // サジェストを追加
+
+          this.searchText = newArray.join(" ") + " "; // 入力欄にサジェストを追加
+          this.suggestions = []; // サジェストをリセット
+        },
+
+        getReviewLink(threadId) {
+          const link = this.communityUrl.replace("http://localhost:8080/", "");
+          return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
+        }
+
+
+
 
         updateSuggestions(inputAreaName) {
           this.suggestions = []; // サジェストをリセット
@@ -896,6 +944,7 @@
         this.getAllHashtags();
 
         this.userImage = `[[ ${image} ]]`;
+
 
       }
 
