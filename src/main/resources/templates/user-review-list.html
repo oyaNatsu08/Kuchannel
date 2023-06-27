@@ -30,9 +30,9 @@
 
 <body>
 
-  <div id="app0">
+  <div id="app">
     <th:block th:insert="common/header"></th:block>
-  </div>
+
 
   <div class="review-container">
 
@@ -51,8 +51,8 @@
       <tbody>
         <th:block th:each="review : ${reviews}">
           <tr>
-            <td><a th:href="@{/review-detail(reviewId=${review.reviewId})}">[[ ${review.reviewTitle} ]]</a></td>
-            <td class="review-cell" style="width: 200px;">[[ ${review.content} ]]</td>
+            <td>[[ ${review.reviewTitle} ]]</td>
+            <td class="review-cell" style="width: 200px;"><a th:href="@{${review.communityUrl}+'/'+ ${review.communityId}+'/threads/'+${review.threadId}+'/reviews/'+${review.reviewId}}">[[ ${review.content} ]]</a></td>
             <td>[[ ${review.threadTitle} ]]</td>
             <td>[[ ${review.communityName} ]]</td>
             <td>[[ ${review.createDate} ]]</td>
@@ -65,11 +65,37 @@
 
   </div>
 
-  <script src="/js/base.js"></script>
+  </div>
+
+<!--  <script src="/js/base.js"></script>-->
 
   <script>
 
-  </script>
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    showMenu: false,
+                    userImage: '',
+                }
+
+            },
+
+            methods: {
+                toggleMenu() {
+                    this.showMenu = !this.showMenu;
+                },
+
+            },
+
+            created: function () {
+                this.userImage = `[[ ${image} ]]`;
+            }
+
+        }).mount('#app')
+
+    </script>
 
 </body>
 

@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 //マイページ用。レビュー一覧を表示する用のエンティティ
 @Data
 public class MyReview {
+    private Integer reviewId;
     private String reviewTitle;
     private String review;
     private String threadTitle;

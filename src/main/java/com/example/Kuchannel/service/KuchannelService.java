@@ -238,8 +238,8 @@ public class KuchannelService {
     /*-----------------------------------------------------*/
 
     //プロフィール編集
-    public  ProfileEditRecord edit(String loginId,String name , String password){
-        return kuchannelDao.edit(loginId, name, password);
+    public  ProfileEditRecord edit(String loginId,String name , String password, String image){
+        return kuchannelDao.edit(loginId, name, password, image);
     }
 
     public int goodDealThread(Integer thread_id, Integer user_id){

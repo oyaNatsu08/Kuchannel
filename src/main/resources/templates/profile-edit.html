@@ -1,44 +1,80 @@
 <!DOCTYPE html>
-<html lang= "ja" xmlns:th="http://www.thymeleaf.org">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>プロフィール編集画面</title>
     <link href="/css/commons.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
-<body class="create-body">
-<div class="create-form">
-    <h1 class="site_logo">口ゃんねる（口コミ）</h1>
 
-    <div class="error" th:if="${error}">
-        <p class="error" th:text="${error}"></p>
-    </div>
+    <body class="create-body">
+    <div id="app">
+        <th:block th:insert="common/header"></th:block>
+        <div class="create-form">
+            <h1 class="site_logo">口ゃんねる（口コミ）</h1>
 
-    <form action="/kuchannel/profile-edit" method="POST" th:object="${EditForm}">
-        <div class="cp-iptxt">
-            <span class="size">名前</span>
-            <input class="base-input" type="name" name="name" th:field="*{name}" th:value="${user.name}">
-            <div class="error" th:each="error: ${#fields.errors('name')}">
-                [[ ${error} ]]
+            <div class="error" th:if="${error}">
+                <p class="error" th:text="${error}"></p>
             </div>
-        </div>
 
-        <div class="cp-iptxt">
-            <span class="size">パスワード</span>
-            <input class="base-input" type="password" name="password" th:field="*{password}">
-            <div class="error" th:each="error: ${#fields.errors('password')}">
-                [[ ${error} ]]
-            </div>
-        </div>
-        <div>
-            <input type="hidden" id="loginId" name="loginId" th:field="*{loginId}" th:value="${user.loginId}">
-        </div>
+            <form action="/kuchannel/profile-edit" method="POST" th:object="${EditForm}" enctype="multipart/form-data">
+                <div class="cp-iptxt">
+                    <span class="size">名前</span>
+                    <input class="base-input" type="text" name="name" th:field="*{name}">
+                    <div class="error" th:each="error: ${#fields.errors('name')}">
+                        [[ ${error} ]]
+                    </div>
+                </div>
 
-        <a th:href="@{/kuchannel/profile-details}" class="custom-btn">戻る</a>
-        <button type="submit" class="custom-btn">編集</button>
-        </button>
-    </form>
+                <div class="cp-iptxt">
+                    <span class="size">パスワード</span>
+                    <input class="base-input" type="password" name="password" th:field="*{password}">
+                    <div class="error" th:each="error: ${#fields.errors('password')}">
+                        [[ ${error} ]]
+                    </div>
+                </div>
+                <p>更新前の画像</p>
+                <div>
+                    <img :src="'data:image/png;base64,' + userImage" style="width: 50px; height: auto;">
+                </div>
+                <p>写真の追加：<input type="file" name="updateImage"></p>
+                <div>
+                    <input type="hidden" id="loginId" name="loginId" th:value="${loginId}">
+                </div>
+
+                <a th:href="@{/kuchannel/profile-details}" class="custom-btn">戻る</a>
+                <button type="submit" class="custom-btn">編集</button>
+                </button>
+            </form>
+        </div>
 </div>
 <script>
-  </script>
+    const { createApp } = Vue
+
+    createApp({
+        data() {
+            return {
+                showMenu: false,
+                userImage: '',
+            }
+
+        },
+
+        methods: {
+            toggleMenu() {
+                this.showMenu = !this.showMenu;
+            }
+
+        },
+
+        created: function () {
+            this.userImage = `[[ ${image} ]]`;
+        }
+
+    }).mount('#app')
+
+</script>
 </body>
+
 </html>

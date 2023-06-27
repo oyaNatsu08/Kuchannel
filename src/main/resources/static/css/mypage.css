@@ -34,7 +34,7 @@ body {
 
 .tab-content-area {
     width: 75%;
-    min-height: 500px;
+
     background-color: #fff;
     display: flex;
     align-items: center;
