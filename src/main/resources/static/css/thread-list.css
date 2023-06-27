@@ -19,19 +19,21 @@ body {
   
   h3 {
     margin: 0;
-    font-size: 24px;
+        font-size: 26px;
   }
 
   .thread-create-button {
-  border-radius: 5px;
+        border-radius: 5px;
         background-color: #FFA629;
         padding: auto;
         line-height: 2;
         padding: 10px;
         cursor: pointer;
-        color: white;
+        color: black;
         margin: 0 20px;
         float: right;
+        font-weight: bold;
+        font-size: 15px;
   }
   
   .restaurant {
@@ -47,9 +49,9 @@ body {
   }
   
   .restaurant-img {
-    flex-shrink: 0;
-    width: 80px;
-    height: 80px;
+flex-shrink: 0;
+    width: 200px;
+    height: 190px;
     margin-right: 10px;
   }
   
@@ -58,12 +60,12 @@ body {
   }
   
   .genre {
-    font-size: 10px;
+    font-size: 18px;
   }
   
   .address {
-    font-size: 12px;
-    margin-top: 5px;
+    font-size: 18px;
+        margin-top: 5px;
   }
   
   .likes {
@@ -74,19 +76,22 @@ body {
   
   .likes button {
     margin-right: 5px;
-    padding: 5px 10px;
-    border: none;
-    background-color: #eaeaea;
-    cursor: pointer;
+        padding: 5px 10px;
+        border: solid 1px;
+        background-color: #bffdf1;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+
   }
   
   .likes span {
-    font-size: 12px;
+    font-size: 15px;
     font-weight: bold;
   }
   
   .opening-hours {
-    font-size: 10px;
+    font-size: 17px;
     margin-top: 5px;
   }
   
@@ -100,6 +105,7 @@ body {
     margin-right: 5px;
     color: #1e66b8;
     text-decoration: none;
+    font-size: 14px;
   }
 
   .thread-list-ul{
@@ -116,29 +122,35 @@ body {
   }
 
   .update-button{
-  border: none;
-      border-radius: 5px;
-      background-color: #FFA629;
-      padding: auto;
-      line-height: 2;
-      padding: 10px;
-      cursor: pointer;
-      color: white;
-      margin: 20px;
+          border-radius: 5px;
+          background-color: #86dd60;
+          padding: auto;
+          line-height: 2;
+          padding: 10px;
+          cursor: pointer;
+          color: black;
+          margin: 20px;
+          /* font-weight: bold; */
+          font-size: 20px;
   }
   .delete-button{
-  border: none;
       border-radius: 5px;
-      background-color: #F24822;
+      background-color: #ffa995;
       padding: auto;
       line-height: 2;
       padding: 10px;
       cursor: pointer;
-      color: white;
+      color: black;
       margin: 20px;
+      /* font-weight: bold; */
+      font-size: 20px;
   }
 
   .community-name{
     text-align: center;
+  }
+
+  .sorting{
+    font-size: 20px;
   }
 

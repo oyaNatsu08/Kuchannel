@@ -8,12 +8,12 @@
     <link href="css/mypage.css" rel="stylesheet">
     <style>
         .notice-list {
-            margin: 0 auto;
-            max-width: 800px;
-            padding: 20px;
-            border: 1px solid gray;
-            padding: 10px;
-            margin-bottom: 10px;
+            margin: 20px;
+               max-width: 100%;
+              padding: 20px;
+              border: 1px solid gray;
+                  padding: 10px;
+             font-size: 20px;
         }
     </style>
 </head>
@@ -27,19 +27,20 @@
     <div id="app2">
 
         <div class="tab-container">
-            <h1>お知らせ</h1>
 
-            <div class="tab-buttons">
-                <button class="tab-button" @click="changeReply" id="btn1">返信</button>
-                <button class="tab-button" @click="changeInquiry" id="btn2">お問い合わせ</button>
-            </div>
 
             <div class="tab-content-area">
+                <h1 style="text-align: center;">お知らせ</h1>
+
+                <div class="tab-buttons">
+                    <button class="tab-button" @click="changeReply" id="btn1">返信</button>
+                    <button class="tab-button" @click="changeInquiry" id="btn2">お問い合わせ</button>
+                </div>
                 <div v-if="replyView">
                     <th:block th:each="notice : ${notices}">
                         <div th:if="${notice.flag}">
                             <a th:href="@{/review(id=${notice.reviewId})}">
-                                <p class="notice-list" style="background-color: sandybrown;"
+                                <p class="notice-list" style="background-color: #ffcea5;"
                                     th:text="${notice.replyUserName} + 'さんが' + ${notice.threadTitle} + 'へのレビューに返信しました'">
                                 </p>
                             </a>

@@ -28,6 +28,8 @@ body {
     margin-right: 8px;
     transition: background-color 0.3s ease;
     border-radius: 6px;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .tab-button.active {
@@ -40,6 +42,7 @@ body {
     background-color: rgba(255, 255, 255, 0.9);
     display: block;
     border-radius: 30px;
+
     }
 
 .tab-content {
@@ -59,6 +62,7 @@ table{
 
 .community-table {
     border: solid #DB8E23 2px;
+    font-size: 19px;
 }
 
 td {
@@ -67,6 +71,7 @@ td {
 
 .nickname-css{
     margin-right: 50px;
+    font-size: 20px;
 }
 
 /* 奇数行 */

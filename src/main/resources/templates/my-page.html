@@ -30,8 +30,8 @@
           <table class="community-table">
             <thead>
               <tr style="background-color: #FFA629; text-align: center;" >
-                <th>コミュニティ名</th>
-                <th style="width: 100px;">共有リンクのコピー</th>
+                <th style="padding: 10px;">コミュニティ名</th>
+                <th style="width: 180px;">共有リンクのコピー</th>
                 <th>ニックネーム</th>
                 <th>退会する</th>
               </tr>
@@ -40,11 +40,16 @@
               <button type="button" @click="openPopupCommu" style="margin-bottom: 10px; background-color: #FFA931; " class="tab-button">コミュニティ作成</button>
               <tr v-for="com in belongingCommunities" class="community-tr">
                 <td>{{com.communityName}}</td>
-                <td><button type="button" @click="copy(com.communityId)" >共有</button></td>
+                <td><button type="button" @click="copy(com.communityId)" style="
+    font-size: 21px;
+">共有</button></td>
                 <td><input type="text" v-model="com.nickName" class="nickname-css"><button type="button"
-                    @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)" style="background-color: #f9dfb2;border: #755e36 solid 1px;">変更</button></button>
+                    @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)" style="background-color: #f9dfb2;border: #755e36 solid 1px; font-size: 20px;">変更</button></button>
                 </td>
-                <td><button type="button" @click="withdrawal(com.communityId)" style="background-color: #FF3535;color: white;border: red;">退会</button></td>
+                <td><button type="button" @click="withdrawal(com.communityId)" style="background-color: rgb(255 156 156);
+    color: black;
+    font-size: 20px;
+}">退会</button></td>
               </tr>
             </tbody>
           </table>
@@ -75,18 +80,18 @@
         </div>
 
         <div id="tab2" v-if="tab2" class="tab-content">
-          <table>
+          <table class="community-table">
 
             <thead>
               <tr style="background-color: #FFA629; text-align: center;">
-                <th>スレッド名</th>
+                <th style="padding: 10px;">スレッド名</th>
                 <th>コミュニティ名</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="thread in myThreads">
-                <td><a href="#" style="color: #0D99FF;">{{thread.threadTitle}}</a></td>
-                <td><a :href="getCommunityLink(thread.communityId)" style="color: #0D99FF;">{{thread.communityName}}</a></td>
+                <td><a href="#" style="color: rgb(0 88 255);">{{thread.threadTitle}}</a></td>
+                <td><a :href="getCommunityLink(thread.communityId)" style="color: rgb(0 88 255);">{{thread.communityName}}</a></td>
               </tr>
 
             </tbody>
@@ -94,11 +99,11 @@
         </div>
 
         <div id="tab3" v-if="tab3" class="tab-content">
-          <table>
+          <table class="community-table">
 
             <thead>
               <tr style="background-color: #FFA629; text-align: center;">
-                <th>タイトル</th>
+                <th style="padding: 10px;">タイトル</th>
                 <th>本文</th>
                 <th>スレッド名</th>
                 <th>コミュニティ名</th>
@@ -107,7 +112,7 @@
             </thead>
             <tbody>
               <tr v-for="review in myReviews">
-                <td><a href="#" style="color: #0D99FF;">{{review.reviewTitle}}</a></td>
+                <td><a href="#" style="color: rgb(0, 88, 255);">{{review.reviewTitle}}</a></td>
                 <td class="review-cell">{{review.review}}</td>
                 <td>{{review.threadTitle}}</td>
                 <td>{{review.communityName}}</td>

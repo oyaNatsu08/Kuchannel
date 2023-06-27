@@ -18,21 +18,22 @@
     <form action="/login" method="post" th:object="${UserForm}">
             <div class="cp_iptxt">
                 <span class="base-text">ユーザーID</span><input class="base-input" type="text" name="loginId" th:field="*{loginId}">
-                <div class="error" th:each="error: ${#fields.errors('loginId')}">
+                <div class="error1" th:each="error: ${#fields.errors('loginId')}">
                     [[ ${error} ]]
                 </div>
             </div>
 
             <div class="cp_iptxt">
                 <span class="size">パスワード</span><input class="base-input" type="password" name="password" th:field="*{password}">
-                <div class="error" th:each="error: ${#fields.errors('password')}">
+                <div class="error2" th:each="error: ${#fields.errors('password')}">
                     [[ ${error} ]]
                 </div>
             </div>
+        <a th:href="@{create-user}" class="custom-btn">新規作成</a>
         <button id="login-btn" class="custom-btn" type="submit">
             ログイン
         </button>
-        <a th:href="@{create-user}" class="custom-btn">新規作成</a>
+
     </form>
 </div>
     <script>

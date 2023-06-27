@@ -22,18 +22,16 @@
 <div id="app">
 
 <div class="review-area">
-  <h2 style="padding: 10px;">登録したお店の情報</h2>
+  <h2 style="padding: 10px; font-size: 30px;">登録したお店の情報</h2>
   <hr>
   <div class="review">
-    <p>
-      タイトル：
-      <input type="text" v-model="reviewTitle">
-    </p>
-    <p>
-      本文：
+    <spanp class="font-size">タイトル：</spanp>
+      <input type="text" v-model="reviewTitle" class="input-width">
+<br>
+    <spanp class="font-size">本文：</spanp>
       <textarea cols="30" rows="10" v-model="content"></textarea>
-    </p>
-    <p>
+<br>
+    <p class="font-size">
       写真の追加：
       <input type="file" ref="fileInput" multiple />
     </p>
