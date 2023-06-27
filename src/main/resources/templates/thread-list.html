@@ -13,9 +13,9 @@
 
 <body>
 
-<!--  <div id="app0">-->
-<!--    <th:block th:insert="common/header"></th:block>-->
-<!--  </div>-->
+  <!--  <div id="app0">-->
+  <!--    <th:block th:insert="common/header"></th:block>-->
+  <!--  </div>-->
 
   <div id="app">
 
@@ -108,13 +108,13 @@
           </table>
           <form action="/kuchannel/Information" method="get">
             <button type="submit" v-if="sessionInfo.role ===1">問い合わせ</button>
-            <input type="hidden" name="communityId" th:value="${communityId}"/>
+            <input type="hidden" name="communityId" th:value="${communityId}" />
 
             <button type="button" v-if="sessionInfo.role ===2" @click="applyChenge">この内容で変更する</button>
             <button @click.self="closePopup('CommunityMember')">閉じる</button>
-  
+
           </form>
-          
+
         </div>
       </div>
 
@@ -179,7 +179,8 @@
             </select>
           </p>
 
-          <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags" @input="updateSuggestions('updateThreadHashtags')"></p>
+          <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags"
+              @input="updateSuggestions('updateThreadHashtags')"></p>
 
           <div v-if="iseditThreadHashtagsSuggest" class="suggest-area">
             <ul>
@@ -244,7 +245,7 @@
           <div v-for="thread in selectedThreads" class="hashtag-list">
             <div v-for="hashtag in thread.hashTagList">
               <p><label><input type="checkbox" name="hashTag" v-bind:value="hashtag.tag_name"
-                  v-model="selectedThreadHashTag" />{{hashtag.tag_name}}</label></p>
+                    v-model="selectedThreadHashTag" />{{hashtag.tag_name}}</label></p>
             </div>
           </div>
           <button @click.self="ThreadIntegrate">統合する</button>
@@ -258,7 +259,8 @@
       <div v-for="thread in threads" v-if="threadMainView">
         <div class="restaurant" v-if="genreIncludeCheck(thread.genre)">
 
-          <img :src="'data:image/png;base64,' + thread.image_path" class="restaurant-img" v-if="thread.image_path != null">
+          <img :src="'data:image/png;base64,' + thread.image_path" class="restaurant-img"
+            v-if="thread.image_path != null">
 
           <div>
             <input type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2">
@@ -282,7 +284,8 @@
           </div>
           <div class="delete-update">
             <button type="button" @click="openUpdateThread(thread.id)">情報編集</button>
-            <button type="button" v-if="thread.user_id == sessionInfo.id || thread.user_id == 2" @click="deleteThread(thread.id)">削除</button>
+            <button type="button" v-if="thread.user_id == sessionInfo.id || thread.user_id == 2"
+              @click="deleteThread(thread.id)">削除</button>
 
           </div>
 
@@ -308,7 +311,8 @@
                 <div class="review-content">
                   <h5>レビュータイトル：{{ review.reviewTitle }}</h5>
                   <p class="review-cell"><span style="width: 500px;">本文：{{ review.reviewContent }}</span></p>
-                  <a :href="getReviewDetailLink(review.threadId,review.reviewId)">レビュー詳細へ</a> <!--　getReviewDetailLink(thread.id, review.reviewId)でリンクへ飛ぶ　-->
+                  <a :href="getReviewDetailLink(review.threadId,review.reviewId)">レビュー詳細へ</a>
+                  <!--　getReviewDetailLink(thread.id, review.reviewId)でリンクへ飛ぶ　-->
                 </div>
               </div>
             </div>
@@ -325,7 +329,7 @@
   </div>
 
 
-<!--  <script src="/js/base.js"></script>-->
+  <!--  <script src="/js/base.js"></script>-->
 
   <script>
     const { createApp } = Vue;
@@ -397,7 +401,7 @@
           issearchTextSuggest: false,
           isaddThreadHashtagsSuggest: false,
 
-          iseditThreadHashtagsSuggest:false,
+          iseditThreadHashtagsSuggest: false,
           suggestions: [], // サジェストされるハッシュタグ
           existingHashTags: [],
 
@@ -425,7 +429,7 @@
           axios.get(`/getThreads/${this.communityId}`)
             .then(res => {
               this.threads = res.data;
-              console.log('こいつ',this.threads);
+              console.log('こいつ', this.threads);
             });
         },
 
@@ -689,7 +693,7 @@
 
         // スレッドのレビュー一覧に遷移
         getThreadReviewLink(threadId) {
-         return `/thread-review/${threadId}`;
+          return `/thread-review/${threadId}`;
         },
 
         getReviewLink(threadId) {
@@ -857,10 +861,7 @@
         getReviewLink(threadId) {
           const link = this.communityUrl.replace("http://localhost:8080/", "");
           return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
-        }
-
-
-
+        },
 
         updateSuggestions(inputAreaName) {
           this.suggestions = []; // サジェストをリセット
@@ -913,7 +914,7 @@
           const link = this.communityUrl.replace("http://localhost:8080/", "");
           return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
         },
-        getReviewDetailLink(threadId,reviewId) {
+        getReviewDetailLink(threadId, reviewId) {
           const link = this.communityUrl.replace("http://localhost:8080/", "");
           return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews/${reviewId}`;
         },
@@ -924,9 +925,9 @@
           return `/kuchannel/user-review/${userId}`;
         },
 
-      toggleMenu() {
+        toggleMenu() {
           this.showMenu = !this.showMenu;
-      },
+        },
 
 
       },
