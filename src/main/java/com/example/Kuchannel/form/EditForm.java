@@ -11,7 +11,7 @@ public class EditForm {
     //    @NotEmpty
     private String name;
 
-    @NotEmpty
+    @NotEmpty(message = "パスワードは必須です")
     private String password;
 
 }

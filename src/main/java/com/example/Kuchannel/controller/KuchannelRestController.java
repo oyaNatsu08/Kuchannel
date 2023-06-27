@@ -108,6 +108,18 @@ public class KuchannelRestController {
         return kuchannelService.deleteThread(thread_id);
     }
 
+    //スレッド削除（一般化管理者かの判断も追加版）
+    @DeleteMapping("/deleteThread/{threadId}/{role}")
+    public boolean deleteThread2(@PathVariable("threadId")Integer thread_id,@PathVariable("role")Integer role){
+        System.out.println("スレid"+thread_id);
+        System.out.println("ロール"+role);
+        if(role == 2){
+            System.out.println("2やねん");
+            return kuchannelService.forcedDeleteThread(thread_id);
+        }
+        return kuchannelService.deleteThread(thread_id);
+    }
+
     //セッション情報から、ユーザーidとroleを持った情報を返す。
     //getThreadと同じで、コミュニティidを渡すようにする。今は１で固定。
     @GetMapping("/getSessionInfo/{communityId}")

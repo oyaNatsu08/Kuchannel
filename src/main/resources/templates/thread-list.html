@@ -23,7 +23,7 @@
 
     <div class="pagetop">
       <h1>{{communityName}}へようこそ！</h1>
-      <button @click.self="getCommunityMember">コミュニティメンバーの確認</button>
+      <button @click.self="getCommunityMember">コミュニティの詳細</button>
     </div>
 
     <!-- 検索バー -->
@@ -35,7 +35,7 @@
           <ul>
 
             <li v-for="suggestion in suggestions" :key="suggestion" class="suggest-content">
-              <a @click="selectSuggestion(suggestion)">{{ suggestion }}</a>
+              <a @click="selectSuggestion(suggestion,'searchText')">{{ suggestion }}</a>
             </li>
           </ul>
         </div>
@@ -48,7 +48,7 @@
           <option value="thread">スレッド</option>
           <option value="review">全レビュー</option>
         </select>
-        <button type="button" @click="changeRefineView()">簡単絞り込み</button>
+        <button type="button"  @click="changeRefineView()">簡単絞り込み</button>
       </div>
 
       <div v-if="refineView" style="text-align: center;" class="refine-view">
@@ -60,7 +60,7 @@
           </div>
         </div>
         <hr>
-        <div>
+        <div v-if="isPopularKeyWord">
           <h3>人気のキーワード</h3>
           <div v-for="hashtag in hashtags" style="display: inline-block;">
             <p style="color: blue; margin-right: 10px;" @click="searchAdd(hashtag.tagName)">{{ hashtag.tagName }}</p>
@@ -140,7 +140,7 @@
           <div v-if="isaddThreadHashtagsSuggest" class="suggest-area">
             <ul>
               <li v-for="suggestion in suggestions" :key="suggestion" class="suggest-content">
-                <a @click="selectSuggestion(suggestion)">{{ suggestion }}</a>
+                <a @click="selectSuggestion(suggestion,'addThreadHashtags')">{{ suggestion }}</a>
               </li>
             </ul>
           </div>
@@ -161,6 +161,7 @@
         <label><input type="radio" name="sortSelect" @click="sortItems('good_count')"></button>いいねの多い順にする</label>
       </div>
 
+
       <!-- スレッド情報編集 -->
       <div v-if="isThreadUpdatePopup" class="popup-overlay" @click.self="closePopup('ThreadUpdate')">
         <div class="popup">
@@ -178,10 +179,10 @@
           </p>
           <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags" @input="updateSuggestions('updateThreadHashtags')"></p>
           
-          <div v-if="iseditThreadHashtagsSuggest" class="suggest-area">
+          <div v-if="isupdateThreadHashtagsSuggest" class="suggest-area">
             <ul>
               <li v-for="suggestion in suggestions" :key="suggestion" class="suggest-content">
-                <a @click="selectSuggestion(suggestion)">{{ suggestion }}</a>
+                <a @click="selectSuggestion(suggestion,'updateThreadHashtags')">{{ suggestion }}</a>
               </li>
             </ul>
           </div>
@@ -277,7 +278,7 @@
           </div>
           <div class="delete-update">
             <button type="button" @click="openUpdateThread(thread.id)">情報編集</button>
-            <button type="button" v-if="thread.user_id == sessionInfo.id" @click="deleteThread(thread.id)">削除</button>
+            <button type="button" v-if="thread.user_id == sessionInfo.id || sessionInfo.role ===2" @click="deleteThread(thread.id)">削除</button>
 
           </div>
 
@@ -379,6 +380,7 @@
           GenreChecked: [],
           searchText: '',
           selectedOption: 'thread',
+          isPopularKeyWord:true,
 
           //スレッドのメインリストを表示
           threadMainView: true,
@@ -388,7 +390,7 @@
           //サジェスト用
           issearchTextSuggest: false,
           isaddThreadHashtagsSuggest: false,
-          iseditThreadHashtagsSuggest:false,
+          isupdateThreadHashtagsSuggest:false,
           suggestions: [], // サジェストされるハッシュタグ
           existingHashTags: [],
 
@@ -396,6 +398,15 @@
         }
 
 
+      },
+      watch: {
+        selectedOption(newVal) {
+          if (newVal === 'thread') {
+            this.isPopularKeyWord = true;
+          } else if (newVal === 'review') {
+            this.isPopularKeyWord = false;
+          }
+        }
       },
 
 
@@ -434,7 +445,9 @@
 
 
         deleteThread(threadId) {
-          axios.delete(`/deleteThread/${threadId}`)
+          if (window.confirm(`本当に削除してもよいですか？`)) {
+            (this.sessionInfo.role === 1)
+              axios.delete(`/deleteThread/${threadId}/${this.sessionInfo.role}`)
             .then(res => {
 
               console.log(res.data);
@@ -446,6 +459,10 @@
               }
 
             });
+            
+            
+          }
+          
         },
 
         //スレッドの並び替えonclickで並び替えたいキーの名前を入れる。
@@ -474,19 +491,6 @@
           if (this.addThreadTitle == '') {
             alert('お店の名前は必須入力です')
           } else {
-            // const addInfo = {
-            //   threadName: this.addThreadTitle,
-            //   furigana: this.addThreadFurigana,
-            //   address: this.addThreadAddress,
-            //   salesTime: this.addThreadSalesTime,
-            //   genre: this.addThreadGenre,
-            //   hashtag: this.addThreadHashtags,
-            //   communityId: this.communityId,
-            // }
-            // if (this.addThreadHashtags.trim() == '') {
-            //   addInfo.hashtag = null
-            // }
-
 
             const formData = new FormData();
             formData.append("threadName", this.addThreadTitle);
@@ -538,14 +542,6 @@
           if (this.updateThreadTitle == '') {
             alert('お店の名前は必須入力です')
           } else {
-            // const updataInfo = {
-            //   threadName: this.updateThreadTitle,
-            //   furigana: this.updateThreadFurigana,
-            //   address: this.updateThreadAddress,
-            //   salesTime: this.updateThreadSalesTime,
-            //   genre: this.updateThreadGenre,
-            //   hashtag: this.updateThreadHashtags
-            // }
 
             const formData = new FormData();
             formData.append("threadName", this.updateThreadTitle);
@@ -603,6 +599,7 @@
         },
         //コミュニティ削除
         deleteCommunity() {
+          
           if (window.confirm(`${this.communityName}を本当に削除してもよいですか？`)) {
             if (window.confirm('後悔しませんか?')) {
               axios.delete(`/deleteCommunity/${this.communityId}`)
@@ -683,7 +680,7 @@
 
         //絞り込みリストを表示
         changeRefineView() {
-          getPopularHashtags()
+          this.getPopularHashtags()
           this.refineView = !this.refineView;
         },
 
@@ -807,17 +804,23 @@
         updateSuggestions(inputAreaName) {
           this.suggestions = []; // サジェストをリセット
 
-          // テキストを解析してハッシュタグを検索
-          const words = this[`${inputAreaName}`].split(" ");
-          if (words.length > 0) {
+          const words0 = this[`${inputAreaName}`].replace(/　/g, " ").split(" ");
+          const words = words0.filter(word => word.trim() !== '');
+          
+          // const splited = words.split(/(　| |、)/);
+          // const replaced = splited.map(item => item.replace(/[＃#]/g, ""));
+          // const filtered = replaced.filter(item => item !== " " && item !== "、");
+          // const trimed = filtered.map(item => item.trim());
+          if ( words.length > 0) {
             this.isaddThreadHashtagsSuggest = false
             this.issearchTextSuggest = false
-            this.iseditTextSuggest = false
+            this.isupdateThreadHashtagsSuggest = false
             this[`is${inputAreaName}Suggest`] = true;
           }
           const lastWord = words[words.length - 1]; // 最後の単語を取得
 
-          if (lastWord.startsWith("#") || lastWord.startsWith("＃")) {
+          if(lastWord ){
+            if ( lastWord.startsWith("#") || lastWord.startsWith("＃")) {
             const inputTag = lastWord.substring(1); // "#"を除いた部分を取得
             //「#」だけの時にはサジェストが出ない
             if (!inputTag == '') {
@@ -829,26 +832,38 @@
               this.suggestions = this.suggestions.map(item => "#" + item + " ");
             }
           }
+          }
+          
         },
-        removeEmptyStrings(value) {
-          return value !== '';
-        },
-        selectSuggestion(suggestion) {
-          const words0 = this.searchText.split(" ").join("　").split("　"); // スペースで分割し、全角スペースでも分割する
-          const words = words0.filter(this.removeEmptyStrings); // 空の文字列を削除する
+        
+        selectSuggestion(suggestion, inputArea) {
+          const words0 = this[inputArea].replace(/　/g, " ").split(" ");
+          console.log('words0',words0);
+          const words = words0.filter(word => word.trim() !== '');
+          console.log('words',words);
 
-          let lastWord = words[words.length - 1]; // 最後の単語を取得
+          let lastWord = words[words.length - 1].trim();
 
           if (lastWord.startsWith("#") || lastWord.startsWith("＃")) {
-            // 最後の単語がハッシュタグで始まっている場合は削除
             words.splice(-1, 1);
           }
 
-          let newArray = words.filter(this.removeEmptyStrings);
-          newArray.push(suggestion); // サジェストを追加
+          let newArray = words.filter(word => word.trim() !== '');
+          newArray.push(suggestion);
 
-          this.searchText = newArray.join(" ") + " "; // 入力欄にサジェストを追加
-          this.suggestions = []; // サジェストをリセット
+          if (inputArea !== 'searchText') {
+            this[inputArea] = newArray.join(" ") + ", ";
+          } else {
+            this[inputArea] = newArray.join(" ") + " ";
+          }
+
+          this.suggestions = [];
+          this.isaddThreadHashtagsSuggest = false;
+          this.issearchTextSuggest = false;
+          this.isupdateThreadHashtagsSuggest = false;
+        },
+        removeEmptyStrings(value) {
+          return value !== '';
         },
 
         getReviewLink(threadId) {
@@ -862,10 +877,6 @@
         getUserReviewLink(userId) {
           return `/kuchannel/user-review/${userId}`;
         },
-
-
-
-
       },
 
       created: function () {

@@ -7,13 +7,13 @@ import lombok.Data;
 public class CreateForm {
     private int id;
 
-    @NotEmpty
+    @NotEmpty(message = "ユーザーIDは必須です")
     private String loginId;
 
-    //    @NotEmpty
+    @NotEmpty(message = "名前は必須です")
     private String name;
 
-    @NotEmpty
+    @NotEmpty(message = "パスワードは必須です")
     private String password;
 
 

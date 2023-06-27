@@ -14,10 +14,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Repository
 public class KuchannelDao {
@@ -666,7 +663,7 @@ public class KuchannelDao {
     public List<HashTag> getAllHashtags(Integer communityId){
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("communityId", communityId);
-        var list = jdbcTemplate.query("SELECT h.id, h.tag_name FROM hashtags h JOIN thread_hashtag th ON h.id = th.hashtag_id JOIN threads t ON t.id = th.thread_id WHERE t.community_id = :communityId ;",param, new DataClassRowMapper<>(HashTag.class));
+        var list = jdbcTemplate.query("SELECT DISTINCT h.id, h.tag_name FROM hashtags h JOIN thread_hashtag th ON h.id = th.hashtag_id JOIN threads t ON t.id = th.thread_id WHERE t.community_id = :communityId ;",param, new DataClassRowMapper<>(HashTag.class));
 
         return list;
 
@@ -1049,7 +1046,7 @@ public class KuchannelDao {
         System.out.println("userId:"+userId);
         System.out.println("addedThreadId:"+addedThreadId);
 
-        //レビューのいいねを重複させ内容にインサート
+        //レビューのいいねを重複させずにインサート
         MapSqlParameterSource param =new MapSqlParameterSource();
         param.addValue("integrate_thread_id",threadInfo.getIntegrateThreadId());
         param.addValue("added_thread_id",addedThreadId);
@@ -1075,5 +1072,36 @@ public class KuchannelDao {
 
         return 1;
     }
+
+    public boolean forcedDeleteThread(Integer threadId){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("threadId",threadId);
+
+        var result = jdbcTemplate.query("SELECT rev.id AS reviewId ,rev.title AS reviewTitle, CONCAT(LEFT(rev.review,10),'...') AS review, " +
+                        "th.title AS threadTitle, co.name AS communityName, DATE(rev.create_date) AS createDate ,co.id AS communityId , co.id AS communityId , co.url AS communityUrl,th.id AS threadId " +
+                        "FROM reviews rev JOIN threads th ON rev.thread_id = th.id " +
+                        "JOIN communities co ON th.community_id = co.id JOIN community_user cu on co.id = cu.community_id " +
+                        "WHERE th.id = :threadId;", param,
+                new DataClassRowMapper<>(MyReview.class));
+
+        for(var i=0; i< result.size(); i++){
+            reviewDelete(result.get(i).getReviewId());
+        }
+
+//        元のスレッドgoodを削除。
+        int result4 = jdbcTemplate.update("DELETE FROM thread_goods WHERE thread_id = :threadId;", param);
+//        元のスレッドのスレッドハッシュタグを消す
+        int result5 = jdbcTemplate.update("DELETE FROM thread_hashtag WHERE thread_id = :threadId;", param);
+//        元のスレッドを消す
+        int result6 = jdbcTemplate.update("DELETE FROM threads WHERE id = :threadId;", param);
+
+        return true;
+    }
+
+
+
+
+
+
 
 }

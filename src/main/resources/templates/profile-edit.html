@@ -17,6 +17,9 @@
         <div class="cp-iptxt">
             <span class="size">名前</span>
             <input class="base-input" type="name" name="name" th:field="*{name}" th:value="${user.name}">
+            <input class="base-input" type="hidden" name="loginId" th:value="${user.loginId}">
+            <input class="base-input" type="hidden" name="password" th:value="${user.password}">
+            <input class="base-input" type="hidden" name="imagePath" th:value="${user.imagePath}">
             <div class="error" th:each="error: ${#fields.errors('name')}">
                 [[ ${error} ]]
             </div>
@@ -33,8 +36,9 @@
             <input type="hidden" id="loginId" name="loginId" th:field="*{loginId}" th:value="${user.loginId}">
         </div>
 
-        <a th:href="@{/kuchannel/profile-details}" class="custom-btn">戻る</a>
+        
         <button type="submit" class="custom-btn">編集</button>
+        <a th:href="@{/kuchannel/profile-details}" class="custom-btn">戻る</a>
         </button>
     </form>
 </div>

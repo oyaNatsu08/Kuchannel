@@ -253,6 +253,7 @@ public class KuchannelService {
     public boolean deleteThread(Integer thread_id){
         return kuchannelDao.deleteThread(thread_id);
     }
+    public boolean forcedDeleteThread(Integer thread_id){return kuchannelDao.forcedDeleteThread(thread_id);}
 
     public int threadUpdate(ThreadAddForm inputData,Integer thread_id){return kuchannelDao.threadUpdate(inputData,thread_id);}
 
