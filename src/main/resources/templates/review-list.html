@@ -58,6 +58,7 @@
           <button @click.self="updateThread">更新</button>
           <button @click.self="closeUpdateThread()">閉じる</button>
         </div>
+
       </div>
 
       <div class="sorting">
@@ -428,7 +429,6 @@
             formData.append("salesTime", this.updateThreadSalesTime);
             formData.append("genre", this.updateThreadGenre);
 
-
             if (this.updateThreadHashtags == '') {
               formData.append("hashtag", null);
             } else {
@@ -534,6 +534,7 @@
         this.communityId = `[[ ${community.id} ]]`
         this.communityUrl = `[[ ${community.url} ]]`
         console.log(this.imageThread);
+
         this.userId = `[[ ${userId} ]]`;
 
         this.userImage = `[[ ${image} ]]`;

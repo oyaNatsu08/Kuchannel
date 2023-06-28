@@ -56,6 +56,7 @@
         <div class="review-area">
         <div class="review" style="margin-top: 20px;font-size: 20px;">
             <h3>投稿者：<a th:href="@{/kuchannel/user-review/{communityId}/{userId}(communityId=${communityId},userId=${review.userId})}">[[ ${review.userName} ]]</a></h3>
+
             <p>投稿日：[[ ${review.createDate} ]]</p>
             <h2>[[ ${review.title} ]]</h2>
             <hr>
@@ -147,6 +148,9 @@
                 //ユーザーのレビュー一覧に遷移
                 getUserReviewLink(userId) {
                     return `/kuchannel/user-review/[[ ${communityId} ]]/${userId}`;
+                },
+                toggleMenu() {
+                    this.showMenu = !this.showMenu;
                 },
                 toggleMenu() {
                     this.showMenu = !this.showMenu;

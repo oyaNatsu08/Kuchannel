@@ -163,6 +163,7 @@ public class KuchannelController {
             return "login";
         } else {
             var user = (UserRecord) session.getAttribute("user");
+
             model.addAttribute("image", user.imagePath());
             return "my-page";
         }
@@ -204,6 +205,13 @@ public class KuchannelController {
 
             model.addAttribute("communityId", communityId);
             model.addAttribute("communityName", inviteCode);
+            model.addAttribute("image", user.imagePath());
+
+            var community =kuchannelService.findCommunity(communityId);
+            String url = community.url();
+            String moldedUrl =url.replace("http://localhost:8080/","");
+
+            return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace( "%2F","/") + "/" + community.id() + "/threads";
 
             var community = kuchannelService.findCommunity(communityId);
             String url = community.url();
@@ -252,6 +260,7 @@ public class KuchannelController {
             model.addAttribute("image", user.imagePath());
 
             var communityUser = kuchannelService.checkJoin(user.id(), "http://192.168.33.99:8080/kuchannel/community/" + str + "/" + code);
+
             if (communityUser == null) {
                 model.addAttribute("communityName", code);
                 model.addAttribute("url", "http://192.168.33.99:8080/kuchannel/community/" + str + "/" + code);
@@ -264,7 +273,9 @@ public class KuchannelController {
                 if (community.deleteDate() == null) {
                     model.addAttribute("communityId", community.id());
                     model.addAttribute("communityName", code);
+
                     model.addAttribute("communityUrl", community.url());
+
 
                     return "thread-list";
                 } else {
@@ -301,6 +312,7 @@ public class KuchannelController {
                 model.addAttribute("thread", thread);
                 model.addAttribute("userId", user.id());
                 model.addAttribute("community", community);
+
 
                 return "review-list";
             } else {
@@ -388,6 +400,7 @@ public class KuchannelController {
 
             model.addAttribute("review", new ReviewElementAll(review.getUserId(), review.getUserName(), review.getReviewId(), review.getTitle(),
                     review.getReview(), review.getCreateDate(), reviewImages, reviewReplies, goodCount));
+
             model.addAttribute("reviewId", reviewId);
             model.addAttribute("threadId", threadId);
             model.addAttribute("communityId", thread.getCommunity_id());
@@ -442,9 +455,9 @@ public class KuchannelController {
 
             model.addAttribute("image", user.imagePath());
 
-
             String moldedUrl = url.replace("http://192.168.33.99:8080/", "");
             String URlToJump = moldedUrl + "/" + community.id() + "/" + "/threads";
+
 
             return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace("%2F", "/") + "/" + community.id() + "/threads";
 
@@ -475,6 +488,7 @@ public class KuchannelController {
 
             model.addAttribute("image", loginUser.imagePath());
 
+
             return "inquiry-detail";
         }
     }
@@ -491,6 +505,7 @@ public class KuchannelController {
         model.addAttribute("name", community.name());
 
         var user = (UserRecord) session.getAttribute("user");
+
         model.addAttribute("image", user.imagePath());
 
         return "thread-list";
@@ -503,6 +518,7 @@ public class KuchannelController {
                        Model model) {
 
         var user = (UserRecord) session.getAttribute("user");
+
         model.addAttribute("image", user.imagePath());
 
         model.addAttribute("communityId", communityId);
@@ -519,6 +535,9 @@ public class KuchannelController {
         var user = (UserRecord) session.getAttribute("user");
         model.addAttribute("image", user.imagePath());
         model.addAttribute("communityId", communityId);
+
+        var user = (UserRecord)session.getAttribute("user");
+        model.addAttribute("image", user.imagePath());
 
         //バリデーション
         if (bindingResult.hasErrors()) {
@@ -540,9 +559,11 @@ public class KuchannelController {
         model.addAttribute("communityName", community.name());
 
         String url = community.url();
+
         String moldedUrl = url.replace("http://192.168.33.99:8080/", "");
 
         return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace("%2F", "/") + "/" + community.id() + "/threads";
+
 
     }
 
@@ -562,6 +583,7 @@ public class KuchannelController {
 
             //ユーザー情報を取得
             var user = (UserRecord) session.getAttribute("user");
+
             model.addAttribute("image", user.imagePath());
 
             model.addAttribute("thread", thread);
@@ -573,6 +595,7 @@ public class KuchannelController {
             String moldedUrl = url.replace("http://192.168.33.99:8080/", "");
 
             return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace("%2F", "/") + "/" + community.id() + "/threads/" + threadId + "/reviews";
+
         }
     }
 
@@ -631,7 +654,9 @@ public class KuchannelController {
 
             var community = kuchannelService.findCommunity(thread.getCommunity_id());
             String url = community.url();
+
             String moldedUrl = url.replace("http://192.168.33.99:8080/", "");
+
 
             return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace("%2F", "/") + "/" + community.id() + "/threads/" + threadId + "/reviews/" + reviewId;
         }
@@ -698,6 +723,7 @@ public class KuchannelController {
                                 BindingResult bindingResult,
                                 @RequestParam("loginId") String loginId,
                                 @RequestParam(value = "updateImage", required = false) MultipartFile updateImage,
+
                                 Model model) throws IOException {
 
         var user = (UserRecord) session.getAttribute(("user"));
@@ -705,6 +731,7 @@ public class KuchannelController {
 
         //バリデーション
         if (bindingResult.hasErrors()) {
+
             model.addAttribute("image", user.imagePath());
             return "profile-edit";
         }
