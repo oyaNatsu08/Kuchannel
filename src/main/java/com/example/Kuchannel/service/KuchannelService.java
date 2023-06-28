@@ -6,8 +6,6 @@ import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.entity.InformatonRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.File;
 import java.io.IOException;
@@ -126,7 +124,7 @@ public class KuchannelService {
     }
 
     //データベースからレビュー一覧に表示する情報を全件取得
-    public List<ReviewRecord> findReviewAll(Integer threadId) {
+    public List<Review> findReviewAll(Integer threadId) {
         return kuchannelDao.findReviewAll(threadId);
     }
 
@@ -161,7 +159,7 @@ public class KuchannelService {
     }
 
     //レビューIDを元にreviewsテーブルから情報を取得する
-    public ReviewRecord findReview(Integer reviewId) {
+    public Review findReview(Integer reviewId) {
         return kuchannelDao.findReview(reviewId);
     }
 
@@ -288,8 +286,18 @@ public class KuchannelService {
 
     public int IntegrateThreads(ThreadAddForm threadInfo,Integer userId){return kuchannelDao.IntegrateThreads(threadInfo,userId);}
 
-    //画像生成
+    //お問い合わせ完了処理
+    public int completeInquiryUpdate(Integer inquiryId) {
+        return kuchannelDao.completeInquiryUpdate(inquiryId);
+    }
+
+    //プロフィールアイコン画像生成
     public void userImageCreate(List<File> imageFiles) throws IOException {
         kuchannelDao.userImageCreate(imageFiles);
+    }
+
+    //スレッド画像生成
+    public void threadImagesCreate(List<File> imageFiles) throws IOException {
+        kuchannelDao.threadImagesCreate(imageFiles);
     }
 }

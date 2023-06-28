@@ -424,7 +424,7 @@
         },
         //ユーザーのレビュー一覧に遷移
         getUserReviewLink(userId) {
-          return `/kuchannel/user-review/${userId}`;
+          return `/kuchannel/user-review/[[${community.id}]]/${userId}`;
         },
         //いいねボタン押された時の挙動
         goodDeal(reviewId) {

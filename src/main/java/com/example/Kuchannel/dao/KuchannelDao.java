@@ -12,11 +12,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -309,15 +310,17 @@ public class KuchannelDao {
     }
 
     //データベースからレビュー一覧に表示する情報を全件取得
-    public List<ReviewRecord> findReviewAll(Integer threadId) {
+    public List<Review> findReviewAll(Integer threadId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("threadId", threadId);
+
+        //System.out.println("スレッドID" + threadId);
 
         var list = jdbcTemplate.query("SELECT u.id AS userId, u.name AS userName, " +
                         "r.id AS reviewId, r.title, r.review, to_char(r.create_date, 'YYYY-MM-DD HH24:MI') AS createDate " +
                         "FROM users u JOIN reviews r ON u.id = r.user_id " +
                         "WHERE r.thread_id = :threadId ORDER BY r.id", param,
-                        new DataClassRowMapper<>(ReviewRecord.class));
+                        new DataClassRowMapper<>(Review.class));
 
         return list;
 
@@ -408,13 +411,23 @@ public class KuchannelDao {
 
         var user = (UserRecord)session.getAttribute("user");
 
+        String beforeDate = keyHolder.getKeys().get("create_date").toString();
+
+        // 元の日付のフォーマットを指定
+        DateTimeFormatter originalFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+        LocalDateTime dateTime = LocalDateTime.parse(beforeDate, originalFormatter);
+
+        // 変換したいフォーマットを指定
+        DateTimeFormatter targetFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        String formattedDate = dateTime.format(targetFormatter);
+
         var reply = new ReviewReply(
                         Integer.parseInt(keyHolder.getKeys().get("id").toString()),
                         Integer.parseInt(keyHolder.getKeys().get("user_id").toString()),
                         user.name(),
                         Integer.parseInt(keyHolder.getKeys().get("review_id").toString()),
                         keyHolder.getKeys().get("reply").toString(),
-                        keyHolder.getKeys().get("create_date").toString()
+                        formattedDate
                 );
 
         return reply;
@@ -430,7 +443,7 @@ public class KuchannelDao {
                         "r.id AS reviewId, r.title, r.review, to_char(r.create_date, 'YYYY-MM-DD HH24:MI') AS createDate " +
                         "FROM users u JOIN reviews r ON u.id = r.user_id " +
                         "WHERE r.id = :reviewId", param,
-                new DataClassRowMapper<>(ReviewRecord.class));
+                new DataClassRowMapper<>(Review.class));
 
         return list.isEmpty() ? null : list.get(0);
     }
@@ -1001,7 +1014,7 @@ public class KuchannelDao {
                         "On u.id = cu.user_id\n" +
                         "WHERE cu.community_id = :community_id AND user_id = :user_id;", param,
                 new DataClassRowMapper<>(AccountInformation.class));
-        //System.out.println(list.get(0));
+//        System.out.println(list.get(0));
         return list.isEmpty() ? null : list.get(0);
     }
 
@@ -1084,7 +1097,7 @@ public class KuchannelDao {
         return 1;
     }
 
-    //画像生成
+    //プロフィールアイコン画像生成
     public void userImageCreate(List<File> imageFiles) throws IOException {
         //エンコードした画像情報をもつリスト
         List<String> encodes = new ArrayList<>();
@@ -1107,6 +1120,40 @@ public class KuchannelDao {
 
         }
 
+    }
+
+    //スレッド画像生成
+    public void threadImagesCreate(List<File> imageFiles) throws IOException {
+        //エンコードした画像情報をもつリスト
+        List<String> encodes = new ArrayList<>();
+
+        MapSqlParameterSource param = new MapSqlParameterSource();
+
+        int count = 0;
+
+        for (int i = 1; i <= 200; i++) {
+            //int randomIndex = ThreadLocalRandom.current().nextInt(imageFiles.size());
+            //System.out.println(randomIndex);
+
+            String encode;
+            if (i % 2 == 0) {   // && i <= 170
+                File ImageFile = imageFiles.get(count);
+                byte[] bytes = Files.readAllBytes(ImageFile.toPath());
+                encode = Base64.getEncoder().encodeToString(bytes);
+                count++;
+            } else {
+                File file = new File("src/main/resources/static/images/noImage/noImage.png");
+                byte[] bytes = Files.readAllBytes(file.toPath());
+                encode = Base64.getEncoder().encodeToString(bytes);
+            }
+
+
+            param.addValue("image", encode);
+            param.addValue("userId", i);
+
+            jdbcTemplate.update("UPDATE threads SET image_path = :image WHERE id = :userId", param);
+
+        }
     }
 
 }

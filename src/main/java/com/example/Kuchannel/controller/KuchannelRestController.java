@@ -16,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -145,10 +147,20 @@ public class KuchannelRestController {
 
         String encode = null;
 
-        if (image != null) {
+        //画像をエンコード　nullの場合は固定の画像をエンコード
+        if (image == null) {
+            File file = new File("src/main/resources/static/images/noImage/noImage.png");
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            encode = Base64.getEncoder().encodeToString(bytes);
+        } else {
             byte[] bytes = image.getBytes();
             encode = Base64.getEncoder().encodeToString(bytes);
         }
+
+//        if (image != null) {
+//            byte[] bytes = image.getBytes();
+//            encode = Base64.getEncoder().encodeToString(bytes);
+//        }
 
         //System.out.println("ハッシュタグ" + hashtag);
 
@@ -240,13 +252,17 @@ public class KuchannelRestController {
 
         for (var rev : revs) {
             //ユーザーIDとコミュニティIDをもとにニックネームを入手
-            var reviewAccount = kuchannelService.getAccountInfoNick(rev.userId(), thread.getCommunity_id());
+            //System.out.println("コミュニティID" + thread.getCommunity_id() + "ユーザーID：" + rev.getUserId());
+            var reviewAccount = kuchannelService.getAccountInfoNick(rev.getUserId(), thread.getCommunity_id());
+            //System.out.println("レビューユーザーアカウント：" + reviewAccount);
+            //レビューのユーザーのニックネームをセット
+            rev.setUserName(reviewAccount.getName());
 
             //データベースからレビューの画像情報を取得する
-            var reviewImages = kuchannelService.getReviewImages(rev.reviewId());
+            var reviewImages = kuchannelService.getReviewImages(rev.getReviewId());
 
             //データベースからレビューの返信情報を取得する
-            var reviewReplies = kuchannelService.getReviewReply(rev.reviewId());
+            var reviewReplies = kuchannelService.getReviewReply(rev.getReviewId());
 
             for (ReviewReply reviewReply : reviewReplies) {
                 //ユーザーIDとコミュニティIDをもとにニックネームを入手
@@ -257,10 +273,10 @@ public class KuchannelRestController {
             }
 
             //データベースからレビューのいいね件数を取得する
-            var goodCount = kuchannelService.getGoodReview(rev.reviewId());
+            var goodCount = kuchannelService.getGoodReview(rev.getReviewId());
 
-            reviews.add(new ReviewElementAll(rev.userId(), rev.userName(), rev.reviewId(), rev.title(),
-                    rev.review(), rev.createDate(), reviewImages, reviewReplies, goodCount));
+            reviews.add(new ReviewElementAll(rev.getUserId(), rev.getUserName(), rev.getReviewId(), rev.getTitle(),
+                    rev.getReview(), rev.getCreateDate(), reviewImages, reviewReplies, goodCount));
 
         }
 
@@ -344,7 +360,7 @@ public class KuchannelRestController {
     //レビュー返信登録処理
     @PostMapping("add-reply")
     public ReviewReply addReply(@RequestParam("id") Integer reviewId,
-                                           @RequestParam("content") String content) {
+                                @RequestParam("content") String content) {
         //repliesテーブルにインサート処理
         var user = (UserRecord)session.getAttribute("user");
         var reply = kuchannelService.replyInsert(user.id(), reviewId, content);
@@ -439,6 +455,12 @@ public class KuchannelRestController {
             //System.out.println("スレッドID:" + thread.getThreadId() + "キーワード：" + keyword);
             //スレッドごとにキーワード検索
             var reviews = kuchannelService.findKeyReview(thread.getThreadId(), keywords);
+
+            for (var review : reviews) {
+                 var reviewAccount = kuchannelService.getAccountInfoNick(review.getUserId(), communityId);
+                 review.setUserName(reviewAccount.getName());
+            }
+
             threadReviews.add(new FindThreadReviews(thread.getThreadId(), thread.getUserId(), thread.getCommunityId(), thread.getTitle(),
                     thread.getGenre(), thread.getGood_count(), thread.getImage_path(), reviews));
         }

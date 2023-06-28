@@ -151,7 +151,7 @@ public class KuchannelController {
     private boolean isImageFile(File file) {
         String name = file.getName();
         String extension = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
-        return extension.equals("jpg") || extension.equals("jpeg") || extension.equals("png");
+        return extension.equals("jpg") || extension.equals("jpeg") || extension.equals("png") || extension.equals("webp");
     }
 
     /*----------------------------------------*/
@@ -176,7 +176,14 @@ public class KuchannelController {
     @PostMapping("/kuchannel/community-add")
     public String communityAdd(@Validated @ModelAttribute("communityAdd") CommunityAddForm communityAddForm,
                                BindingResult bindingResult, Model model) {
+
+        //コミュニティユーザーテーブルにインサートする処理
+        var user = (UserRecord)session.getAttribute("user");
+
+        model.addAttribute("image", user.imagePath());
+
         if (bindingResult.hasErrors()) {
+            model.addAttribute("judge", false);
             return "my-page";
         } else {
             String inviteCode = communityAddForm.getCommunityName();
@@ -190,9 +197,6 @@ public class KuchannelController {
             //コミュニティを作成する処理と作成したIDを受け取る
             int communityId = kuchannelService.communityInsert(communityAddForm.getCommunityName(), "http://192.168.33.99:8080/kuchannel/community/" + randomString + "/" + communityAddForm.getCommunityName());
 
-            //コミュニティユーザーテーブルにインサートする処理
-            var user = (UserRecord)session.getAttribute("user");
-
             //もしニックネームがnullならユーザーネームを登録する
             if ("".equals(communityAddForm.getNickName())) {
                 kuchannelService.communityUserInsert(user.id(), communityId, user.name(), 2);
@@ -202,11 +206,12 @@ public class KuchannelController {
 
             model.addAttribute("communityId", communityId);
             model.addAttribute("communityName", inviteCode);
-            model.addAttribute("image", user.imagePath());
 
             var community =kuchannelService.findCommunity(communityId);
             String url = community.url();
             String moldedUrl =url.replace("http://192.168.33.99:8080/","");
+
+            model.addAttribute("judge", true);
 
             return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace( "%2F","/") + "/" + community.id() + "/threads";
 
@@ -352,8 +357,16 @@ public class KuchannelController {
                 return "login";
             } else {
 
+                //スレッドIDをもとにコミュニティIDを取得する
+                var thread = kuchannelService.getThread(threadId);
+
                 //レビューIDを元にreviewsテーブルから情報を取得する
                 var review = kuchannelService.findReview(reviewId);
+
+                //ユーザーIDとコミュニティIDをもとにニックネームを入手
+                //System.out.println("コミュニティID" + thread.getCommunity_id() + "ユーザーID：" + rev.getUserId());
+                var reviewAccount = kuchannelService.getAccountInfoNick(review.getUserId(), thread.getCommunity_id());
+                review.setUserName(reviewAccount.getName());
 
                 //データベースからレビューの画像情報を取得する
                 var reviewImages = kuchannelService.getReviewImages(reviewId);
@@ -361,16 +374,25 @@ public class KuchannelController {
                 //データベースからレビューの返信情報を取得する
                 var reviewReplies = kuchannelService.getReviewReply(reviewId);
 
+                for (ReviewReply reviewReply : reviewReplies) {
+                    //ユーザーIDとコミュニティIDをもとにニックネームを入手
+                    var replyAccount = kuchannelService.getAccountInfoNick(reviewReply.getUserId(), thread.getCommunity_id());
+
+                    reviewReply.setUserName(replyAccount.getName());
+
+                }
+
                 //データベースからレビューのいいね件数を取得する
                 var goodCount = kuchannelService.getGoodReview(reviewId);
 
                 var user = (UserRecord) session.getAttribute("user");
                 model.addAttribute("image", user.imagePath());
 
-                model.addAttribute("review", new ReviewElementAll(review.userId(), review.userName(), review.reviewId(), review.title(),
-                        review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
+                model.addAttribute("review", new ReviewElementAll(review.getUserId(), review.getUserName(), review.getReviewId(), review.getTitle(),
+                        review.getReview(), review.getCreateDate(), reviewImages, reviewReplies, goodCount));
                 model.addAttribute("reviewId", reviewId);
                 model.addAttribute("threadId", threadId);
+                model.addAttribute("communityId", thread.getCommunity_id());
 
                 return "review-detail";
 
@@ -577,7 +599,7 @@ public class KuchannelController {
             var review = kuchannelService.findReview(reviewId);
 
             //ユーザーIDとコミュニティIDをもとにニックネームを入手
-            var reviewAccount = kuchannelService.getAccountInfoNick(review.userId(), thread.getCommunity_id());
+            var reviewAccount = kuchannelService.getAccountInfoNick(review.getUserId() ,thread.getCommunity_id());
 
             //データベースからレビューの画像情報を取得する
             var reviewImages = kuchannelService.getReviewImages(reviewId);
@@ -596,8 +618,8 @@ public class KuchannelController {
             //データベースからレビューのいいね件数を取得する
             var goodCount = kuchannelService.getGoodReview(reviewId);
 
-            model.addAttribute("review", new ReviewElementAll(review.userId(), reviewAccount.getName(), review.reviewId(), review.title(),
-                    review.review(), review.createDate(), reviewImages, reviewReplies, goodCount));
+            model.addAttribute("review", new ReviewElementAll(review.getUserId(), reviewAccount.getName(), review.getReviewId(), review.getTitle(),
+                    review.getReview(), review.getCreateDate(), reviewImages, reviewReplies, goodCount));
             model.addAttribute("reviewId", reviewId);
             model.addAttribute("threadId", threadId);
 
@@ -619,9 +641,10 @@ public class KuchannelController {
     }
 
     //ユーザーのレビュー一覧画面に遷移
-    @GetMapping("/kuchannel/user-review/{userId}")
+    @GetMapping("/kuchannel/user-review/{communityId}/{userId}")
     public String userReviewView(@PathVariable("userId") Integer userId,
                                  @ModelAttribute("UserForm") UserForm userForm,
+                                 @PathVariable("communityId") Integer communityId,
                                  Model model) {
 
         //ログインしているか確認
@@ -632,7 +655,13 @@ public class KuchannelController {
             //ユーザーのレビュー一覧に必要な情報を取得する
             var reviews = kuchannelService.getUserReview(userId);
 
+            //ユーザーを特定する
+            var targetUser = kuchannelService.findUser(userId);
+
+            var reviewAccount = kuchannelService.getAccountInfoNick(targetUser.id(), communityId);
+
             model.addAttribute("reviews", reviews);
+            model.addAttribute("userName", reviewAccount.getName());
 
             var user = (UserRecord) session.getAttribute("user");
             model.addAttribute("image", user.imagePath());
@@ -724,28 +753,62 @@ public class KuchannelController {
         return "redirect:/" + URLEncoder.encode(moldedUrl, StandardCharsets.UTF_8).replace( "%2F","/") + "/" + community.id() + "/threads";
     }
 
+    //お問い合わせ対応完了処理
+    @PostMapping("/kuchannel/inquiryComplete/{id}")
+    public String completeInquiry(@PathVariable("id") Integer inquiryId) {
+        //完了処理
+        kuchannelService.completeInquiryUpdate(inquiryId);
 
-    @GetMapping("/iconCreate")
-    public String userIconCreate(@ModelAttribute("UserForm") UserForm userForm) throws IOException {
+        return "redirect:/kuchannel/notice";
 
-        iconCreate();
-        return "login";
     }
 
-    //プロフィールアイコンを自動生成する処理
-    public void iconCreate() throws IOException {
-        File directory = new File("src/main/resources/static/images/icons");
 
-        File[] files = directory.listFiles();
 
-        List<File> imageFiles = new ArrayList<>();
-        for (File file : files) {
-            if (file.isFile() && isImageFile(file)) {
-                imageFiles.add(file);
-            }
-        }
+//    @GetMapping("/iconCreate")
+//    public String userIconCreate(@ModelAttribute("UserForm") UserForm userForm) throws IOException {
+//
+//        iconCreate();
+//        return "login";
+//    }
+//
+//    //プロフィールアイコンを自動生成する処理
+//    public void iconCreate() throws IOException {
+//        File directory = new File("src/main/resources/static/images/icons");
+//
+//        File[] files = directory.listFiles();
+//
+//        List<File> imageFiles = new ArrayList<>();
+//        for (File file : files) {
+//            if (file.isFile() && isImageFile(file)) {
+//                imageFiles.add(file);
+//            }
+//        }
+//
+//        kuchannelService.userImageCreate(imageFiles);
+//    }
 
-        kuchannelService.userImageCreate(imageFiles);
-    }
+//    @GetMapping("/threadImageCreate")
+//    public String threadImageCreate(@ModelAttribute("UserForm") UserForm userForm) throws IOException {
+//
+//        threadCreate();
+//        return "login";
+//    }
+//
+//    //スレッド画像を自動生成する処理
+//    public void threadCreate() throws IOException {
+//        File directory = new File("src/main/resources/static/images/threadImages");
+//
+//        File[] files = directory.listFiles();
+//
+//        List<File> imageFiles = new ArrayList<>();
+//        for (File file : files) {
+//            if (file.isFile() && isImageFile(file)) {
+//                imageFiles.add(file);
+//            }
+//        }
+//
+//        kuchannelService.threadImagesCreate(imageFiles);
+//    }
 
 }
