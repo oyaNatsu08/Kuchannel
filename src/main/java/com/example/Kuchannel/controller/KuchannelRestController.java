@@ -1,22 +1,17 @@
 package com.example.Kuchannel.controller;
 
-import com.example.Kuchannel.KuchannelApplication;
-import com.example.Kuchannel.entity.*;
-import com.example.Kuchannel.entity.*;
-import com.example.Kuchannel.form.ThreadAddForm;
-import com.example.Kuchannel.form.ReviewUpdateForm;
 import com.example.Kuchannel.entity.*;
 import com.example.Kuchannel.form.ThreadAddForm;
 import com.example.Kuchannel.service.KuchannelService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -32,37 +27,37 @@ public class KuchannelRestController {
 
     //所属しているコミュニティを取得。（マイページ用）
     @GetMapping("/getBelongingCommunities")
-    public List<BelongingCommunities> getBelongingCommunities(){
+    public List<BelongingCommunities> getBelongingCommunities() {
         //System.out.println("ゲットコミュニティ");
 
         //session.getAttribute("userId");
         //セッションからユーザーのidを渡すように変える。今は1で固定している → 修正済み
-        var user = (UserRecord)session.getAttribute("user");
+        var user = (UserRecord) session.getAttribute("user");
         List<BelongingCommunities> communityList = kuchannelService.getBelongingCommunities(user.id());
         return communityList;
     }
 
     //マイページで任意のコミュにティから退会する用の処理。
     @PostMapping(value = "/withdrawal", consumes = "text/plain;charset=UTF-8")
-    public int withdrawal(@RequestBody String getCommunityId){
-        var communityId =Integer.parseInt(getCommunityId);
+    public int withdrawal(@RequestBody String getCommunityId) {
+        var communityId = Integer.parseInt(getCommunityId);
         //session.getAttribute("userId");
         //セッションからユーザーのidを渡すように変える。今は1で固定している → 修正済み
-        var user = (UserRecord)session.getAttribute("user");
+        var user = (UserRecord) session.getAttribute("user");
         int result = kuchannelService.withdrawal(user.id(), communityId);
         return result;
     }
 
     //    マイページ用の、ニックネームを変更する処理
     @PostMapping("/updateNickName")
-    public int updateNickName(@RequestBody BelongingCommunities updateInfo){
+    public int updateNickName(@RequestBody BelongingCommunities updateInfo) {
         int result = kuchannelService.updateNickName(updateInfo);
         return result;
     }
 
     //マイページ用で、スレッドを取得する
     @GetMapping("/getMyThreads")
-    public List<MyThread> getMyThread(){
+    public List<MyThread> getMyThread() {
         //session.getAttribute("userId");
         //セッションからユーザーのidを渡すように変える。今は1で固定している→修正済み
         UserRecord user = (UserRecord) session.getAttribute("user");
@@ -72,49 +67,61 @@ public class KuchannelRestController {
 
     //マイページ用で、レビューを取得する
     @GetMapping("/getMyReviews")
-    public List<MyReview> getMyReviews(){
+    public List<MyReview> getMyReviews() {
         //session.getAttribute("userId");
         //セッションからユーザーのidを渡すように変える。今は1で固定している → 修正済み
-        var user = (UserRecord)session.getAttribute("user");
+        var user = (UserRecord) session.getAttribute("user");
         List<MyReview> result = kuchannelService.getMyReviews(user.id());
         return result;
     }
 
-//    スレッド一覧ページ用。スレッドの情報を取得
+    //    スレッド一覧ページ用。スレッドの情報を取得
     @GetMapping("getThreads/{communityId}")
-    public List<CommunityThread> getThreads(@PathVariable("communityId")Integer communityId){
+    public List<CommunityThread> getThreads(@PathVariable("communityId") Integer communityId) {
 //        コミュニティidを渡すようにする（今は1で固定）->修正
         var threads = kuchannelService.communityThreads(communityId);
         return threads;
     }
 
     @GetMapping("/goodDeal/{id}")
-    public int GoodDeal(@PathVariable("id")Integer thread_id){
+    public int GoodDeal(@PathVariable("id") Integer thread_id) {
 //        セッションからuser_idをもらう一旦1で固定
 //        var user = (UserRecord)session.getAttribute("user");
-        return kuchannelService.goodDeal(thread_id,1);
+        return kuchannelService.goodDeal(thread_id, 1);
     }
 
     @GetMapping("/goodDeal/review/{reviewId}")
     public int GoodReviewDeal(@PathVariable("reviewId") Integer reviewId) {
-        var user = (UserRecord)session.getAttribute("user");
+        var user = (UserRecord) session.getAttribute("user");
 
         return kuchannelService.goodDealReview(reviewId, user.id());
     }
 
     //スレッド削除用
     @DeleteMapping("/deleteThread/{threadId}")
-    public boolean deleteThread(@PathVariable("threadId")Integer thread_id){
+    public boolean deleteThread(@PathVariable("threadId") Integer thread_id) {
+        return kuchannelService.deleteThread(thread_id);
+    }
+
+    //スレッド削除（一般化管理者かの判断も追加版）
+    @DeleteMapping("/deleteThread/{threadId}/{role}")
+    public boolean deleteThread2(@PathVariable("threadId") Integer thread_id, @PathVariable("role") Integer role) {
+        System.out.println("スレid" + thread_id);
+        System.out.println("ロール" + role);
+        if (role == 2) {
+            System.out.println("2やねん");
+            return kuchannelService.forcedDeleteThread(thread_id);
+        }
         return kuchannelService.deleteThread(thread_id);
     }
 
     //セッション情報から、ユーザーidとroleを持った情報を返す。
     //getThreadと同じで、コミュニティidを渡すようにする。今は１で固定。
     @GetMapping("/getSessionInfo/{communityId}")
-    public AccountInformation getSessionInfo(@PathVariable("communityId")Integer communityId){
+    public AccountInformation getSessionInfo(@PathVariable("communityId") Integer communityId) {
 
-        var user = (UserRecord)session.getAttribute("user");
-        var accountInfo = kuchannelService.getAccountInfo(user.id(),communityId);
+        var user = (UserRecord) session.getAttribute("user");
+        var accountInfo = kuchannelService.getAccountInfo(user.id(), communityId);
 
         return accountInfo;
     }
@@ -129,14 +136,24 @@ public class KuchannelRestController {
                          @RequestParam("hashtag") String hashtag,
                          @RequestParam("communityId") Integer communityId,
                          @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {    //@RequestBody ThreadAddForm inputData
-        var user = (UserRecord)session.getAttribute("user");
+        var user = (UserRecord) session.getAttribute("user");
 
         String encode = null;
 
-        if (image != null) {
+        //画像をエンコード　nullの場合は固定の画像をエンコード
+        if (image == null) {
+            File file = new File("src/main/resources/static/images/noImage/noImage.png");
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            encode = Base64.getEncoder().encodeToString(bytes);
+        } else {
             byte[] bytes = image.getBytes();
             encode = Base64.getEncoder().encodeToString(bytes);
         }
+
+//        if (image != null) {
+//            byte[] bytes = image.getBytes();
+//            encode = Base64.getEncoder().encodeToString(bytes);
+//        }
 
         //System.out.println("ハッシュタグ" + hashtag);
 
@@ -146,7 +163,7 @@ public class KuchannelRestController {
         }
 
         //threadsテーブルにINSERT処理
-        var result = kuchannelService.threadInsert(new ThreadAddForm(threadName, furigana, address, salesTime, genre, hashtag, communityId, encode),user.id());
+        var result = kuchannelService.threadInsert(new ThreadAddForm(threadName, furigana, address, salesTime, genre, hashtag, communityId, encode), user.id());
         return result;
     }
 
@@ -183,23 +200,23 @@ public class KuchannelRestController {
 
     //管理者用。メンバー編集用
     @PutMapping("/memberSetting/{communityId}")
-    public int memberSetting(@PathVariable("communityId") Integer communityId,@RequestBody List<AccountInformation> updateInfo){
+    public int memberSetting(@PathVariable("communityId") Integer communityId, @RequestBody List<AccountInformation> updateInfo) {
         //System.out.println(updateInfo);
-        var result =kuchannelService.memberSetting(updateInfo, communityId);
+        var result = kuchannelService.memberSetting(updateInfo, communityId);
         return result;
     }
 
     @PutMapping("updateCommunityName/{communityId}/{newCommunityName}")
-    public int updateCommunityName(@PathVariable("communityId") Integer communityId,@PathVariable("newCommunityName") String newCommunityName){
+    public int updateCommunityName(@PathVariable("communityId") Integer communityId, @PathVariable("newCommunityName") String newCommunityName) {
         System.out.println(newCommunityName);
-        var result =kuchannelService.updateCommunityName(communityId,newCommunityName);
+        var result = kuchannelService.updateCommunityName(communityId, newCommunityName);
         return result;
     }
 
     //管理者用。コミュニティを消すよう。
     @DeleteMapping("/deleteCommunity/{communityId}")
-    public int deleteCommunity(@PathVariable("communityId")Integer communityId){
-        var result =kuchannelService.deleteCommunity(communityId);
+    public int deleteCommunity(@PathVariable("communityId") Integer communityId) {
+        var result = kuchannelService.deleteCommunity(communityId);
         return result;
     }
 
@@ -228,13 +245,17 @@ public class KuchannelRestController {
 
         for (var rev : revs) {
             //ユーザーIDとコミュニティIDをもとにニックネームを入手
-            var reviewAccount = kuchannelService.getAccountInfoNick(rev.userId(), thread.getCommunity_id());
+            //System.out.println("コミュニティID" + thread.getCommunity_id() + "ユーザーID：" + rev.getUserId());
+            var reviewAccount = kuchannelService.getAccountInfoNick(rev.getUserId(), thread.getCommunity_id());
+            //System.out.println("レビューユーザーアカウント：" + reviewAccount);
+            //レビューのユーザーのニックネームをセット
+            rev.setUserName(reviewAccount.getName());
 
             //データベースからレビューの画像情報を取得する
-            var reviewImages = kuchannelService.getReviewImages(rev.reviewId());
+            var reviewImages = kuchannelService.getReviewImages(rev.getReviewId());
 
             //データベースからレビューの返信情報を取得する
-            var reviewReplies = kuchannelService.getReviewReply(rev.reviewId());
+            var reviewReplies = kuchannelService.getReviewReply(rev.getReviewId());
 
             for (ReviewReply reviewReply : reviewReplies) {
                 //ユーザーIDとコミュニティIDをもとにニックネームを入手
@@ -245,10 +266,10 @@ public class KuchannelRestController {
             }
 
             //データベースからレビューのいいね件数を取得する
-            var goodCount = kuchannelService.getGoodReview(rev.reviewId());
+            var goodCount = kuchannelService.getGoodReview(rev.getReviewId());
 
-            reviews.add(new ReviewElementAll(rev.userId(), rev.userName(), rev.reviewId(), rev.title(),
-                    rev.review(), rev.createDate(), reviewImages, reviewReplies, goodCount));
+            reviews.add(new ReviewElementAll(rev.getUserId(), rev.getUserName(), rev.getReviewId(), rev.getTitle(),
+                    rev.getReview(), rev.getCreateDate(), reviewImages, reviewReplies, goodCount));
 
         }
 
@@ -307,7 +328,7 @@ public class KuchannelRestController {
 //        }
 
         //reviewsテーブルにインサート処理かつインサートしたIDを取得(thread_id 固定)
-        var user = (UserRecord)session.getAttribute("user");
+        var user = (UserRecord) session.getAttribute("user");
         int reviewId = kuchannelService.reviewInsert(user.id(), threadId, title, content);
 
 
@@ -332,9 +353,9 @@ public class KuchannelRestController {
     //レビュー返信登録処理
     @PostMapping("add-reply")
     public ReviewReply addReply(@RequestParam("id") Integer reviewId,
-                                           @RequestParam("content") String content) {
+                                @RequestParam("content") String content) {
         //repliesテーブルにインサート処理
-        var user = (UserRecord)session.getAttribute("user");
+        var user = (UserRecord) session.getAttribute("user");
         var reply = kuchannelService.replyInsert(user.id(), reviewId, content);
 
         return reply;
@@ -361,7 +382,7 @@ public class KuchannelRestController {
 
     //人気のハッシュタグを取得
     @GetMapping("/getPopularHashtags/{communityId}")
-    public List<PopularHashTag> getHashtags(@PathVariable("communityId")Integer communityId) {
+    public List<PopularHashTag> getHashtags(@PathVariable("communityId") Integer communityId) {
         var hashtags = kuchannelService.getPopularHashtags(communityId);
 
         for (var hashtag : hashtags) {
@@ -375,7 +396,7 @@ public class KuchannelRestController {
 
     //ハッシュタグ全件を取得
     @GetMapping("/getAllHashtags/{communityId}")
-    public List<HashTag> getAllHashtags(@PathVariable("communityId")Integer communityId) {
+    public List<HashTag> getAllHashtags(@PathVariable("communityId") Integer communityId) {
         var hashtags = kuchannelService.getAllHashtags(communityId);
         System.out.println("ハッシュタグ全件：" + hashtags);
         return hashtags;
@@ -385,8 +406,9 @@ public class KuchannelRestController {
     @GetMapping("/keywordThreads")
 
     public List<CommunityThread> keyThreads(@RequestParam("keyword") String keyword
-                                            ,@RequestParam("communityId") Integer communityId
-                                            ) {
+            , @RequestParam("communityId") Integer communityId
+    ) {
+
 
         //keywordを空白(半角または全角)ごとに分けて格納
         String[] splittedKeywords = keyword.split("[\\s\\p{Z}]");
@@ -399,7 +421,7 @@ public class KuchannelRestController {
         }
         String[] keywords = filteredKeywords.toArray(new String[0]);
         //もし検索欄に何も書いていなければ全件取得
-        if(keywords.length == 0){
+        if (keywords.length == 0) {
             return kuchannelService.communityThreads(communityId);
 
         }
@@ -414,7 +436,7 @@ public class KuchannelRestController {
     //キーワードでレビューからスレッドを絞り込む
     @GetMapping("/keywordReviews")
     public List<FindThreadReviews> keyReviews(@RequestParam("communityId") Integer communityId,
-                                            @RequestParam("keyword") String keyword) {
+                                              @RequestParam("keyword") String keyword) {
         //keywordを空白(半角または全角)ごとに分けて格納
         String[] keywords = keyword.split("[\\s\\p{Z}]");
 
@@ -427,6 +449,12 @@ public class KuchannelRestController {
             //System.out.println("スレッドID:" + thread.getThreadId() + "キーワード：" + keyword);
             //スレッドごとにキーワード検索
             var reviews = kuchannelService.findKeyReview(thread.getThreadId(), keywords);
+
+            for (var review : reviews) {
+                var reviewAccount = kuchannelService.getAccountInfoNick(review.getUserId(), communityId);
+                review.setUserName(reviewAccount.getName());
+            }
+
             threadReviews.add(new FindThreadReviews(thread.getThreadId(), thread.getUserId(), thread.getCommunityId(), thread.getTitle(),
                     thread.getGenre(), thread.getGood_count(), thread.getImage_path(), reviews));
         }
@@ -465,16 +493,12 @@ public class KuchannelRestController {
 
     //統合処理。スレッド情報をもとに新しいスレッドを作成&スレッドいいねとスレッドハッシュタグを編集。
     @PutMapping("/IntegrateThreads")
-    public int IntegrateThreads(@RequestBody ThreadAddForm threadInfo){
-        var user = (UserRecord)session.getAttribute("user");
+    public int IntegrateThreads(@RequestBody ThreadAddForm threadInfo) {
+        var user = (UserRecord) session.getAttribute("user");
         kuchannelService.IntegrateThreads(threadInfo, user.id());
         //System.out.println(threadInfo);
         return 1;
     }
-
-
-
-
 
 
 }

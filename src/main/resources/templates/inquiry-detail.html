@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>口ゃんねる</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <link href="/css/commons.css" rel="stylesheet">
 </head>
 
 <body>
@@ -20,6 +21,10 @@
 <!--  <a th:href="@{/community/thread-list(id=${community.id})}" th:text="該当コミュニティへ"></a>-->
   <a th:href="@{/kuchannel/notice}" th:text="戻る"></a>
   <a th:href="@{${community.url}+'/'+ ${community.id}+'/threads'}" th:text="該当コミュニティへ"></a>
+  <form action="/kuchannel/inquiryComplete/{id}(id=${inquiry.id})" method="post">
+    <input type="hidden" name="_method" value="put">
+    <button type="submit">対応完了</button>
+  </form>
 
 </div>
 

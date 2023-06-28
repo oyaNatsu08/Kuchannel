@@ -1,13 +1,39 @@
 body {
+  background-image: url(../images/background.png);
+  background-attachment: fixed;
+  background-size: 100%;
   font-family: Arial, sans-serif;
   line-height: 1.5;
   margin: 0;
   padding: 20px;
 }
 
+.thread-area {
+  width: 90%;
+  height: auto;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: block;
+  border-radius: 30px;
+  margin: 30px auto;
+}
+
 h3 {
   margin: 0;
-  font-size: 24px;
+  font-size: 26px;
+}
+
+.thread-create-button {
+  border-radius: 5px;
+  background-color: #FFA629;
+  padding: auto;
+  line-height: 2;
+  padding: 10px;
+  cursor: pointer;
+  color: black;
+  margin: 0 9%;
+  float: right;
+  font-weight: bold;
+  font-size: 15px;
 }
 
 .restaurant {
@@ -20,26 +46,37 @@ h3 {
   width: 80%;
   margin: 0 auto;
   margin-top: 4%;
-  padding: 4%;
+  padding: 2%;
 }
 
 .restaurant-img {
   flex-shrink: 0;
-  width: 80px;
-  height: 80px;
+  width: 200px;
+  height: 190px;
   margin-right: 10px;
 }
+
+.thread-integrate{
+    border-radius: 5px;
+    background-color: #FFA629;
+    padding: auto;
+    padding: 4px;
+    cursor: pointer;
+    color: black;
+    margin: 7px 9%;
+    float: right;
+    font-size: 15px;}
 
 .restaurant-name {
   font-size: 20px;
 }
 
 .genre {
-  font-size: 10px;
+  font-size: 18px;
 }
 
 .address {
-  font-size: 12px;
+  font-size: 18px;
   margin-top: 5px;
 }
 
@@ -52,18 +89,25 @@ h3 {
 .likes button {
   margin-right: 5px;
   padding: 5px 10px;
-  border: none;
-  background-color: #eaeaea;
+  border: solid 1px;
+  background-color: #bffdf1;
   cursor: pointer;
-}
-
-.likes span {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: bold;
 }
 
+.likes span {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.sorting{
+    margin: 4% 2% 0 7%;
+    font-size: 20px;
+}
+
 .opening-hours {
-  font-size: 10px;
+  font-size: 17px;
   margin-top: 5px;
 }
 
@@ -77,40 +121,83 @@ h3 {
   margin-right: 5px;
   color: #1e66b8;
   text-decoration: none;
+  font-size: 14px;
 }
 
-.hashUl {
+.thread-list-ul {
   list-style-type: none;
   display: flex;
   padding: 0px 5px
 }
 
-.delete-update {
-  margin-left: auto;
-  margin-bottom: auto;
+.thread-margin{
+    margin: 30px;
 }
+
+/*
+.hashUl {
+  list-style-type: none;
+  display: flex;
+  padding: 0px 5px
+}
+*/
+
+.delete-update {
+      margin-left: auto;
+      margin-bottom: auto;
+      display: flex;
+      flex-direction: column;
+}
+
+  .update-button{
+          border-radius: 5px;
+          background-color: #86dd60;
+          padding: auto;
+          line-height: 2;
+          padding: 10px;
+          cursor: pointer;
+          color: black;
+          margin: 20px;
+          /* font-weight: bold; */
+          font-size: 20px;
+  }
+
+    .delete-button{
+        border-radius: 5px;
+        background-color: #ffa995;
+        padding: auto;
+        line-height: 2;
+        padding: 10px;
+        cursor: pointer;
+        color: black;
+        margin: 20px;
+        /* font-weight: bold; */
+        font-size: 20px;
+    }
 
 .community-name {
   text-align: center;
+  font-size: 35px;
 }
 
 /* 検索ボックスcss */
 .search-container {
-  /* box-sizing: border-box; */
-  position: relative;
-  border: 1px solid #999;
-  /* padding-bottom: 20px; */
-  border-radius: 20px;
-  height: 2.5em;
-  /* overflow: hidden; */
-  /* display: flex;
-  justify-content: center; */
+box-sizing: border-box;
+    position: relative;
+    border: 1px solid #999;
+    /* padding-bottom: 20px; */
+    border-radius: 20px;
+    height: 2.5em;
+    background-color: white;
+    margin: 20px;
+     overflow: hidden;
 }
 
 .search-container input[type="text"] {
-  margin-left: 5%;
-  width: 90%;
-  border: none;
+    background-color: white;
+    width: 93%;
+    border: none;
+    height: 30px;
 }
 
 .search-container input[type="text"]:focus {
@@ -136,6 +223,7 @@ h3 {
   padding: 20px; */
 }
 
+/*
 h3 {
   margin: 0;
   font-size: 24px;
@@ -144,7 +232,6 @@ h3 {
 .restaurant {
   margin-bottom: 20px;
   background-color: #FFECD7;
-  /* 薄いオレンジ色の背景 */
   display: flex;
   align-items: center;
   align-items: flex-start;
@@ -226,6 +313,8 @@ h3 {
   text-align: center;
 }
 
+*/
+
 .member-container {
   margin: 0 auto;
 }
@@ -235,11 +324,14 @@ h3 {
   align-items: center;
   margin: 0 auto;
   justify-content: center;
+  flex-direction: column;
 }
 
 .pagetop button {
-  height: 30px;
-  width: 200px;
+    width: 23%;
+    font-size: 20px;
+    background-color: #FFA629;
+    border: solid 2px;
 }
 
 .hashtag-list {
@@ -255,25 +347,31 @@ h3 {
   border-radius: 10px;
   margin-bottom: 20px;
 }
+
 .review-content {
   background-color: rgb(252, 210, 194);
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 10px;
 }
+
 .review-cell {
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.suggest-area{
+
+.suggest-area {
   background-color: #98e5eb;
   opacity: 0.8;
 }
-.suggest-content{
+
+.suggest-content {
   opacity: 1;
 }
-.refine-view{
+
+.refine-view {
   background-color: rgba(240, 171, 24, 0.945);
+  margin: 20px;
 }

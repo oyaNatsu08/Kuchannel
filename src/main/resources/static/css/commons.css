@@ -32,7 +32,7 @@ body {
     }
 
 .cp_iptxt{
-    line-height: 70px;
+    /*line-height: 70px;*/
 }
 
 .site_logo {
@@ -51,13 +51,29 @@ body {
     line-height: 2;
     padding: 10px;
     cursor: pointer;
-    color: white;
     margin: 35px;
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
   }
 
 .error {
     color: red;
     text-align: center;
+}
+
+ .error1 {
+      position: absolute;
+          top: 42%;
+          left: 47%;
+          color: red;
+  }
+
+.error2 {
+    position: absolute;
+        top: 59%;
+        left: 47%;
+        color: red;
 }
 
 .login-form {
@@ -68,37 +84,10 @@ body {
     margin: 60px;
 }
 
-.size {
-    font-size: 20px;
-    margin: 40px;
-    width: 130px;
-    font-weight: bold;
-    display: inline-block;
-}
 .base-input {
     width: 300px;
     height: 20px;
 }
-
-.site_logo {
-    text-align: center;
-    width: auto;
-    font-size: 45px;
-    line-height: 60px;
-
-}
-
-.custom-btn {
-    border: none;
-    border-radius: 5px;
-    background-color: #FFA629;
-    padding: auto;
-    line-height: 2;
-    padding: 10px;
-    cursor: pointer;
-    color: white;
-    margin: 35px;
-  }
 
 .logout-comment {
     font-size: 50px;
@@ -111,4 +100,29 @@ body {
 textarea.information {
         width: 510px;
         height: 350px;
+}
+
+.base-text{
+    font-size: 20px;
+        margin: 40px;
+        width: 130px;
+        font-weight: bold;
+        display: inline-block;
+}
+
+.base-text-images{
+    font-size: 20px;
+    margin: 40px;
+    width: 180px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.review-area {
+    width: 90%;
+    height: auto;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: block;
+    border-radius: 30px;
+    margin: auto;
 }

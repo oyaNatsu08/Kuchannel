@@ -8,11 +8,11 @@ import org.hibernate.validator.constraints.Length;
 @Data
 public class CommunityAddForm {
 
-    @NotEmpty
+    @NotEmpty(message = "コミュニティ名を入力してください")
     @Length(max = 50)
     String communityName;
 
-    @Length(max = 50)
+    @Length(max = 50, message = "50文字以内で入力してください")
     String nickName;
 
 }

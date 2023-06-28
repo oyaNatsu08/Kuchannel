@@ -19,40 +19,44 @@
     <th:block th:insert="common/header"></th:block>
 
     <div class="tab-container">
-      <div class="tab-buttons">
-        <button class="tab-button active" @click="displayTabJudge(1)" id="btn1">コミュニティ一覧</button>
-        <button class="tab-button" @click="displayTabJudge(2)" id="btn2">自分のスレッド</button>
-        <button class="tab-button" @click="displayTabJudge(3)" id="btn3">自分のレビュー</button>
-      </div>
+
+
 
       <div class="tab-content-area">
+        <div class="tab-buttons">
+                <button class="tab-button active" @click="displayTabJudge(1)" id="btn1">コミュニティ一覧</button>
+                <button class="tab-button" @click="displayTabJudge(2)" id="btn2">自分のスレッド</button>
+                <button class="tab-button" @click="displayTabJudge(3)" id="btn3">自分のレビュー</button>
+        </div>
+
         <div id="tab1" v-if="tab1" class="tab-content">
 
           <table>
 
             <thead>
-              <tr>
-                <th>コミュニティ名</th>
-                <th>共有リンクのコピー</th>
+              <tr style="background-color: #FFA629; text-align: center;">
+                <th style="padding: 10px;">コミュニティ名</th>
+                <th style="width: 180px;">共有リンクのコピー</th>
                 <th>ニックネーム</th>
                 <th>退会する</th>
               </tr>
             </thead>
             <tbody>
-              <button type="button" @click="openPopupCommu">コミュニティ作成</button>
-              <tr v-for="com in belongingCommunities">
+              <button type="button" @click="openPopupCommu" style="margin-bottom: 10px; background-color: #FFA931; " class="tab-button">コミュニティ作成</button>
+              <tr v-for="com in belongingCommunities" class="community-tr">
                 <td><a :href="getCommunityLink(com.communityUrl,com.communityId)">{{com.communityName}}</a></td>
-                <td><button type="button" @click="copy(com.communityId)">共有</button></td>
-                <td><input type="text" v-model="com.nickName"><button type="button"
-                    @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)">変更</button></button>
+                <td><button type="button" @click="copy(com.communityId)" style="font-size: 21px;">共有</button></td>
+                <td><input type="text" v-model="com.nickName" class="nickname-css">
+                  <button type="button" @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)" style="background-color: #f9dfb2;border: #755e36 solid 1px; font-size: 20px;">変更</button>
+
                 </td>
-                <td><button type="button" @click="withdrawal(com.communityId)">退会</button></td>
+                <td><button type="button" @click="withdrawal(com.communityId)" style="background-color: rgb(255 156 156); color: black; font-size: 20px;">退会</button></td>
               </tr>
             </tbody>
           </table>
 
           <!-- コミュニティ作成画面 -->
-          <div v-if="isPopupCommunity" class="popup-overlay" @click.self="closePopupCommu">
+          <div v-if="communityAddJudege" class="popup-overlay" @click.self="closePopupCommu">
             <div class="popup">
               <h1>コミュニティ作成</h1>
               <form action="/kuchannel/community-add" method="post" th:object="${communityAdd}">
@@ -78,18 +82,19 @@
 
         <!-- 自分のスレッド -->
         <div id="tab2" v-if="tab2" class="tab-content">
-          <table>
+          <table class="community-table">
 
             <thead>
-              <tr>
-                <th>スレッド名</th>
+              <tr style="background-color: #FFA629; text-align: center;">
+                <th style="padding: 10px;">スレッド名</th>
                 <th>コミュニティ名</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="thread in myThreads">
-                <td><a :href="getReviewLink(thread.communityUrl,thread.communityId,thread.threadId)">{{thread.threadTitle}}</a></td>
                 <td><a :href="getCommunityLink(thread.communityUrl,thread.communityId)">{{thread.communityName}}</a></td>
+                <td><a :href="getReviewListLink(thread.communityUrl,thread.communityId,thread.threadId)">{{thread.threadTitle}}</a></td>
+                
               </tr>
 
             </tbody>
@@ -98,11 +103,11 @@
 
         <!-- 自分のレビュー -->
         <div id="tab3" v-if="tab3" class="tab-content">
-          <table>
+          <table class="community-table">
 
             <thead>
-              <tr>
-                <th>タイトル</th>
+              <tr style="background-color: #FFA629; text-align: center;">
+                <th style="padding: 10px;">タイトル</th>
                 <th>本文</th>
                 <th>スレッド名</th>
                 <th>コミュニティ名</th>
@@ -111,12 +116,13 @@
             </thead>
             <tbody>
               <tr v-for="review in myReviews">
-                <td>{{review.reviewTitle}}</td>
+                <td style="color: rgb(0, 88, 255);">{{review.reviewTitle}}</td>
 
-                <td class="review-cell"><a :href="getReviewLink(review.communityUrl,review.communityId,review.threadId,review.reviewId)">{{review.review}}</a></td>
+                <td class="review-cell"><a :href="getReviewListLink(review.communityUrl,review.communityId,review.threadId,review.reviewId)">{{review.review}}</a></td>
 
-                <td> <a :href="getReviewLink(review.communityUrl,review.communityId,review.threadId)">{{review.threadTitle}}</a></td>
-                <td><a :href="getCommunityLink(review.communityUrl,review.communityId)">{{review.communityName}}</a></td>
+                <td class="review-cell"><a :href="getReviewDetailLink(review.communityUrl,review.communityId,review.threadId,review.reviewId)">{{review.threadTitle}}</a></td>
+                <td> <a :href="getReviewListLink(review.communityUrl,review.communityId,review.threadId)">{{review.communityName}}</a></td>
+
                 <td>{{review.createDate}}</td>
               </tr>
 
@@ -147,9 +153,10 @@
           inputNickName: '',
           myThreads: [],
           myReviews: [],
-          isPopupCommunity: false,
+          //isPopupCommunity: false,
           showMenu: false,
           userImage: '',
+          communityAddJudege: false,
         }
 
       },
@@ -228,9 +235,9 @@
             //後ほどURLをkucahnnel入りに修正するため、不要
               const gotUrl = res.data;
               console.log('gotUrl',gotUrl)
-              const replace = gotUrl.replace("http://localhost:8080/","");
+              const replace = gotUrl.replace("http://192.168.33.99:8080/","");
               console.log('replace',replace)
-              const molded = `http://localhost:8080/${replace}/${id}/threads`;
+              const molded = `http://192.168.33.99:8080/${replace}/${id}/threads`;
               console.log(molded,'molded');
 
 
@@ -250,26 +257,26 @@
         },
         //コミュニティ作成画面をポップアップ
         openPopupCommu() {
-          this.isPopupCommunity = true;
+          this.communityAddJudege = true;
         },
         closePopupCommu() {
-          this.isPopupCommunity = false;
+          this.communityAddJudege = false;
         },
 
 
 //後ほど・・
         getCommunityLink(communityLink,communityId) {
-          const link = communityLink.replace("http://localhost:8080/","");
-          return `http://localhost:8080/${link}/${communityId}/threads`;
+          const link = communityLink.replace("http://192.168.33.99:8080/","");
+          return `http://192.168.33.99:8080/${link}/${communityId}/threads`;
         },
-        getReviewLink(communityLink,communityId,threadId) {
-          const link = communityLink.replace("http://localhost:8080/","");
-          return `http://localhost:8080/${link}/${communityId}/threads/${threadId}/reviews`;
+        getReviewListLink(communityLink,communityId,threadId) {
+          const link = communityLink.replace("http://192.168.33.99:8080/","");
+          return `http://192.168.33.99:8080/${link}/${communityId}/threads/${threadId}/reviews`;
 
         },
-        getReviewLink(communityLink,communityId,threadId,reviewId) {
-          const link = communityLink.replace("http://localhost:8080/","");
-          return `http://localhost:8080/${link}/${communityId}/threads/${threadId}/reviews/${reviewId}`;
+        getReviewDetailLink(communityLink,communityId,threadId,reviewId) {
+          const link = communityLink.replace("http://192.168.33.99:8080/","");
+          return `http://192.168.33.99:8080/${link}/${communityId}/threads/${threadId}/reviews/${reviewId}`;
         },
         toggleMenu() {
           this.showMenu = !this.showMenu;
@@ -286,6 +293,8 @@
         this.getMyReviews();
 
         this.userImage = `[[ ${image} ]]`;
+        this.communityAddJudege = `[[ ${judge} ]]`;
+
       }
 
     }).mount('#app')

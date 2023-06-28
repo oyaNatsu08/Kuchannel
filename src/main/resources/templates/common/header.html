@@ -1,15 +1,18 @@
-<header>
-    <div style="display: flex;">
-        <h1 class="me-auto"><a th:href="@{/kuchannel/mypage}" class="a-tag">口ゃんねる(口コミ)</a></h1>
+<link href="/css/header.css" rel="stylesheet">
+<header class="header">
+    <div class="header-body" style="display: flex;">
+        <h1 class="me-auto"><a th:href="@{/kuchannel/mypage}" class="border-bottom">口ゃんねる(口コミ)</a></h1>
 
-        <a th:href="@{/kuchannel/notice}"><img src="/images/bell.png" alt="通知" style="width: 50px; height: 50px; margin-top: 20px;"></a>
-        <p @click="toggleMenu"><img :src="'data:image/png;base64,' + userImage" style="width: 50px; height: 50px;"></p>
+        <div class="header-icon">
+        <a th:href="@{/kuchannel/notice}"><img src="/images/bell.png" alt="通知" style="width: 50px; height: 50px; margin: 0 20px;"></a>
+        <p @click="toggleMenu" style="margin: 0 10px; cursor: pointer;"><img :src="'data:image/png;base64,' + userImage" style="width: 50px; height: 50px;"></p>
 
-        <ul v-if="showMenu">
-            <li><a th:href="@{/kuchannel/mypage}">マイページへ</a></li>
-           <li><a th:href="@{/kuchannel/profile-details}">プロフィール閲覧</a></li>
-            <li><a th:href="@{/kuchannel/logout}">ログアウト</a></li>
+        <ul v-if="showMenu"  class="header-ul">
+            <li><a class="border-bottom" th:href="@{/kuchannel/mypage}">マイページへ</a></li>
+           <li><a class="border-bottom" th:href="@{/kuchannel/profile-details}" style="margin-right: 20px;">プロフィール閲覧</a></li>
+            <li><a class="border-bottom" th:href="@{/kuchannel/logout}">ログアウト</a></li>
         </ul>
+        </div>
     </div>
 
 </header>

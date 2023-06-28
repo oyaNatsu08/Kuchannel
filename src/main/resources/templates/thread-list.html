@@ -13,30 +13,31 @@
 
 <body>
 
-<!--  <div id="app0">-->
-<!--    <th:block th:insert="common/header"></th:block>-->
-<!--  </div>-->
+  <!--  <div id="app0">-->
+  <!--    <th:block th:insert="common/header"></th:block>-->
+  <!--  </div>-->
 
   <div id="app">
 
     <th:block th:insert="common/header"></th:block>
 
+    <div class="thread-area">
 
     <div class="pagetop">
-      <h1>{{communityName}}へようこそ！</h1>
-      <button @click.self="getCommunityMember">コミュニティメンバーの確認</button>
+      <h1 class="community-name">{{communityName}}へようこそ！</h1>
+      <button @click.self="getCommunityMember">コミュニティの詳細</button>
     </div>
 
     <!-- 検索バー -->
     <div>
       <div class="search-container">
-        <p>
+        <p style="margin: 3px 13px;">
           <input type="text" v-model="searchText" @input="updateSuggestions('searchText')">
         <div v-if="issearchTextSuggest" class="suggest-area">
           <ul>
 
             <li v-for="suggestion in suggestions" :key="suggestion" class="suggest-content">
-              <a @click="selectSuggestion(suggestion)">{{ suggestion }}</a>
+              <a @click="selectSuggestion(suggestion,'searchText')">{{ suggestion }}</a>
             </li>
           </ul>
         </div>
@@ -44,24 +45,24 @@
         </p>
       </div>
 
-      <div>
-        <select name="refine" v-model="selectedOption">
+      <div style="text-align: center;margin: 20px;">
+        <select name="refine" v-model="selectedOption" style="font-size: 16px;width: 20%;padding: 5px;">
           <option value="thread">スレッド</option>
           <option value="review">全レビュー</option>
         </select>
-        <button type="button" @click="changeRefineView()">簡単絞り込み</button>
+        <button type="button" @click="changeRefineView()" style="font-size: 15px;margin: 10px;background-color: #fffe94;">簡単絞り込み</button>
       </div>
 
       <div v-if="refineView" style="text-align: center;" class="refine-view">
-        <div>
+        <div style="font-size: 19px;">
           <h3>ジャンル</h3>
-          <div v-for="genre in genres" style="display: inline-block;">
+          <div v-for="genre in genres" style="display: inline-block; ">
             <label><input type="checkbox" v-model="GenreChecked" :value="genre.genreName"></input>{{ genre.genreName
               }}</label>
           </div>
         </div>
         <hr>
-        <div>
+        <div  v-if="isPopularKeyWord"  style="font-size: 19px;">
           <h3>人気のキーワード</h3>
           <div v-for="hashtag in hashtags" style="display: inline-block;">
             <p style="color: blue; margin-right: 10px;" @click="searchAdd(hashtag.tagName)">{{ hashtag.tagName }}</p>
@@ -75,7 +76,7 @@
       <!-- メンバー確認 -->
       <div v-if="isCommunityMemberPopup" @click.self="closePopup('CommunityMember')" class="popup-overlay"
         type="button">
-        <div class="popup">
+        <div class="popup-member">
           <h2 v-if="sessionInfo.role ===1">{{communityName}}のメンバー</h2>
           <input type="text" v-if="sessionInfo.role ===2" v-model="newCommunityName">
           <div v-if="sessionInfo.role ===2"><button @click="deleteCommunity">コミュニティを削除する</button></div>
@@ -108,19 +109,19 @@
           </table>
           <form action="/kuchannel/Information" method="get">
             <button type="submit" v-if="sessionInfo.role ===1">問い合わせ</button>
-            <input type="hidden" name="communityId" th:value="${communityId}"/>
+            <input type="hidden" name="communityId" th:value="${communityId}" />
 
             <button type="button" v-if="sessionInfo.role ===2" @click="applyChenge">この内容で変更する</button>
             <button @click.self="closePopup('CommunityMember')">閉じる</button>
-  
+
           </form>
-          
+
         </div>
       </div>
 
 
       <!-- スレッドの新規作成 -->
-      <button type="button" @click="openPopup('ThreadAdd')">スレッドの新規作成</button>
+      <button class="thread-create-button" type="button" @click="openPopup('ThreadAdd')">スレッドの新規作成</button>
       <div v-if="isThreadAddPopup" class="popup-overlay" @click.self="closePopup('ThreadAdd')">
         <div class="popup">
           <h1>スレッド新規作成</h1>
@@ -142,7 +143,7 @@
             <ul>
 
               <li v-for="suggestion in suggestions" :key="suggestion" class="suggest-content">
-                <a @click="selectSuggestion(suggestion)">{{ suggestion }}</a>
+                <a @click="selectSuggestion(suggestion,'addThreadHashtags')">{{ suggestion }}</a>
               </li>
             </ul>
           </div>
@@ -159,8 +160,8 @@
 
       <!-- 並べ替えのところ -->
       <div class="sorting">
-        <label><input type="radio" name="sortSelect" @click="sortItems('id')"></button>投稿の新しい順にする</label>
-        <label><input type="radio" name="sortSelect" @click="sortItems('good_count')"></button>いいねの多い順にする</label>
+        <label style="margin: 10px;"><input type="radio" name="sortSelect" @click="sortItems('id')"></button>投稿の新しい順にする</label>
+        <label style="margin: 10px;"><input type="radio" name="sortSelect" @click="sortItems('good_count')"></button>いいねの多い順にする</label>
       </div>
 
 
@@ -179,20 +180,24 @@
             </select>
           </p>
 
-          <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags" @input="updateSuggestions('updateThreadHashtags')"></p>
+          <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags"
+              @input="updateSuggestions('updateThreadHashtags')"></p>
 
-          <div v-if="iseditThreadHashtagsSuggest" class="suggest-area">
+          <div v-if="isupdateThreadHashtagsSuggest" class="suggest-area">
             <ul>
               <li v-for="suggestion in suggestions" :key="suggestion" class="suggest-content">
-                <a @click="selectSuggestion(suggestion)">{{ suggestion }}</a>
+                <a @click="selectSuggestion(suggestion,'updateThreadHashtags')">{{ suggestion }}</a>
+
               </li>
             </ul>
           </div>
 
           <p>写真の追加：<input type="file" ref="fileInput" /></p>
-          <p>更新前の画像</p>
-          <div style="display: flex; justify-content: center;">
-            <img :src="'data:image/png;base64,' + imageThread" style="width: 50px; height: auto;">
+          <div v-if="imageThread != null">
+            <p>更新前の画像</p>
+            <div style="display: flex; justify-content: center;">
+              <img :src="'data:image/png;base64,' + imageThread" style="width: 50px; height: auto;">
+            </div>
           </div>
 
           <button @click.self="updateThread">更新</button>
@@ -200,7 +205,7 @@
         </div>
       </div>
       <!-- スレッドの統合 -->
-      <button type="button" v-if="sessionInfo.role ===2" @click="integrateThread">スレッドの統合</button>
+      <button class="thread-integrate" type="button" v-if="sessionInfo.role ===2" @click="integrateThread">スレッドの統合</button>
       <div v-if="isIntegrateThreadsPopup" class="popup-overlay" @click.self="closePopup('IntegrateThreads')">
         <div class="popup">
           <h1>スレッド統合（採用するお店の情報を選択してください。）</h1>
@@ -244,7 +249,7 @@
           <div v-for="thread in selectedThreads" class="hashtag-list">
             <div v-for="hashtag in thread.hashTagList">
               <p><label><input type="checkbox" name="hashTag" v-bind:value="hashtag.tag_name"
-                  v-model="selectedThreadHashTag" />{{hashtag.tag_name}}</label></p>
+                    v-model="selectedThreadHashTag" />{{hashtag.tag_name}}</label></p>
             </div>
           </div>
           <button @click.self="ThreadIntegrate">統合する</button>
@@ -257,11 +262,12 @@
       <!-- スレッドの表示。 -->
       <div v-for="thread in threads" v-if="threadMainView">
         <div class="restaurant" v-if="genreIncludeCheck(thread.genre)">
+<input style="margin: 0 30px;" type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2">
+          <img :src="'data:image/png;base64,' + thread.image_path" class="restaurant-img"
+            v-if="thread.image_path != null">
 
-          <img :src="'data:image/png;base64,' + thread.image_path" class="restaurant-img" v-if="thread.image_path != null">
+          <div class="thread-margin">
 
-          <div>
-            <input type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2">
             <a :href="getReviewLink(thread.id)" class="restaurant-name">
               <h3>{{thread.title}}</h3>
             </a>
@@ -273,18 +279,19 @@
             </div>
             <div class="opening-hours">営業時間：{{thread.sales_time}}</div>
             <div class="hashtags">
-              <ul class="hashtag" v-for="hashtag in thread.hashTagList">
+              <ul class="thread-list-ul" v-for="hashtag in thread.hashTagList">
                 <li>
-                  <p style="color: blue;" @click="searchAdd(hashtag.tag_name)"> {{hashtag.tag_name}}</p>
+                  <p style="color: blue;font-size: 15px;" @click="searchAdd(hashtag.tag_name)"> {{hashtag.tag_name}}</p>
                 </li>
               </ul>
             </div>
           </div>
-          <div class="delete-update">
-            <button type="button" @click="openUpdateThread(thread.id)">情報編集</button>
-            <button type="button" v-if="thread.user_id == sessionInfo.id" @click="deleteThread(thread.id)">削除</button>
 
+          <div class="delete-update">
+            <button class="update-button" type="button" @click="openUpdateThread(thread.id)">情報編集</button>
+            <button class="delete-button" type="button" v-if="thread.user_id == sessionInfo.id || sessionInfo.role ===2" @click="deleteThread(thread.id)">削除</button>
           </div>
+
 
         </div>
       </div>
@@ -292,9 +299,9 @@
       <!-- 全レビュー検索時のスレッド&レビュー表示 -->
       <div v-for="threadReview in threads" v-if="reviewSearchView">
         <div class="restaurant" v-if="genreIncludeCheck(threadReview.genre)">
+          <!-- <input type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2"> -->
           <img :src="'data:image/png;base64,' + threadReview.image_path" class="restaurant-img">
           <div>
-            <!-- <input type="checkbox" v-model="thread.isSelected" v-if="sessionInfo.role ===2"> -->
 
             <a :href="getReviewLink(threadReview.id)" class="restaurant-name">
 
@@ -304,11 +311,12 @@
 
             <div v-for="review in threadReview.reviews">
               <div class="review-background">
-                <p>投稿者：{{ review.userName }}</p>
+                <p>投稿者：<a :href="getUserReviewLink(review.userId)">{{ review.userName }}</a></p>
                 <div class="review-content">
                   <h5>レビュータイトル：{{ review.reviewTitle }}</h5>
                   <p class="review-cell"><span style="width: 500px;">本文：{{ review.reviewContent }}</span></p>
-                  <a href="#">レビュー詳細へ</a> <!--　getReviewDetailLink(thread.id, review.reviewId)でリンクへ飛ぶ　-->
+                  <a :href="getReviewDetailLink(review.threadId,review.reviewId)">レビュー詳細へ</a>
+                  <!--　getReviewDetailLink(thread.id, review.reviewId)でリンクへ飛ぶ　-->
                 </div>
               </div>
             </div>
@@ -322,10 +330,6 @@
   </div>
 
   </div>
-  </div>
-
-
-<!--  <script src="/js/base.js"></script>-->
 
   <script>
     const { createApp } = Vue;
@@ -397,7 +401,7 @@
           issearchTextSuggest: false,
           isaddThreadHashtagsSuggest: false,
 
-          iseditThreadHashtagsSuggest:false,
+          isupdateThreadHashtagsSuggest:false,
           suggestions: [], // サジェストされるハッシュタグ
           existingHashTags: [],
 
@@ -407,6 +411,15 @@
         }
 
 
+      },
+      watch: {
+        selectedOption(newVal) {
+          if (newVal === 'thread') {
+            this.isPopularKeyWord = true;
+          } else if (newVal === 'review') {
+            this.isPopularKeyWord = false;
+          }
+        }
       },
 
 
@@ -425,7 +438,7 @@
           axios.get(`/getThreads/${this.communityId}`)
             .then(res => {
               this.threads = res.data;
-              console.log('こいつ',this.threads);
+              console.log('こいつ', this.threads);
             });
         },
 
@@ -445,7 +458,9 @@
 
 
         deleteThread(threadId) {
-          axios.delete(`/deleteThread/${threadId}`)
+          if (window.confirm(`本当に削除してもよいですか？`)) {
+            (this.sessionInfo.role === 1)
+              axios.delete(`/deleteThread/${threadId}/${this.sessionInfo.role}`)
             .then(res => {
 
               console.log(res.data);
@@ -457,6 +472,9 @@
               }
 
             });
+
+
+          }
         },
 
         //スレッドの並び替えonclickで並び替えたいキーの名前を入れる。
@@ -525,6 +543,13 @@
               .then(res => {
                 this.getThreads();
                 this.closePopup('ThreadAdd');
+                this.addThreadTitle = '';
+                this.addThreadFurigana = '';
+                this.addThreadAddress = '';
+                this.addThreadSalesTime = '';
+                this.addThreadGenre = '和食';
+                this.addThreadHashtags = '';
+                this.suggestions = [];
               });
           };
 
@@ -621,7 +646,7 @@
             if (window.confirm('後悔しませんか?')) {
               axios.delete(`/deleteCommunity/${this.communityId}`)
                 .then(res => {
-                  window.location.href = "http://localhost:8080/kuchannel/mypage";
+                  window.location.href = "http://192.168.33.99:8080/kuchannel/mypage";
                 });
             }
           }
@@ -682,23 +707,23 @@
 
         // スレッドのレビュー一覧に遷移
         getThreadReviewLink(threadId) {
-         return `/thread-review/${threadId}`;
+          return `/thread-review/${threadId}`;
         },
 
         getReviewLink(threadId) {
-          const link = this.communityUrl.replace("http://localhost:8080/", "");
-          return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
+          const link = this.communityUrl.replace("http://192.168.33.99:8080/", "");
+          return `http://192.168.33.99:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
         },
 
         //レビュー詳細画面へ
         getReviewDetailLink(threadId, reviewId) {
-          const link = this.communityUrl.replace("http://localhost:8080/", "");
-          return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews/${reviewId}`;
+          const link = this.communityUrl.replace("http://192.168.33.99:8080/", "");
+          return `http://192.168.33.99:8080/${link}/${this.communityId}/threads/${threadId}/reviews/${reviewId}`;
         },
 
         //絞り込みリストを表示
         changeRefineView() {
-          getPopularHashtags()
+          this.getPopularHashtags();
           this.refineView = !this.refineView;
         },
 
@@ -847,77 +872,78 @@
           this.suggestions = []; // サジェストをリセット
         },
 
-        getReviewLink(threadId) {
-          const link = this.communityUrl.replace("http://localhost:8080/", "");
-          return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
-        },
-
-
-
-
         updateSuggestions(inputAreaName) {
           this.suggestions = []; // サジェストをリセット
 
           // テキストを解析してハッシュタグを検索
-          const words = this[`${inputAreaName}`].split(" ");
+          const words0 = this[`${inputAreaName}`].replace(/　/g, " ").split(" ");
+          const words = words0.filter(word => word.trim() !== '');
           if (words.length > 0) {
             this.isaddThreadHashtagsSuggest = false
             this.issearchTextSuggest = false
-            this.iseditTextSuggest = false
+            this.isupdateThreadHashtagsSugges = false
             this[`is${inputAreaName}Suggest`] = true;
           }
           const lastWord = words[words.length - 1]; // 最後の単語を取得
-
-          if (lastWord.startsWith("#") || lastWord.startsWith("＃")) {
-            const inputTag = lastWord.substring(1); // "#"を除いた部分を取得
-            //「#」だけの時にはサジェストが出ない
-            if (!inputTag == '') {
-              // 既存のハッシュタグから入力と合致するものを検索
-              for (let i = 0; i < this.existingHashTags.length; i++) {
-                this.suggestions.push(this.existingHashTags[i].tag_name)
+          if(lastWord ){
+            if (lastWord.startsWith("#") || lastWord.startsWith("＃")) {
+              const inputTag = lastWord.substring(1); // "#"を除いた部分を取得
+              //「#」だけの時にはサジェストが出ない
+              if (!inputTag == '') {
+                // 既存のハッシュタグから入力と合致するものを検索
+                for (let i = 0; i < this.existingHashTags.length; i++) {
+                  this.suggestions.push(this.existingHashTags[i].tag_name)
+                }
+                this.suggestions = this.suggestions.filter(tag => tag.includes(inputTag));
+                this.suggestions = this.suggestions.map(item => "#" + item + " ");
               }
-              this.suggestions = this.suggestions.filter(tag => tag.includes(inputTag));
-              this.suggestions = this.suggestions.map(item => "#" + item + " ");
             }
           }
+        },
+
+
+
+        selectSuggestion(suggestion, inputArea) {
+          const words0 = this[inputArea].replace(/　/g, " ").split(" ");
+          console.log('words0',words0);
+          const words = words0.filter(word => word.trim() !== '');
+          console.log('words',words);
+
+          let lastWord = words[words.length - 1].trim();
+
+          if (lastWord.startsWith("#") || lastWord.startsWith("＃")) {
+            words.splice(-1, 1);
+          }
+
+          let newArray = words.filter(word => word.trim() !== '');
+          newArray.push(suggestion);
+
+          if (inputArea !== 'searchText') {
+            this[inputArea] = newArray.join(" ") + ", ";
+          } else {
+            this[inputArea] = newArray.join(" ") + " ";
+          }
+
+          this.suggestions = [];
+          this.isaddThreadHashtagsSuggest = false;
+          this.issearchTextSuggest = false;
+          this.isupdateThreadHashtagsSuggest = false;
         },
         removeEmptyStrings(value) {
           return value !== '';
         },
-        selectSuggestion(suggestion) {
-          const words0 = this.searchText.split(" ").join("　").split("　"); // スペースで分割し、全角スペースでも分割する
-          const words = words0.filter(this.removeEmptyStrings); // 空の文字列を削除する
 
-          let lastWord = words[words.length - 1]; // 最後の単語を取得
-
-          if (lastWord.startsWith("#") || lastWord.startsWith("＃")) {
-            // 最後の単語がハッシュタグで始まっている場合は削除
-            words.splice(-1, 1);
-          }
-
-          let newArray = words.filter(this.removeEmptyStrings);
-          newArray.push(suggestion); // サジェストを追加
-
-          this.searchText = newArray.join(" ") + " "; // 入力欄にサジェストを追加
-          this.suggestions = []; // サジェストをリセット
-        },
-
-        getReviewLink(threadId) {
-          const link = this.communityUrl.replace("http://localhost:8080/", "");
-          return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews`;
-        },
-        getReviewDetailLink(threadId,reviewId) {
-          const link = this.communityUrl.replace("http://localhost:8080/", "");
-          return `http://localhost:8080/${link}/${this.communityId}/threads/${threadId}/reviews/${reviewId}`;
+        getReviewDetailLink(threadId, reviewId) {
+          const link = this.communityUrl.replace("http://192.168.33.99:8080/", "");
+          return `http://192.168.33.99:8080/${link}/${this.communityId}/threads/${threadId}/reviews/${reviewId}`;
         },
         getUserReviewLink(userId) {
-          return `/kuchannel/user-review/${userId}`;
+          return `/kuchannel/user-review/[[${communityId}]]/${userId}`;
         },
 
-      toggleMenu() {
+        toggleMenu() {
           this.showMenu = !this.showMenu;
-      },
-
+        },
 
       },
 

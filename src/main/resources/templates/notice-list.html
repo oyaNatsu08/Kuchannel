@@ -8,82 +8,89 @@
     <link href="/css/mypage.css" rel="stylesheet">
     <style>
         .notice-list {
-            margin: 0 auto;
-            max-width: 800px;
+            margin: 20px;
+            max-width: 100%;
             padding: 20px;
             border: 1px solid gray;
             padding: 10px;
-            margin-bottom: 10px;
+            font-size: 20px;
         }
     </style>
 </head>
 
 <body>
 
-<!--    <div id="app0">-->
-<!--        <th:block th:insert="common/header"></th:block>-->
-<!--    </div>-->
+    <!--    <div id="app0">-->
+    <!--        <th:block th:insert="common/header"></th:block>-->
+    <!--    </div>-->
 
     <div id="app">
 
-        <th:block th:insert="common/header"></th:block>-->
+
+        <th:block th:insert="common/header"></th:block>
 
         <div class="tab-container">
-            <h1>お知らせ</h1>
-
-            <div class="tab-buttons">
-                <button class="tab-button" @click="changeReply" id="btn1">返信</button>
-                <button class="tab-button" @click="changeInquiry" id="btn2">お問い合わせ</button>
-            </div>
 
             <div class="tab-content-area">
-                <div v-if="replyView">
-                    <th:block th:each="notice : ${notices}">
-                        <div th:if="${notice.flag}">
-                            <a th:href="@{/review-detail(reviewId=${notice.reviewId}, threadId=${notice.threadId}, noticeId=${notice.noticeId}, flag=${notice.flag})}">
-                                <p class="notice-list" style="background-color: sandybrown;"
-                                    th:text="${notice.replyUserName} + 'さんが' + ${notice.threadTitle} + 'へのレビューに返信しました'">
-                                </p>
-                            </a>
-                        </div>
-                        <div th:unless="${notice.flag}">
-                            <a th:href="@{/review-detail(reviewId=${notice.reviewId}, threadId=${notice.threadId}, noticeId=${notice.noticeId}, flag=${notice.flag})}">
-                                <p class="notice-list" style="background-color: gray;"
-                                    th:text="${notice.replyUserName} + 'さんが' + ${notice.threadTitle} + 'へのレビューに返信しました'">
-                                </p>
-                            </a>
-                        </div>
-                    </th:block>
+                <h1 style="text-align: center;">お知らせ</h1>
+
+                <div class="tab-buttons">
+                    <button class="tab-button" @click="changeReply" id="btn1">返信</button>
+                    <button class="tab-button" @click="changeInquiry" id="btn2">お問い合わせ</button>
                 </div>
 
+                <div class="tab-content-area" STYLE="margin: 0 auto;">
+                    <div v-if="replyView">
+                        <th:block th:each="notice : ${notices}">
+                            <div th:if="${notice.flag}">
+                                <a th:href="@{/review-detail(reviewId=${notice.reviewId}, threadId=${notice.threadId}, noticeId=${notice.noticeId}, flag=${notice.flag})}">
+                                    <p class="notice-list" style="background-color: #ffcea5;text-align:center;"
+                                        th:text="${notice.replyUserName} + 'さんが' + ${notice.threadTitle} + 'へのレビューに返信しました'">
+                                    </p>
+                                </a>
+                            </div>
+                            <div th:unless="${notice.flag}">
+                                <a th:href="@{/review-detail(reviewId=${notice.reviewId}, threadId=${notice.threadId}, noticeId=${notice.noticeId}, flag=${notice.flag})}">
+                                    <p class="notice-list" style="background-color: gray;"
+                                        th:text="${notice.replyUserName} + 'さんが' + ${notice.threadTitle} + 'へのレビューに返信しました'">
+                                    </p>
+                                </a>
+                            </div>
+                        </th:block>
+                    </div>
 
-                <div v-if="inquiryView">
-                    <th:block th:each="inquiry : ${inquires}">
-                        <a th:href="@{/inquiry(id=${inquiry.id})}">
-                            <p class="notice-list" style="background-color: lightcoral;"
-                                th:text="${inquiry.inquiryUserName} + 'さんから' + ${inquiry.communityName} + 'へお問い合わせがありました'">
-                            </p>
-                        </a>
-                    </th:block>
+
+                    <div v-if="inquiryView">
+                        <th:block th:each="inquiry : ${inquires}">
+                            <a th:href="@{/inquiry(id=${inquiry.id})}">
+                                <p class="notice-list" style="background-color: lightcoral;"
+                                    th:text="${inquiry.inquiryUserName} + 'さんから' + ${inquiry.communityName} + 'へお問い合わせがありました'">
+                                </p>
+                            </a>
+                        </th:block>
+                    </div>
                 </div>
+
             </div>
 
         </div>
 
     </div>
 
-<!--    <script src="/js/base.js"></script>-->
+    <!--    <script src="/js/base.js"></script>-->
 
     <script>
 
-const { createApp } = Vue
+        const { createApp } = Vue
+
 
         createApp({
             data() {
                 return {
                     replyView: true,
                     inquiryView: false,
-                    noticeList:[],
+                    noticeList: [],
+
 
                     showMenu: false,
                     userImage: '',
@@ -103,9 +110,9 @@ const { createApp } = Vue
                     this.showMenu = !this.showMenu;
                 },
             },
-            created: function (){
+            created: function () {
                 console.log('created')
-                this.noticeList =`[[${notices}]]`
+                this.noticeList = `[[${notices}]]`
                 console.log(this.noticeList);
                 this.userImage = `[[ ${image} ]]`;
             },
