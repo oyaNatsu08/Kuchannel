@@ -287,6 +287,17 @@ public class KuchannelDao {
         return list.isEmpty() ? null : list.get(0);
     }
 
+    public UserRecord checkExistingLoginId(String loginId){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("loginId", loginId);
+        var list = jdbcTemplate.query("SELECT id, login_id, name, password, image_path " +
+                        "FROM users WHERE login_id = :loginId", param,
+                new DataClassRowMapper<>(UserRecord.class));
+
+        return list.isEmpty() ? null : list.get(0);
+
+    }
+
     //コミュニティIDを元にコミュニティを特定する
     public CommunityRecord findCommunity(Integer communityId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -433,9 +444,8 @@ public class KuchannelDao {
         return reply;
 
     }
-
-    //レビューIDを元にreviewsテーブルから情報を取得する
-    public ReviewRecord findReview(Integer reviewId) {
+   //レビューIDを元にreviewsテーブルから情報を取得する
+    public Review findReview(Integer reviewId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("reviewId", reviewId);
 
@@ -672,7 +682,7 @@ public class KuchannelDao {
     public List<PopularHashTag> getPopularHashtags(Integer communityId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("communityId", communityId);
-        var list = jdbcTemplate.query("SELECT h.id, h.tag_name AS tagName, COUNT(*) AS count FROM hashtags h \n" +
+        var list = jdbcTemplate.query("SELECT DISTINCT h.id, h.tag_name AS tagName, COUNT(*) AS count FROM hashtags h \n" +
                 "                JOIN thread_hashtag th ON h.id = th.hashtag_id \n" +
                 "                JOIN threads t ON t.id = th.thread_id\n" +
                 "                WHERE t.community_id = :communityId GROUP BY h.id  ORDER BY COUNT(*) DESC LIMIT 5;",param, new DataClassRowMapper<>(PopularHashTag.class));
@@ -1095,6 +1105,39 @@ public class KuchannelDao {
 
 
         return 1;
+    }
+
+    public boolean forcedDeleteThread(Integer threadId){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("threadId",threadId);
+
+        var result = jdbcTemplate.query("SELECT rev.id AS reviewId ,rev.title AS reviewTitle, CONCAT(LEFT(rev.review,10),'...') AS review, " +
+                        "th.title AS threadTitle, co.name AS communityName, DATE(rev.create_date) AS createDate ,co.id AS communityId , co.id AS communityId , co.url AS communityUrl,th.id AS threadId " +
+                        "FROM reviews rev JOIN threads th ON rev.thread_id = th.id " +
+                        "JOIN communities co ON th.community_id = co.id JOIN community_user cu on co.id = cu.community_id " +
+                        "WHERE th.id = :threadId;", param,
+                new DataClassRowMapper<>(MyReview.class));
+
+        for(var i=0; i< result.size(); i++){
+            reviewDelete(result.get(i).getReviewId());
+        }
+
+//        元のスレッドgoodを削除。
+        int result4 = jdbcTemplate.update("DELETE FROM thread_goods WHERE thread_id = :threadId;", param);
+//        元のスレッドのスレッドハッシュタグを消す
+        int result5 = jdbcTemplate.update("DELETE FROM thread_hashtag WHERE thread_id = :threadId;", param);
+//        元のスレッドを消す
+        int result6 = jdbcTemplate.update("DELETE FROM threads WHERE id = :threadId;", param);
+
+        return true;
+    }
+
+    //お問い合わせ完了処理
+    public int completeInquiryUpdate(Integer inquiryId) {
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("inquiryId", inquiryId);
+
+        return jdbcTemplate.update("UPDATE inquiries SET flag = 't' WHERE id = :inquiryId", param);
     }
 
     //プロフィールアイコン画像生成

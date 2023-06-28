@@ -31,4 +31,23 @@
     padding: 20px;
     border-radius: 5px;
 }
+
+.popup-member {
+    width: 60%;
+    height: auto;
+    text-align: center;
+    margin-top: 30px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 500px;
+    background-color: #fff;
+    overflow: auto;
+}
+
 /*ここまでポップアップのcss*/

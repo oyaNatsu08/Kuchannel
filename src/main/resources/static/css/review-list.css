@@ -29,6 +29,11 @@ body {
       margin-right: 20%;
     }
 
+    .sorting{
+        margin: 4% 2% 0 7%;
+        font-size: 20px;
+    }
+
     .review {
       border: 1px solid orangered;
       border-radius: 8px;

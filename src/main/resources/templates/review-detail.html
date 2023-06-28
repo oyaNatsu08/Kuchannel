@@ -8,11 +8,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <style>
         body {
-            text-align: center;
-        }
+          background-image: url(/images/background.png);
+          background-attachment: fixed;
+          background-size: 100%;
+          text-align: center;
+    }
+
+    .review-area{
+        width: 90%;
+        height: auto;
+        background-color: rgba(255, 255, 255, 0.9);
+        display: block;
+        border-radius: 30px;
+        margin: auto;
+        padding-top: 20px;
+        padding-bottom: 10px;
+        margin-top: 20px;
+    }
 
         .review {
-            border: 1px solid orangered;
+            border: 5px solid #ff9a74;
             border-radius: 8px;
             padding: 10px;
             margin-bottom: 10px;
@@ -21,7 +36,7 @@
         }
 
         .reply {
-            border: 1px solid lightgreen;
+            border: 5px solid lightgreen;
             border-radius: 8px;
             padding: 10px;
             margin-bottom: 10px;
@@ -52,7 +67,7 @@
 
         </div>
 
-        <p>このレビューへのコメント</p>
+        <p style="font-size: 20px">このレビューへのコメント</p>
         <div class="reply">
             <th:block th:each="reply : ${review.reviewReplies}">
                 <div class="review">
@@ -85,7 +100,7 @@
             <button type="button" onclick="history.back()">戻る</button>
             <button type="button" @click="openReply(reviewId)">返信する</button>
         </form>
-
+        </div>
     </div>
 
 <!--    <script src="/js/base.js"></script>-->

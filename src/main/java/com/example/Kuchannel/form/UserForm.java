@@ -6,9 +6,9 @@ import lombok.Data;
 @Data
 public class UserForm {
 
-    @NotEmpty
+    @NotEmpty(message = "ユーザーIDは必須です")
     private String loginId;
 
-    @NotEmpty
+    @NotEmpty(message = "パスワードは必須です")
     private String password;
 }

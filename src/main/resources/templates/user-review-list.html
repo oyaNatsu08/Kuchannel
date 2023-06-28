@@ -7,18 +7,33 @@
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
   <style>
-    body {
+  body {
       background-image: url(/images/background.png);
       background-size: cover;
     }
 
     .review-container {
-      margin-top: 20px;
       margin-left: 10%;
       margin-right: 10%;
-      background-color: #fff;
+      margin-top: 30px;
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.9);
       padding: 20px;
+      text-align: center;
+      border-radius: 30px;
     }
+
+
+tr:nth-child(odd) {
+  background-color: #FFE8A3;
+  text-align: center;
+}
+
+/* 偶数行 */
+tr:nth-child(even) {
+  background-color: #ffffff;
+  text-align: center;
+}
 
     .review-cell {
       display: -webkit-box;
@@ -39,10 +54,10 @@
 
     <h2 style="font-size: 30px;">[[ ${userName} ]]さんのレビュー</h2>
 
-    <table>
+    <table style="border: solid #DB8E23 2px; font-size: 19px; width: 100%;">
       <thead>
-        <tr>
-          <th>タイトル</th>
+        <tr style="background-color: #FFA629; text-align: center;">
+          <th style="padding: 10px;">タイトル</th>
           <th>本文</th>
           <th>スレッド名</th>
           <th>コミュニティ名</th>
@@ -62,7 +77,7 @@
       </tbody>
     </table>
 
-    <button type="button" onclick="history.back()">戻る</button>
+    <button style="margin: 20px;font-size: 20px;background-color: #ffb671;" type="button" onclick="history.back()">戻る</button>
 
   </div>
 

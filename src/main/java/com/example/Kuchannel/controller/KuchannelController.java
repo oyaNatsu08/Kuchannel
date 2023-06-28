@@ -118,6 +118,10 @@ public class KuchannelController {
         if (bindingResult.hasErrors()) {
             return "create-user";
         }
+        if(kuchannelService.checkExistingLoginId(createForm.getLoginId())!=null){
+            model.addAttribute("error", "そのアカウントIDは既に存在します");
+            return "create-user";
+        }
         String loginId = createForm.getLoginId();
         String password = createForm.getPassword();
         String name = createForm.getName();
@@ -675,6 +679,7 @@ public class KuchannelController {
     /*-------------------------Update(プロフィール編集)--------------------------*/
     @GetMapping("/kuchannel/profile-edit")
     public String profileUpdate(@ModelAttribute("EditForm")EditForm editForm,
+                                @ModelAttribute("UserForm")UserForm userForm,
                                 Model model){
 
         //ログインしているか確認

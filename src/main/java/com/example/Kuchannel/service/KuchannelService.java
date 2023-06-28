@@ -32,6 +32,10 @@ public class KuchannelService {
         return kuchannelDao.create(loginId,password,name,image_path);
     }
 
+    public UserRecord checkExistingLoginId(String loginId){
+        return kuchannelDao.checkExistingLoginId(loginId);
+    }
+
     //プロフィール編集
 //    public  ProfileEditRecord edit(int id,String name , String password){
 //        return kuchannelDao.edit(name,password);
@@ -253,6 +257,8 @@ public class KuchannelService {
     public boolean deleteThread(Integer thread_id){
         return kuchannelDao.deleteThread(thread_id);
     }
+
+    public boolean forcedDeleteThread(Integer thread_id){return kuchannelDao.forcedDeleteThread(thread_id);}
 
     public int threadUpdate(ThreadAddForm inputData,Integer thread_id){return kuchannelDao.threadUpdate(inputData,thread_id);}
 

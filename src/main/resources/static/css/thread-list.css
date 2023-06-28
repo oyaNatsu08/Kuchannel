@@ -14,7 +14,7 @@ body {
   background-color: rgba(255, 255, 255, 0.9);
   display: block;
   border-radius: 30px;
-  margin: auto;
+  margin: 30px auto;
 }
 
 h3 {
@@ -30,7 +30,7 @@ h3 {
   padding: 10px;
   cursor: pointer;
   color: black;
-  margin: 0 20px;
+  margin: 0 9%;
   float: right;
   font-weight: bold;
   font-size: 15px;
@@ -56,12 +56,23 @@ h3 {
   margin-right: 10px;
 }
 
+.thread-integrate{
+    border-radius: 5px;
+    background-color: #FFA629;
+    padding: auto;
+    padding: 4px;
+    cursor: pointer;
+    color: black;
+    margin: 7px 9%;
+    float: right;
+    font-size: 15px;}
+
 .restaurant-name {
   font-size: 20px;
 }
 
 .genre {
-  font-size: 10px;
+  font-size: 18px;
 }
 
 .address {
@@ -90,6 +101,11 @@ h3 {
   font-weight: bold;
 }
 
+.sorting{
+    margin: 4% 2% 0 7%;
+    font-size: 20px;
+}
+
 .opening-hours {
   font-size: 17px;
   margin-top: 5px;
@@ -114,6 +130,10 @@ h3 {
   padding: 0px 5px
 }
 
+.thread-margin{
+    margin: 30px;
+}
+
 /*
 .hashUl {
   list-style-type: none;
@@ -123,39 +143,61 @@ h3 {
 */
 
 .delete-update {
-  border-radius: 5px;
-  background-color: #ffa995;
-  padding: auto;
-  line-height: 2;
-  padding: 10px;
-  cursor: pointer;
-  color: black;
-  margin: 20px;
-  /* font-weight: bold; */
-  font-size: 20px;
+      margin-left: auto;
+      margin-bottom: auto;
+      display: flex;
+      flex-direction: column;
 }
+
+  .update-button{
+          border-radius: 5px;
+          background-color: #86dd60;
+          padding: auto;
+          line-height: 2;
+          padding: 10px;
+          cursor: pointer;
+          color: black;
+          margin: 20px;
+          /* font-weight: bold; */
+          font-size: 20px;
+  }
+
+    .delete-button{
+        border-radius: 5px;
+        background-color: #ffa995;
+        padding: auto;
+        line-height: 2;
+        padding: 10px;
+        cursor: pointer;
+        color: black;
+        margin: 20px;
+        /* font-weight: bold; */
+        font-size: 20px;
+    }
 
 .community-name {
   text-align: center;
+  font-size: 35px;
 }
 
 /* 検索ボックスcss */
 .search-container {
-  /* box-sizing: border-box; */
-  position: relative;
-  border: 1px solid #999;
-  /* padding-bottom: 20px; */
-  border-radius: 20px;
-  height: 2.5em;
-  /* overflow: hidden; */
-  /* display: flex;
-  justify-content: center; */
+box-sizing: border-box;
+    position: relative;
+    border: 1px solid #999;
+    /* padding-bottom: 20px; */
+    border-radius: 20px;
+    height: 2.5em;
+    background-color: white;
+    margin: 20px;
+     overflow: hidden;
 }
 
 .search-container input[type="text"] {
-  margin-left: 5%;
-  width: 90%;
-  border: none;
+    background-color: white;
+    width: 93%;
+    border: none;
+    height: 30px;
 }
 
 .search-container input[type="text"]:focus {
@@ -282,11 +324,14 @@ h3 {
   align-items: center;
   margin: 0 auto;
   justify-content: center;
+  flex-direction: column;
 }
 
 .pagetop button {
-  height: 30px;
-  width: 200px;
+    width: 23%;
+    font-size: 20px;
+    background-color: #FFA629;
+    border: solid 2px;
 }
 
 .hashtag-list {
@@ -328,4 +373,5 @@ h3 {
 
 .refine-view {
   background-color: rgba(240, 171, 24, 0.945);
+  margin: 20px;
 }
