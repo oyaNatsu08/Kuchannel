@@ -1,6 +1,14 @@
+@font-face {
+    font-family: 'CustomFont';
+    src: url('/fonts/acgyosyo.ttf');
+  }
+
 .header {
     background-color: #f99247b0;
 }
+body {
+    font-family: 'acgyosyo';
+  }
 
 .header-body {
     display: flex;

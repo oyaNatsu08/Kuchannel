@@ -38,12 +38,12 @@
                     <button class="tab-button" @click="changeInquiry" id="btn2">お問い合わせ</button>
                 </div>
 
-                <div class="tab-content-area">
+                <div class="tab-content-area" STYLE="margin: 0 auto;">
                     <div v-if="replyView">
                         <th:block th:each="notice : ${notices}">
                             <div th:if="${notice.flag}">
                                 <a th:href="@{/review-detail(reviewId=${notice.reviewId}, threadId=${notice.threadId}, noticeId=${notice.noticeId}, flag=${notice.flag})}">
-                                    <p class="notice-list" style="background-color: #ffcea5;"
+                                    <p class="notice-list" style="background-color: #ffcea5;text-align:center;"
                                         th:text="${notice.replyUserName} + 'さんが' + ${notice.threadTitle} + 'へのレビューに返信しました'">
                                     </p>
                                 </a>
