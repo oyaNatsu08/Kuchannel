@@ -505,4 +505,5 @@ public class KuchannelRestController {
         return kuchannelService.testData(id);
     }
 
+
 }

@@ -147,7 +147,7 @@ public class KuchannelDao {
         param.addValue("url", str);
         param.addValue("name", name);
         var list = jdbcTemplate.query("SELECT id, name, url, delete_date FROM communities WHERE " +
-                        "url = CONCAT('http://localhost:8080/community/', :url, '/', :name)", param,
+                        "url = CONCAT('http://192.168.33.99:8080/community/', :url, '/', :name)", param,
                 new DataClassRowMapper<>(CommunityRecord.class));
 
         return list.isEmpty() ? null : list.get(0);
@@ -1148,6 +1148,7 @@ public class KuchannelDao {
         MapSqlParameterSource param = new MapSqlParameterSource();
 
         for (int i = 1; i <= 25; i++) {
+
             int randomIndex = ThreadLocalRandom.current().nextInt(imageFiles.size());
             //System.out.println(randomIndex);
             File randomImageFile = imageFiles.get(randomIndex);

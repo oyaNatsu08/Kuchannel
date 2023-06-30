@@ -12,6 +12,7 @@ public class EditForm {
     //private String loginId;
     @NotEmpty(message="名前は必須です")
     @Length(max = 50,message = "1から50の間の長さにしてください")
+
     private String name;
 
     @NotEmpty(message = "パスワードは必須です")

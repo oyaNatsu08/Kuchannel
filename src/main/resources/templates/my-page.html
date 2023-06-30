@@ -48,6 +48,7 @@
                 <td><button type="button" @click="copy(com.communityId)" style="font-size: 21px;">共有</button></td>
                 <td><input type="text" v-model="com.nickName" class="nickname-css">
                   <button type="button" @click="updateNickName(com.nickName,com.communityId,com.userId,com.communityName)" style="background-color: #f9dfb2;border: #755e36 solid 1px; font-size: 20px;">変更</button>
+
                 </td>
                 <td><button type="button" @click="withdrawal(com.communityId)" style="background-color: rgb(255 156 156); color: black; font-size: 20px;">退会</button></td>
               </tr>
@@ -93,6 +94,7 @@
               <tr v-for="thread in myThreads">
                 <td><a :href="getCommunityLink(thread.communityUrl,thread.communityId)">{{thread.threadTitle}}</a></td>
                 <td><a :href="getReviewListLink(thread.communityUrl,thread.communityId,thread.threadId)">{{thread.communityName}}</a></td>
+
                 
               </tr>
 
@@ -116,6 +118,7 @@
             <tbody>
               <tr v-for="review in myReviews">
                 <td>{{review.reviewTitle}}</td>
+
 
                 <td class="review-cell"><a :href="getReviewListLink(review.communityUrl,review.communityId,review.threadId,review.reviewId)">{{review.review}}</a></td>
 
@@ -233,9 +236,9 @@
             //後ほどURLをkucahnnel入りに修正するため、不要
               const gotUrl = res.data;
               console.log('gotUrl',gotUrl)
-              const replace = gotUrl.replace("http://localhost:8080/","");
+              const replace = gotUrl.replace("http://192.168.33.99:8080/","");
               console.log('replace',replace)
-              const molded = `http://localhost:8080/${replace}/${id}/threads`;
+              const molded = `http://192.168.33.99:8080/${replace}/${id}/threads`;
               console.log(molded,'molded');
 
 
@@ -264,8 +267,8 @@
 
 //後ほど・・
         getCommunityLink(communityLink,communityId) {
-          const link = communityLink.replace("http://localhost:8080/","");
-          return `http://localhost:8080/${link}/${communityId}/threads`;
+          const link = communityLink.replace("http://192.168.33.99:8080/","");
+          return `http://192.168.33.99:8080/${link}/${communityId}/threads`;
         },
         getReviewListLink(communityLink,communityId,threadId) {
           const link = communityLink.replace("http://localhost:8080/","");

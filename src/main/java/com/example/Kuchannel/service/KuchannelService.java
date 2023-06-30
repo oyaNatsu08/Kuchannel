@@ -310,4 +310,5 @@ public class KuchannelService {
     public int testData(Integer id){
        return kuchannelDao.testData(id);
     }
+
 }

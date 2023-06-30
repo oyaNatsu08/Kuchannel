@@ -16,6 +16,7 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+
   </style>
 </head>
 
@@ -44,6 +45,7 @@
           <h1>スレッド情報編集</h1>
           <p>スレッド名(店名)：<input type="text" v-model="updateThreadTitle"> <!-- String threadName;と対応させる --></p>
           <!-- <p>フリガナ：<input type="text" v-model="updateThreadFurigana"></p> -->
+
           <p>お店の住所：<input type="text" v-model="updateThreadAddress"></p>
           <p>営業時間：<input type="text" v-model="updateThreadSalesTime"></p>
           <p>ジャンル：
@@ -72,6 +74,7 @@
           <button @click.self="updateThread">更新</button>
           <button @click.self="closeUpdateThread()">閉じる</button>
         </div>
+
       </div>
 
       <div class="sorting">
@@ -445,7 +448,6 @@
             formData.append("salesTime", this.updateThreadSalesTime);
             formData.append("genre", this.updateThreadGenre);
 
-
             if (this.updateThreadHashtags == '') {
               formData.append("hashtag", null);
             } else {
@@ -457,8 +459,6 @@
             }
             formData.append("communityId", this.communityId);
             formData.append('image', this.$refs.fileInputThread.files[0]);
-
-
             axios.put(`/updateThread/${this.updateThreadId}`, formData)
               .then(res => {
                 this.findThread(this.updateThreadId);
@@ -560,6 +560,7 @@
         this.communityId = `[[ ${community.id} ]]`
         this.communityUrl = `[[ ${community.url} ]]`
         console.log(this.imageThread);
+
         this.userId = `[[ ${userId} ]]`;
 
         this.userImage = `[[ ${image} ]]`;

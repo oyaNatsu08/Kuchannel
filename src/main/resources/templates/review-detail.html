@@ -70,6 +70,7 @@
         <div class="review-area">
         <div class="review" style="margin-top: 20px;font-size: 20px;">
             <h3>投稿者：<a th:href="@{/kuchannel/user-review/{communityId}/{userId}(communityId=${communityId},userId=${review.userId})}">[[ ${review.userName} ]]</a></h3>
+
             <p>投稿日：[[ ${review.createDate} ]]</p>
             <h2>[[ ${review.title} ]]</h2>
             <hr>
@@ -113,6 +114,7 @@
         <form th:action="@{/thread-review/{threadId}(threadId=${threadId})}" method="get">
             <button class="back-reply-button" type="button" onclick="history.back()">戻る</button>
             <button class="back-reply-button" type="button" @click="openReply(reviewId)">返信する</button>
+
         </form>
         </div>
     </div>
@@ -164,6 +166,7 @@
                 },
                 toggleMenu() {
                     this.showMenu = !this.showMenu;
+
                 },
             },
             created: function () {
