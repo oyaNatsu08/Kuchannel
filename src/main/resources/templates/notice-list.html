@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="tab-content-area" STYLE="margin: 0 auto;">
-                    <div v-if="replyView">
+                    <div style="padding: 2%;margin: 10px;" v-if="replyView">
                         <th:block th:each="notice : ${notices}">
                             <div th:if="${notice.flag}">
                                 <a
@@ -61,7 +61,7 @@
                     </div>
 
 
-                    <div v-if="inquiryView">
+                    <div style="padding: 2%;margin: 10px;" v-if="inquiryView">
                         <th:block th:each="inquiry : ${inquires}">
                             <div th:unless="${inquiry.flag}">
                                 <a th:href="@{/inquiry(id=${inquiry.id})}">

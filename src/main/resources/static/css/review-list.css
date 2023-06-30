@@ -27,11 +27,17 @@ body {
       margin-bottom: 10px;
       margin-left: 20%;
       margin-right: 20%;
+      font-size: 21px;
     }
 
     .sorting{
         margin: 4% 2% 0 7%;
         font-size: 20px;
+    }
+
+    .button{
+        margin: 5px;
+        font-size: 17px;
     }
 
     .review {
@@ -41,6 +47,7 @@ body {
       margin-bottom: 10px;
       margin-left: 20%;
       margin-right: 20%;
+      font-size: 20px;
     }
 
     .popup-overlay {
