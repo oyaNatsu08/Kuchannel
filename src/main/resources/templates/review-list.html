@@ -10,6 +10,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
   <link href="/css/review-list.css" rel="stylesheet">
   <style>
+       .review-cell {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
   </style>
 </head>
@@ -28,22 +34,32 @@
     <div class="review-area">
       <h2 style="font-size: 35px;">スレッド名：{{ updateThreadTitle }}</h2>
 
-      <a :href="backThread()" style="text-decoration: none;background-color: rgb(196 255 235);width: 23%;font-size: 20px;background-color: rgb(184 249 255);border: 2px solid black;color: black;padding: 2px;text-decoration: none;">スレッド一覧へ戻る</a>
-    <p></p>
-      <button type="button" @click="openUpdateThread()" style="font-size: 20px;background-color: #ffbf64;border: 2px solid black;color: black;padding: 2px;margin: 20px;">情報編集</button>
+      <a :href="backThread()"
+        style="text-decoration: none;background-color: rgb(196 255 235);width: 23%;font-size: 20px;background-color: rgb(184 249 255);border: 2px solid black;color: black;padding: 2px;text-decoration: none;">スレッド一覧へ戻る</a>
+      <p></p>
+      <button type="button" @click="openUpdateThread()"
+        style="font-size: 20px;background-color: #ffbf64;border: 2px solid black;color: black;padding: 2px;margin: 20px;">情報編集</button>
 
       <div v-if="isThreadUpdatePopup" class="popup-overlay" @click.self="closeUpdateThread()">
         <div class="popup">
           <h1>スレッド情報編集</h1>
           <p>スレッド名(店名)：<input type="text" v-model="updateThreadTitle"> <!-- String threadName;と対応させる --></p>
-          <p>フリガナ：<input type="text" v-model="updateThreadFurigana"></p>
+          <!-- <p>フリガナ：<input type="text" v-model="updateThreadFurigana"></p> -->
+
           <p>お店の住所：<input type="text" v-model="updateThreadAddress"></p>
           <p>営業時間：<input type="text" v-model="updateThreadSalesTime"></p>
           <p>ジャンル：
             <select v-model="updateThreadGenre">
-              <option value="和食" selected>和食</option>
+              <option value="該当なし" selected>該当なし</option>
+              <option value="和食">和食</option>
               <option value="中華">中華</option>
               <option value="イタリアン">イタリアン</option>
+              <option value="洋食">洋食</option>
+              <option value="カフェ">カフェ</option>
+              <option value="居酒屋">居酒屋</option>
+              <option value="ラーメン">ラーメン</option>
+              <option value="ファストフード">ファストフード</option>
+              <option value="エスニック料理">エスニック料理</option>
             </select>
           </p>
           <p>ハッシュタグ：<input type="text" v-model="updateThreadHashtags"></p>
@@ -81,7 +97,8 @@
           <input style="font-size: 16px;" type="file" ref="fileInput" multiple />
         </p>
 
-        <button type="button" @click="addReview">投稿</button>
+        <button class="button" type="button" @click="addReview">投稿</button>
+        <button @click="addTestData">テストデータ</button>
       </div>
 
       <!-- レビュー一覧を表示する -->
@@ -94,10 +111,10 @@
           <p>投稿日：{{ review.createDate }}</p>
 
           <div class="image-review-container">
-            <p class="review-cell" style="width: 300px; margin-right: 20px;">{{review.review}}</p>
+            <p class="review-cell" style="width: 100%; margin-right: 20px;">{{review.review}}</p>
             <div v-for="(image, index) in review.reviewImages">
               <div v-if="index === 0">
-                <img :src="'data:image/png;base64,' + image.imagePath" style="width: 50px; height: auto;">
+                <img :src="'data:image/png;base64,' + image.imagePath" style="width: 100px; height: auto;">
               </div>
             </div>
           </div>
@@ -109,7 +126,7 @@
         <div v-for="(reply, index) in review.reviewReplies">
           <div v-if="index === 0" class="reply">
             <p><a :href="getUserReviewLink(reply.userId)">{{ reply.userName }}さん</a></p>
-            <p class="review-cell" style="width: 300px;">{{ reply.reply }}</p>
+            <p class="review-cell" style="width: 100%;">{{ reply.reply }}</p>
             <p>投稿日：{{ reply.createDate }}</p>
           </div>
         </div>
@@ -122,12 +139,13 @@
           </p>
           <button type="button" @click="closeReply">閉じる</button>
           <button type="button" @click="addReply(review.reviewId)">送信</button>
+          <button @click="replyTestData">テストデータ</button>
         </div>
 
-        <button type="button" v-if="review.userId == userId || sessionInfo.role === 2"
+        <button class="button" type="button" v-if="review.userId == userId || sessionInfo.role === 2"
           @click="showDeleteConfirmation(review.reviewId)">削除</button>
-        <button type="button" v-if="review.userId == userId" @click="showEditPopup(review)">編集</button>
-        <button type="button" @click="openReply(review.reviewId)">返信</button>
+        <button class="button" type="button" v-if="review.userId == userId" @click="showEditPopup(review)">編集</button>
+        <button class="button" type="button" @click="openReply(review.reviewId)">返信</button>
 
         <!-- <form action="/review-detail" method="get" style="margin-top: 20px;">
         <input type="hidden" name="reviewId" :value="review.reviewId" />
@@ -135,11 +153,12 @@
         <button type="submit">詳細画面へ</button>
       </form> -->
 
-        <a :href="getReviewDetailLink(review.reviewId)">詳細画面へ</a>
+        <a style="display: flex;flex-direction: column;margin: 10px;font-size: 18px;"
+          :href="getReviewDetailLink(review.reviewId)">詳細画面へ</a>
         <!-- いいねボタン -->
         <div>
-          <button @click="goodDeal(review.reviewId)">いいね</button>
-          <span>{{ review.goodCount }}</span>
+          <button class="button" @click="goodDeal(review.reviewId)">いいね👍</button>
+          <span style="font-size: 20px;">{{ review.goodCount }}</span>
         </div>
 
         <div v-if="showDeletePopup" class="popup-overlay">
@@ -440,8 +459,6 @@
             }
             formData.append("communityId", this.communityId);
             formData.append('image', this.$refs.fileInputThread.files[0]);
-
-
             axios.put(`/updateThread/${this.updateThreadId}`, formData)
               .then(res => {
                 this.findThread(this.updateThreadId);
@@ -515,6 +532,15 @@
               console.log(res.data);
             });
 
+        },
+
+        addTestData(){
+          this.reviewTitle= '鮮魚やまとへ行ってきました！！';
+          this.content= '今日のお昼に、初めて鮮魚やまとへ行ってきました。とても美味しかったです。また行きたいです。';
+        },
+
+        replyTestData(){
+          this.replyContent = '美味しそう！！私も行ってみたいと思ってたんだよね。今度一緒に行きませんか？';
         },
 
       },

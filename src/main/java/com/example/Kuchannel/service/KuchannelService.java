@@ -108,7 +108,7 @@ public class KuchannelService {
     }
 
     //ユーザーのお知らせ一覧(問い合わせ)をセレクト
-    public List<InquiryRecord> userInquiry(Integer userId) {
+    public List<Inquiry> userInquiry(Integer userId) {
         return kuchannelDao.userInquiry(userId);
     }
 
@@ -306,4 +306,9 @@ public class KuchannelService {
     public void threadImagesCreate(List<File> imageFiles) throws IOException {
         kuchannelDao.threadImagesCreate(imageFiles);
     }
+
+    public int testData(Integer id){
+       return kuchannelDao.testData(id);
+    }
+
 }

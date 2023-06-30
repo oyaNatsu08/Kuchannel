@@ -8,53 +8,93 @@
   <link href="/css/commons.css" rel="stylesheet">
 </head>
 
+<style>
+  .inquiry-detail-area{
+    width: 90%;
+  height: auto;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: block;
+  border-radius: 30px;
+  margin: 30px auto;
+  text-align: center;
+  }
+
+.back-community-button{
+    border: solid 1px;
+    border-radius: 5px;
+    background-color: #ffbc5e;
+    text-decoration: none;
+    line-height: 2;
+    padding: 10px;
+    cursor: pointer;
+    margin: 35px;
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.response-button{
+    border-radius: 5px;
+    background-color: #b6fdee;
+    padding: auto;
+    line-height: 2;
+    padding: 10px;
+    cursor: pointer;
+    margin: 35px;
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+</style>
+
 <body>
 
-<div id="app">
+  <div id="app">
 
-  <th:block th:insert="common/header"></th:block>
+    <th:block th:insert="common/header"></th:block>
 
-  <h3>[[ ${community.name} ]]の、[[ ${userName} ]]さんからの問い合わせ</h3>
-  <p>[[ ${inquiry.content} ]]</p>
+    <div class="inquiry-detail-area">
+    <h3 style="font-size: 34px;padding: 20px;">[[ ${community.name} ]]の、[[ ${userName} ]]さんからの問い合わせ</h3>
+    <p style="font-size: 25px;padding: 11px;border: solid #ffc367 6px;margin: 30px 15%;border-radius: 20px;">[[ ${inquiry.content} ]]</p>
 
-<!--  <a th:href="@{/kuchannel/notice(id=${community.id})}" th:text="戻る"></a>-->
-<!--  <a th:href="@{/community/thread-list(id=${community.id})}" th:text="該当コミュニティへ"></a>-->
-  <a th:href="@{/kuchannel/notice}" th:text="戻る"></a>
-  <a th:href="@{${community.url}+'/'+ ${community.id}+'/threads'}" th:text="該当コミュニティへ"></a>
-  <form action="/kuchannel/inquiryComplete/{id}(id=${inquiry.id})" method="post">
-    <input type="hidden" name="_method" value="put">
-    <button type="submit">対応完了</button>
-  </form>
+    <!--  <a th:href="@{/kuchannel/notice(id=${community.id})}" th:text="戻る"></a>-->
+    <!--  <a th:href="@{/community/thread-list(id=${community.id})}" th:text="該当コミュニティへ"></a>-->
+    <a class="back-community-button" th:href="@{/kuchannel/notice}" th:text="戻る"></a>
+    <a class="back-community-button" th:href="@{${community.url}+'/'+ ${community.id}+'/threads'}" th:text="該当コミュニティへ"></a>
+    <form th:action="@{/kuchannel/inquiryComplete(id=${inquiry.id})}" method="post">
+      <button class="response-button" type="submit">対応完了</button>
+    </form>
+  </div>
+  </div>
 
-</div>
+  <!--<script src="/js/base.js"></script>-->
 
-<!--<script src="/js/base.js"></script>-->
+  <script>
+    const { createApp } = Vue
 
-<script>
-const { createApp } = Vue
+    createApp({
+      data() {
+        return {
+          showMenu: false,
+          userImage: '',
+        }
 
-        createApp({
-            data() {
-                return {
-                    showMenu: false,
-                    userImage: '',
-                }
+      },
 
-            },
+      methods: {
+        toggleMenu() {
+          this.showMenu = !this.showMenu;
+        }
 
-            methods: {
-                toggleMenu() {
-                    this.showMenu = !this.showMenu;
-                }
+      },
 
-            },
+      created: function () {
+        this.userImage = `[[ ${image} ]]`;
+      }
 
-            created: function () {
-                this.userImage = `[[ ${image} ]]`;
-            }
-
-        }).mount('#app')
-</script>
+    }).mount('#app')
+  </script>
 
 </body>
 

@@ -43,6 +43,20 @@
             margin-left: 20%;
             margin-right: 20%;
         }
+
+        .back-reply-button{
+            border: none;
+              border-radius: 5px;
+             background-color: #FFA629;
+              padding: auto;
+                    line-height: 2;
+             padding: 10px;
+            cursor: pointer;
+             margin: 35px;
+                color: black;
+               font-size: 18px;
+              font-weight: bold;
+        }
     </style>
 </head>
 
@@ -63,7 +77,7 @@
             <p>[[ ${review.review} ]]</p>
 
             <th:block th:each="image : ${review.reviewImages}">
-                <img th:src="@{'data:image/png;base64,' + ${image.imagePath} }" style="width: 100px; height: auto;">
+                <img th:src="@{'data:image/png;base64,' + ${image.imagePath} }" style="width: 250px; height: auto;">
             </th:block>
 
         </div>
@@ -98,8 +112,9 @@
         </div>
 
         <form th:action="@{/thread-review/{threadId}(threadId=${threadId})}" method="get">
-            <button type="button" onclick="history.back()">戻る</button>
-            <button type="button" @click="openReply(reviewId)">返信する</button>
+            <button class="back-reply-button" type="button" onclick="history.back()">戻る</button>
+            <button class="back-reply-button" type="button" @click="openReply(reviewId)">返信する</button>
+
         </form>
         </div>
     </div>
@@ -151,9 +166,7 @@
                 },
                 toggleMenu() {
                     this.showMenu = !this.showMenu;
-                },
-                toggleMenu() {
-                    this.showMenu = !this.showMenu;
+
                 },
             },
             created: function () {

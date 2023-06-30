@@ -409,7 +409,6 @@ public class KuchannelRestController {
             , @RequestParam("communityId") Integer communityId
     ) {
 
-
         //keywordを空白(半角または全角)ごとに分けて格納
         String[] splittedKeywords = keyword.split("[\\s\\p{Z}]");
         //"#"と"＃"を除いたキーワードを格納。
@@ -498,6 +497,12 @@ public class KuchannelRestController {
         kuchannelService.IntegrateThreads(threadInfo, user.id());
         //System.out.println(threadInfo);
         return 1;
+    }
+
+    @GetMapping("/testData/{userId}")
+    public int TestData(@PathVariable("userId")Integer id){
+        System.out.println("controller");
+        return kuchannelService.testData(id);
     }
 
 
