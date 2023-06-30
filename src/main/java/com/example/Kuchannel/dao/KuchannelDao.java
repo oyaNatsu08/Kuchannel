@@ -1199,4 +1199,19 @@ public class KuchannelDao {
         }
     }
 
+    public int testData(Integer userId){
+        MapSqlParameterSource param  = new MapSqlParameterSource();
+        param.addValue("id",userId);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        System.out.println("dao");
+        var result= jdbcTemplate.update("INSERT INTO threads(user_id, community_id, image_path, " +
+                "title, address, sales_time, genre, create_date) VALUES(:id, 1, null, '和食かさね(レビューあり)', " +
+                " '那覇市前島', '10~12時', '和食', now())", param,keyHolder);
+        int key = Integer.parseInt(keyHolder.getKeys().get("id").toString());
+        param.addValue("id",key);
+        var result2= jdbcTemplate.update("INSERT INTO reviews(user_id, thread_id, title, review, create_date) " +
+                "VALUES(1, :id, 'taitoru', '行ってきました', now())", param);
+        return result;
+    }
+
 }

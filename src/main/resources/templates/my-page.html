@@ -233,7 +233,7 @@
             //後ほどURLをkucahnnel入りに修正するため、不要
               const gotUrl = res.data;
               console.log('gotUrl',gotUrl)
-              const replace = gotUrl.replace("http://192.168.33.99:8080/","");
+              const replace = gotUrl.replace("http://localhost:8080/","");
               console.log('replace',replace)
               const molded = `http://localhost:8080/${replace}/${id}/threads`;
               console.log(molded,'molded');
@@ -264,17 +264,17 @@
 
 //後ほど・・
         getCommunityLink(communityLink,communityId) {
-          const link = communityLink.replace("http://192.168.33.99:8080/","");
-          return `http://192.168.33.99:8080/${link}/${communityId}/threads`;
+          const link = communityLink.replace("http://localhost:8080/","");
+          return `http://localhost:8080/${link}/${communityId}/threads`;
         },
         getReviewListLink(communityLink,communityId,threadId) {
-          const link = communityLink.replace("http://192.168.33.99:8080/","");
-          return `http://192.168.33.99:8080/${link}/${communityId}/threads/${threadId}/reviews`;
+          const link = communityLink.replace("http://localhost:8080/","");
+          return `http://localhost:8080/${link}/${communityId}/threads/${threadId}/reviews`;
 
         },
         getReviewDetailLink(communityLink,communityId,threadId,reviewId) {
-          const link = communityLink.replace("http://192.168.33.99:8080/","");
-          return `http://192.168.33.99:8080/${link}/${communityId}/threads/${threadId}/reviews/${reviewId}`;
+          const link = communityLink.replace("http://localhost:8080/","");
+          return `http://localhost:8080/${link}/${communityId}/threads/${threadId}/reviews/${reviewId}`;
         },
         toggleMenu() {
           this.showMenu = !this.showMenu;

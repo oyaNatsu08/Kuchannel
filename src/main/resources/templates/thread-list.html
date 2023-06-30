@@ -13,15 +13,15 @@
 
 <body>
 
-  <!--  <div id="app0">-->
-  <!--    <th:block th:insert="common/header"></th:block>-->
-  <!--  </div>-->
+<!--  <div id="app0">-->
+<!--    <th:block th:insert="common/header"></th:block>-->
+<!--  </div>-->
 
-  <div id="app">
+<div id="app">
 
-    <th:block th:insert="common/header"></th:block>
+  <th:block th:insert="common/header"></th:block>
 
-    <div class="thread-area">
+  <div class="thread-area">
 
     <div class="pagetop">
       <h1 class="community-name">{{communityName}}へようこそ！</h1>
@@ -356,10 +356,10 @@
 
 </div>
 
-  </div>
+</div>
 
 
-  <script>
+<script>
     const { createApp } = Vue;
 
     createApp({
@@ -902,6 +902,21 @@
           this.searchText = newArray.join(" ") + " "; // 入力欄にサジェストを追加
           this.suggestions = []; // サジェストをリセット
         },
+        testData(){
+          this.addThreadTitle= 'ラーメン通堂',
+          this.addThreadAddress= '沖縄県那覇市首里',
+          this.addThreadSalesTime= '10時24時～',
+          this.addThreadGenre= 'ラーメン',
+          this.addThreadHashtags= '#1000円以内,お手頃';
+
+        },
+        testData2(user_id){
+          axios.get(`/testData/${user_id}`)
+          .then(res => {
+              this.getThreads();
+            });
+
+        },
 
 
 
@@ -1003,7 +1018,7 @@
 
           this.suggestions = [];
           this.isaddThreadHashtagsSuggest = false;
-          this.issearchTextSuggest = false;
+          this.issearchTextHashtagsSuggest = false;
           this.isupdateThreadHashtagsSuggest = false;
         },
         removeEmptyStrings(value) {

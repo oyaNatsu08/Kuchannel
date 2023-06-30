@@ -306,4 +306,8 @@ public class KuchannelService {
     public void threadImagesCreate(List<File> imageFiles) throws IOException {
         kuchannelDao.threadImagesCreate(imageFiles);
     }
+
+    public int testData(Integer id){
+       return kuchannelDao.testData(id);
+    }
 }

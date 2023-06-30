@@ -499,5 +499,10 @@ public class KuchannelRestController {
         return 1;
     }
 
+    @GetMapping("/testData/{userId}")
+    public int TestData(@PathVariable("userId")Integer id){
+        System.out.println("controller");
+        return kuchannelService.testData(id);
+    }
 
 }

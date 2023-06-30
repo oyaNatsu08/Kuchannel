@@ -259,7 +259,7 @@ public class KuchannelController {
                 return "community-join";
             } else {
 
-                var community = kuchannelService.getCommunity("http://192.168.33.99:8080/kuchannel/community/" + str + "/" + code);
+                var community = kuchannelService.getCommunity("http://localhost:8080/kuchannel/community/" + str + "/" + code);
 
                 if (community.deleteDate() == null) {
                     model.addAttribute("communityId", community.id());
