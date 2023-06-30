@@ -147,7 +147,7 @@ public class KuchannelDao {
         param.addValue("url", str);
         param.addValue("name", name);
         var list = jdbcTemplate.query("SELECT id, name, url, delete_date FROM communities WHERE " +
-                        "url = CONCAT('http://192.168.33.99:8080/community/', :url, '/', :name)", param,
+                        "url = CONCAT('http://localhost:8080/community/', :url, '/', :name)", param,
                 new DataClassRowMapper<>(CommunityRecord.class));
 
         return list.isEmpty() ? null : list.get(0);
@@ -260,16 +260,16 @@ public class KuchannelDao {
     }
 
     //ユーザーのお知らせ一覧(問い合わせ)をセレクト
-    public List<InquiryRecord> userInquiry(Integer userId) {
+    public List<Inquiry> userInquiry(Integer userId) {
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("userId", userId);
 
-        var list = jdbcTemplate.query("SELECT inq.id, u.name AS inquiryUserName, co.id AS communityId, co.name AS communityName " +
-                        "FROM inquiries inq JOIN community_user cu ON inq.community_id = cu.community_id " +
+        var list = jdbcTemplate.query("SELECT inq.id, u.id AS inquiryUserId, u.name AS inquiryUserName, co.id AS communityId, " +
+                        "co.name AS communityName, inq.flag FROM inquiries inq JOIN community_user cu ON inq.community_id = cu.community_id " +
                         "JOIN communities co ON cu.community_id = co.id " +
                         "JOIN users u ON inq.user_id = u.id " +
-                        "WHERE cu.role = 2 AND cu.user_id = :userId AND inq.flag = false", param,
-                new DataClassRowMapper<>(InquiryRecord.class));
+                        "WHERE cu.role = 2 AND cu.user_id = :userId", param,
+                new DataClassRowMapper<>(Inquiry.class));
 
         return list;
 
@@ -694,7 +694,7 @@ public class KuchannelDao {
     public List<HashTag> getAllHashtags(Integer communityId){
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("communityId", communityId);
-        var list = jdbcTemplate.query("SELECT h.id, h.tag_name FROM hashtags h JOIN thread_hashtag th ON h.id = th.hashtag_id JOIN threads t ON t.id = th.thread_id WHERE t.community_id = :communityId ;",param, new DataClassRowMapper<>(HashTag.class));
+        var list = jdbcTemplate.query("SELECT DISTINCT h.id, h.tag_name FROM hashtags h JOIN thread_hashtag th ON h.id = th.hashtag_id JOIN threads t ON t.id = th.thread_id WHERE t.community_id = :communityId ;",param, new DataClassRowMapper<>(HashTag.class));
 
         return list;
 
@@ -1147,7 +1147,7 @@ public class KuchannelDao {
 
         MapSqlParameterSource param = new MapSqlParameterSource();
 
-        for (int i = 1; i <= 40; i++) {
+        for (int i = 1; i <= 25; i++) {
             int randomIndex = ThreadLocalRandom.current().nextInt(imageFiles.size());
             //System.out.println(randomIndex);
             File randomImageFile = imageFiles.get(randomIndex);

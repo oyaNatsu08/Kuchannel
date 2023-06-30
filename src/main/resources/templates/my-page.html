@@ -91,8 +91,8 @@
             </thead>
             <tbody>
               <tr v-for="thread in myThreads">
-                <td><a :href="getCommunityLink(thread.communityUrl,thread.communityId)">{{thread.communityName}}</a></td>
-                <td><a :href="getReviewListLink(thread.communityUrl,thread.communityId,thread.threadId)">{{thread.threadTitle}}</a></td>
+                <td><a :href="getCommunityLink(thread.communityUrl,thread.communityId)">{{thread.threadTitle}}</a></td>
+                <td><a :href="getReviewListLink(thread.communityUrl,thread.communityId,thread.threadId)">{{thread.communityName}}</a></td>
                 
               </tr>
 
@@ -115,7 +115,7 @@
             </thead>
             <tbody>
               <tr v-for="review in myReviews">
-                <td style="color: rgb(0, 88, 255);">{{review.reviewTitle}}</td>
+                <td>{{review.reviewTitle}}</td>
 
                 <td class="review-cell"><a :href="getReviewListLink(review.communityUrl,review.communityId,review.threadId,review.reviewId)">{{review.review}}</a></td>
 
@@ -235,7 +235,7 @@
               console.log('gotUrl',gotUrl)
               const replace = gotUrl.replace("http://192.168.33.99:8080/","");
               console.log('replace',replace)
-              const molded = `http://192.168.33.99:8080/${replace}/${id}/threads`;
+              const molded = `http://localhost:8080/${replace}/${id}/threads`;
               console.log(molded,'molded');
 
 

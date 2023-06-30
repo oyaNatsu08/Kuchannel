@@ -62,7 +62,7 @@
             <p>[[ ${review.review} ]]</p>
 
             <th:block th:each="image : ${review.reviewImages}">
-                <img th:src="@{'data:image/png;base64,' + ${image.imagePath} }" style="width: 100px; height: auto;">
+                <img th:src="@{'data:image/png;base64,' + ${image.imagePath} }" style="width: 250px; height: auto;">
             </th:block>
 
         </div>
